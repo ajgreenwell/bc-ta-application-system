@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Course(models.Model):
-    course_num = models.OneToOneField('CourseNumber', on_delete=models.CASCADE)
+    course_num = models.OneToOneField('CourseNumber', on_delete=models.CASCADE, verbose_name="Course Number")
     name = models.CharField(max_length=60)
     instructor = models.ForeignKey('Instructor', on_delete=models.PROTECT)
     days_of_week = models.CharField(max_length=10)
@@ -10,8 +10,9 @@ class Course(models.Model):
     end_time = models.TimeField()
     building = models.CharField(max_length=30)
     room = models.CharField(max_length=5)
-    max_num_tas = models.PositiveIntegerField(default=2)
-    num_tas = models.PositiveIntegerField(default=0)
+    # semester = NOT IMPLEMENTED
+    max_num_tas = models.PositiveIntegerField(default=2, verbose_name="Max Number of TAs")
+    num_tas = models.PositiveIntegerField(default=0, verbose_name="Number of TAs")
 
     def __str__(self):
         return f'{str(self.course_num)}: {self.name}'
