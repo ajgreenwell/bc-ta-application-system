@@ -31,7 +31,7 @@ class MyAccountManager(BaseUserManager):
 class Account(AbstractBaseUser):
     email = models.EmailField(verbose_name="email", unique=True)
     eagleid = models.IntegerField(verbose_name='eagle id')
-    date_joine = models.DateTimeField(
+    date_joined = models.DateTimeField(
         verbose_name='data joined', auto_now_add=True)
     last_login = models.DateTimeField(verbose_name='last login', auto_now=True)
     is_admin = models.BooleanField(default=False)
