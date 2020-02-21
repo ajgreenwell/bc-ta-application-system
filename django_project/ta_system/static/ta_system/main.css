@@ -28,12 +28,12 @@ ul {
   font-weight: 500;
 }
 
-.content-section {
+.upload-forms {
   background: #ffffff;
   padding: 10px 20px;
   border: 1px solid #dddddd;
   border-radius: 3px;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .article-title {
@@ -81,8 +81,4 @@ a.article-title:hover {
 
 .account-heading {
   font-size: 2.5rem;
-}
-
-.upload-files {
-  margin-top: 290px;
 }

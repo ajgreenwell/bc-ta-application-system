@@ -1,25 +1,80 @@
-from datetime import datetime
-from .models import CourseNumber, Course, Instructor
+from django.shortcuts import render
+from django.utils import timezone
+from .models import Course, Instructor
+from os import remove
+
+COURSE_DATA_VALUES = [
+    'course_number',
+    'name',
+    'instructor',
+    'days_of_week',
+    'start_end_times',
+    'building_and_room',
+    'max_num_tas'
+]
+
+
+def handle_bad_request(request, app, expected_method):
+    context = { 
+        'expected_method': expected_method,
+        'received_method': request.method
+    }
+    return render(request, f'{app}/bad_request.html', context)
 
 
 def handle_course_data_upload(file):
-    path = 'ta_system/static/course_data/'
-    filename = get_course_data_filename()
+    uploaded_fname = str(file)
+    if not uploaded_fname.endswith('.csv'):
+        raise TypeError('Invalid file type –– must upload a csv.')
 
-    with open(path + filename, 'wb+') as destination:
+    file_path = f'ta_system/static/course_data/{get_course_data_filename()}'
+
+    with open(file_path, 'wb+') as destination:
         for chunk in file.chunks():
             destination.write(chunk)
 
-    with open(path + filename, 'r') as f:
+    with open(file_path, 'r') as f:
+        line_number = 1
         for line in f:
-            process_course_data(line)
+            course_data = line.split(',')
+            if not is_valid(course_data):
+                f.close()
+                remove(file_path)
+                raise TypeError(f'Invalid course data –– expected {NUM_VALUES_PER_COURSE} comma separated' +
+                                f'values per line, but received {len(course_data)} on line {line_number}.')
+            process_course_data(course_data)
+            line_number += 1
 
 
 def get_course_data_filename():
-    date = datetime.now()
-    return f'Course_Data_{date.strftime("%b")}_{date.year}'
+    date = timezone.localtime(timezone.now())
+    return f'Course_Data__{date.strftime("%b")}_{date.day}_{date.year}__{date.hour}:{date.minute}:{date.second}.csv'
 
 
-def process_course_data(course):
-    pass
+def is_valid(course_data):
+    return len(course_data) == len(COURSE_DATA_VALUES)
+
+
+def process_course_data(course_data):
+    course_data = dict(zip(COURSE_DATA_VALUES, course_data))
+    instructor = get_instructor(course_data)
+    (start_time, end_time) = course_data['start_end_times'].split('/')
+    (building, room_number) = course_data['building_and_room'].split(' ')
+    course = Course(
+        course_num=course_data['course_number'],
+        name=course_data['name'],
+        instructor=instructor,
+        days_of_week=course_data['days_of_week'],
+        start_time=start_time,
+        end_time=end_time,
+        building=building,
+        room_number=room_number,
+        max_num_tas=course_data['max_num_tas']
+    )
+    course.save()
+
+
+def get_instructor(course_data):
+    instructor = Instructor.objects.get(name=course_data['instructor'])
+    return instructor or Instructor(course_data['instructor'])
 

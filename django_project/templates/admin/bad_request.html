@@ -1,0 +1,8 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+{% block content %}
+    <h1>400: Bad Request</h1>
+    <p>The wrong type of HTTP request was made.</p>
+    <p><strong>Expected:</strong> {{ expected_method }}</p>
+    <p><strong>Received:</strong> {{ received_method }}</p>
+{% endblock %}
