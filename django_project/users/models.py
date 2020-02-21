@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, User
 
 
 class MyAccountManager(BaseUserManager):
@@ -9,7 +9,7 @@ class MyAccountManager(BaseUserManager):
         if not eagleid:
             raise ValueError("User must have an Eagle ID")
         user = self.model(
-            email.self.normalize_email(email),
+            email=self.normalize_email(email),
             eagleid=eagleid,
         )
         user.set_password(password)
@@ -50,3 +50,10 @@ class Account(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.user.username} Profile'
