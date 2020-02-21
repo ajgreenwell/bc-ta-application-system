@@ -39,15 +39,13 @@ def handle_course_data_upload(file):
 
 
 def validate_all_courses(file):
-    line_number = 1
-    for line in file:
+    for line_number, line in enumerate(file):
         course_data = line.split(',')
         if not is_valid(course_data):
             file.close()
             remove(file.name)
             raise TypeError(f'Invalid course data –– expected {len(COURSE_DATA_VALUES)} comma separated ' +
-                            f'values per line, but received {len(course_data)} on line {line_number}.')
-        line_number += 1
+                            f'values per line, but received {len(course_data)} on line {line_number + 1}.')
     file.seek(0)
 
 
