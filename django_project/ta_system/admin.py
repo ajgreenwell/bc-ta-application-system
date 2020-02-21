@@ -8,7 +8,7 @@ from .forms import UploadFileForm
 from .handlers import handle_course_data_upload, handle_bad_request
 
 
-class MyAdminSite(AdminSite):
+class CustomAdminSite(AdminSite):
 
     def get_urls(self):
         from django.urls import path
@@ -42,13 +42,13 @@ class MyAdminSite(AdminSite):
                 messages.error(request, f'File Upload Failed: {err}')
             except IntegrityError as err:
                 messages.error(request, f'File Upload Failed: One or more courses already exists. ' +
-                                        'Please delete all courses before uploading new course data.')
+                                        'Please delete all duplicate courses before uploading new course data.')
             else:
                 messages.success(request, 'File Uploaded Successfully.')
         return redirect('admin:index')
 
 
-admin_site = MyAdminSite()
+admin_site = CustomAdminSite()
 admin_site.register(Course)
 admin_site.register(Instructor)
 admin_site.register(User)

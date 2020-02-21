@@ -13,7 +13,6 @@ COURSE_DATA_VALUES = [
     'max_num_tas'
 ]
 
-
 def handle_bad_request(request, app, expected_method):
     context = { 
         'expected_method': expected_method,
@@ -33,17 +32,23 @@ def handle_course_data_upload(file):
         for chunk in file.chunks():
             destination.write(chunk)
 
-    with open(file_path, 'r') as f:
-        line_number = 1
-        for line in f:
-            course_data = line.split(',')
-            if not is_valid(course_data):
-                f.close()
-                remove(file_path)
-                raise TypeError(f'Invalid course data –– expected {NUM_VALUES_PER_COURSE} comma separated' +
-                                f'values per line, but received {len(course_data)} on line {line_number}.')
-            process_course_data(course_data)
-            line_number += 1
+    with open(file_path, 'r') as courses:
+        validate_all_courses(courses)
+        for course in courses:
+            process_course(course.split(','))
+
+
+def validate_all_courses(file):
+    line_number = 1
+    for line in file:
+        course_data = line.split(',')
+        if not is_valid(course_data):
+            file.close()
+            remove(file.name)
+            raise TypeError(f'Invalid course data –– expected {len(COURSE_DATA_VALUES)} comma separated ' +
+                            f'values per line, but received {len(course_data)} on line {line_number}.')
+        line_number += 1
+    file.seek(0)
 
 
 def get_course_data_filename():
@@ -55,7 +60,7 @@ def is_valid(course_data):
     return len(course_data) == len(COURSE_DATA_VALUES)
 
 
-def process_course_data(course_data):
+def process_course(course_data):
     course_data = dict(zip(COURSE_DATA_VALUES, course_data))
     instructor = get_instructor(course_data)
     (start_time, end_time) = course_data['start_end_times'].split('/')
@@ -75,5 +80,9 @@ def process_course_data(course_data):
 
 
 def get_instructor(course_data):
-    instructor = Instructor.objects.get(name=course_data['instructor'])
-    return instructor or Instructor(course_data['instructor'])
+    try:
+        instructor = Instructor.objects.get(name=course_data['instructor'])
+    except:
+        instructor = Instructor(name=course_data['instructor'])
+        instructor.save()
+    return instructor
