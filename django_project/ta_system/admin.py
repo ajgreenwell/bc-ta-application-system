@@ -52,7 +52,3 @@ admin_site = MyAdminSite()
 admin_site.register(Course)
 admin_site.register(Instructor)
 admin_site.register(User)
-
-
-
-

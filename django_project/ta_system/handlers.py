@@ -77,4 +77,3 @@ def process_course_data(course_data):
 def get_instructor(course_data):
     instructor = Instructor.objects.get(name=course_data['instructor'])
     return instructor or Instructor(course_data['instructor'])
-
