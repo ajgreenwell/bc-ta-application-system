@@ -1,7 +1,7 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}"><link rel="stylesheet" type="text/css" href="{% static 'ta_system/main.css' %}" />{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
 
 {% block coltype %}colMS{% endblock %}
 
@@ -85,15 +85,13 @@
 </div>
 {% endblock %}
 
-{% block extracontent %}
-<div class="upload-forms">
-    <form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data">
-        {% csrf_token %}
-        <fieldset>
-            <legend>Upload Files</legend>
-            {{ form }}
-        </fieldset>
-        <button type="submit">Upload</button>  
-    </form>
-</div>
+{% block custom-content %}
+<form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset>
+        <legend>Upload Files</legend>
+        {{ form }}
+    </fieldset>
+    <button type="submit">Upload</button>
+</form>
 {% endblock %}
