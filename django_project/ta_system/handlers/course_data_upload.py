@@ -1,6 +1,7 @@
-from django.utils import timezone
 from ..models import Course, Instructor
+from ..utils.file_uploads import get_timestamped_fname, handle_file_upload
 from os import remove
+
 
 COURSE_DATA_VALUES = [
     'course_number',
@@ -12,17 +13,18 @@ COURSE_DATA_VALUES = [
     'max_num_tas'
 ]
 
+
 def handle_course_data_upload(file):
-    if not file.name.endswith('.csv'):
-        raise TypeError('Invalid file type –– must upload a csv.')
+    fname = get_timestamped_fname('Course_Data', 'csv')
+    handle_file_upload(
+        file=file,
+        destination=f'ta_system/static/course_data/{fname}',
+        process_data_callback=process_course_data
+    )
 
-    file_path = f'ta_system/static/course_data/{get_course_data_filename()}'
 
-    with open(file_path, 'wb+') as destination:
-        for chunk in file.chunks():
-            destination.write(chunk)
-
-    with open(file_path, 'r') as courses:
+def process_course_data(fname):
+    with open(fname, 'r') as courses:
         validate_all_courses(courses)
         for course in courses:
             process_course(course.split(','))
@@ -37,11 +39,6 @@ def validate_all_courses(file):
             raise TypeError(f'Invalid course data –– expected {len(COURSE_DATA_VALUES)} comma separated ' +
                             f'values per line, but received {len(course_data)} on line {line_number + 1}.')
     file.seek(0)
-
-
-def get_course_data_filename():
-    date = timezone.localtime(timezone.now())
-    return f'Course_Data__{date.strftime("%b")}_{date.day}_{date.year}__{date.hour}:{date.minute}:{date.second}.csv'
 
 
 def is_valid(course_data):

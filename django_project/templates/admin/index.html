@@ -4,7 +4,7 @@
 {% block extrastyle %}
 {{ block.super }}
 <link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
-<link rel="stylesheet" type="text/css" href="{% static "admin/admin.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "admin/index.css" %}">
 {% endblock %}
 
 {% block coltype %}colMS{% endblock %}
@@ -91,19 +91,23 @@
 
 {% block custom-content %}
 <div class="custom-content-separator"></div>
-<form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data">
-    {% csrf_token %}
-    <fieldset>
-        <legend>Upload Files</legend>
-        {{ course_data_upload_form }}
-    </fieldset>
-    <button type="submit">Upload</button>
-</form>
-<form method="POST" action="{% url 'admin:student_data_upload' %}" enctype="multipart/form-data">
-    {% csrf_token %}
-    <fieldset>
-        {{ student_data_upload_form }}
-    </fieldset>
-    <button type="submit">Upload</button>
-</form>
+<div class="custom-content">
+    <form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Upload Files</legend>
+            <div class="mt-8">
+                {{ course_data_upload_form }}
+            </div>
+        </fieldset>
+        <button type="submit">Upload</button>
+    </form>
+    <form method="POST" action="{% url 'admin:student_data_upload' %}" enctype="multipart/form-data" class="mt-8">
+        {% csrf_token %}
+        <fieldset class="student-upload-fieldset">
+            {{ student_data_upload_form }}
+        </fieldset>
+        <button type="submit">Upload</button>
+    </form>
+</div>
 {% endblock %}

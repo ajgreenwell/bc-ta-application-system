@@ -65,9 +65,6 @@ class CustomAdminSite(AdminSite):
                 handle_student_data_upload(request.FILES['file'])
             except TypeError as err:
                 messages.error(request, f'Student Data Upload Failed: {err}')
-            except IntegrityError as err:
-                messages.error(request, f'Student Data Upload Failed: One or more students already exists. ' +
-                                        'Please delete all duplicate students before uploading new student data.')
             else:
                 messages.success(request, 'Student Data Uploaded Successfully.')
         return redirect('admin:index')
