@@ -22,8 +22,7 @@ def handle_bad_request(request, app, expected_method):
 
 
 def handle_course_data_upload(file):
-    uploaded_fname = str(file)
-    if not uploaded_fname.endswith('.csv'):
+    if not file.name.endswith('.csv'):
         raise TypeError('Invalid file type –– must upload a csv.')
 
     file_path = f'ta_system/static/course_data/{get_course_data_filename()}'
