@@ -1,6 +1,5 @@
-from django.shortcuts import render
 from django.utils import timezone
-from .models import Course, Instructor
+from ..models import Course, Instructor
 from os import remove
 
 COURSE_DATA_VALUES = [
@@ -12,14 +11,6 @@ COURSE_DATA_VALUES = [
     'building_and_room',
     'max_num_tas'
 ]
-
-def handle_bad_request(request, app, expected_method):
-    context = { 
-        'expected_method': expected_method,
-        'received_method': request.method
-    }
-    return render(request, f'{app}/bad_request.html', context)
-
 
 def handle_course_data_upload(file):
     if not file.name.endswith('.csv'):

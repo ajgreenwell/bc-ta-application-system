@@ -1,7 +1,11 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "admin/admin.css" %}">
+{% endblock %}
 
 {% block coltype %}colMS{% endblock %}
 
@@ -86,11 +90,19 @@
 {% endblock %}
 
 {% block custom-content %}
+<div class="custom-content-separator"></div>
 <form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data">
     {% csrf_token %}
     <fieldset>
         <legend>Upload Files</legend>
-        {{ form }}
+        {{ course_data_upload_form }}
+    </fieldset>
+    <button type="submit">Upload</button>
+</form>
+<form method="POST" action="{% url 'admin:student_data_upload' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset>
+        {{ student_data_upload_form }}
     </fieldset>
     <button type="submit">Upload</button>
 </form>
