@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 
 def register(request):
-    return render(request, 'users/register.html', {'title', 'Register'})
+    return render(request, 'users/register.html', {'title': 'Register'})
 
 
 def login(request):
