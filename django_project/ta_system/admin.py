@@ -4,10 +4,10 @@ from django.contrib.admin import AdminSite
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from .models import Course, Instructor
-from .forms import CourseDataUploadForm, StudentDataUploadForm
+from .forms import CourseDataUploadForm, ApplicantDataUploadForm
 from .handlers.handlers import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
-from .handlers.student_data_upload import handle_student_data_upload
+from .handlers.student_data_upload import handle_applicant_data_upload
 
 
 class CustomAdminSite(AdminSite):
@@ -22,7 +22,7 @@ class CustomAdminSite(AdminSite):
         urls = [
             path('', self.admin_view(self.index)),
             path('course_data_upload', self.admin_view(self.course_data_upload), name='course_data_upload'),
-            path('student_data_upload', self.admin_view(self.student_data_upload), name='student_data_upload')
+            path('applicant_data_upload', self.admin_view(self.applicant_data_upload), name='student_data_upload')
             ] + urls
         return urls
 
@@ -33,7 +33,7 @@ class CustomAdminSite(AdminSite):
             'title': self.index_title,
             'app_list': app_list,
             'course_data_upload_form': CourseDataUploadForm(),
-            'student_data_upload_form': StudentDataUploadForm(),
+            'applicant_data_upload_form': ApplicantDataUploadForm(),
         }
         request.current_app = self.name
         return render(request, 'admin/index.html', context)
@@ -55,18 +55,18 @@ class CustomAdminSite(AdminSite):
                 messages.success(request, 'Course Data Uploaded Successfully.')
         return redirect('admin:index')
 
-    def student_data_upload(self, request):
+    def applicant_data_upload(self, request):
         if request.method != 'POST':
             return handle_bad_request(request, app='admin', expected_method='POST')
 
-        form = StudentDataUploadForm(request.POST, request.FILES)
+        form = ApplicantDataUploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                handle_student_data_upload(request.FILES['file'])
+                handle_applicant_data_upload(request.FILES['file'])
             except TypeError as err:
-                messages.error(request, f'Student Data Upload Failed: {err}')
+                messages.error(request, f'Applicant Data Upload Failed: {err}')
             else:
-                messages.success(request, 'Student Data Uploaded Successfully.')
+                messages.success(request, 'Applicant Data Uploaded Successfully.')
         return redirect('admin:index')
 
 

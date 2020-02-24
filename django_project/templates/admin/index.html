@@ -105,7 +105,7 @@
     <form method="POST" action="{% url 'admin:student_data_upload' %}" enctype="multipart/form-data" class="mt-8">
         {% csrf_token %}
         <fieldset class="student-upload-fieldset">
-            {{ student_data_upload_form }}
+            {{ applicant_data_upload_form }}
         </fieldset>
         <button type="submit">Upload</button>
     </form>

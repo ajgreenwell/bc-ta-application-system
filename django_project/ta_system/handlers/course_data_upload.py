@@ -1,6 +1,7 @@
 from ..models import Course, Instructor
-from ..utils.file_uploads import get_timestamped_fname, handle_file_upload
+from ..utils.file_uploads import handle_file_upload, FILE_UPLOAD_DESTINATION
 from os import remove
+from uuid import uuid4
 
 
 COURSE_DATA_VALUES = [
@@ -15,10 +16,9 @@ COURSE_DATA_VALUES = [
 
 
 def handle_course_data_upload(file):
-    fname = get_timestamped_fname('Course_Data', 'csv')
     handle_file_upload(
         file=file,
-        destination=f'ta_system/static/course_data/{fname}',
+        destination=f'{FILE_UPLOAD_DESTINATION}{str(uuid4())}.csv',
         process_data_callback=process_course_data
     )
 
