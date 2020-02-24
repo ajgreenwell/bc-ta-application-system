@@ -1,1 +1,4 @@
-admin_config.txt
+.DS_Store
+__pycache__
+*.pyc
+db.sqlite3
