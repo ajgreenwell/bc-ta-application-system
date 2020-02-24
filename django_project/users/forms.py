@@ -1,12 +1,17 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, get_user_model
+from ta_system.models import Profile
 
 
 class UserRegisterForm(UserCreationForm):
+    first_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=True)
+
     class Meta(UserCreationForm.Meta):
         fields = ['username', 'email', 'first_name',
                   'last_name', 'password1', 'password2']
+
         widgets = {
             'username': forms.EmailInput(attrs={
                 'placeholder': 'BC Email',
@@ -25,4 +30,4 @@ class UserRegisterForm(UserCreationForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ('eagle_id')
+        fields = ('eagle_id',)
