@@ -23,7 +23,6 @@ class UserRegisterForm(UserCreationForm):
         user = super().save(False)
         user.email = user.username
         user = super().save()
-
         return user
 
 
