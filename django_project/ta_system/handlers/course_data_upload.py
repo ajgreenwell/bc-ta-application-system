@@ -1,7 +1,11 @@
-from ..models import Course, Instructor
-from ..utils.file_uploads import handle_file_upload, FILE_UPLOAD_DESTINATION
 from os import remove
 from uuid import uuid4
+from ..models import Course, Instructor
+from .file_upload import (
+    handle_file_upload,
+    validate_csv_data,
+    FILE_UPLOAD_DESTINATION
+)
 
 
 COURSE_DATA_VALUES = [
@@ -25,24 +29,9 @@ def handle_course_data_upload(file):
 
 def process_course_data(fname):
     with open(fname, 'r') as courses:
-        validate_all_courses(courses)
+        validate_csv_data(courses, len(COURSE_DATA_VALUES))
         for course in courses:
             process_course(course.split(','))
-
-
-def validate_all_courses(file):
-    for line_number, line in enumerate(file):
-        course_data = line.split(',')
-        if not is_valid(course_data):
-            file.close()
-            remove(file.name)
-            raise TypeError(f'Invalid course data –– expected {len(COURSE_DATA_VALUES)} comma separated ' +
-                            f'values per line, but received {len(course_data)} on line {line_number + 1}.')
-    file.seek(0)
-
-
-def is_valid(course_data):
-    return len(course_data) == len(COURSE_DATA_VALUES)
 
 
 def process_course(course_data):

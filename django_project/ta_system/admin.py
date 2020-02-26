@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.admin import AdminSite
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-from .models import Course, Instructor
+from .models import Course, Instructor, Profile
 from .forms import CourseDataUploadForm, ApplicantDataUploadForm
 from .handlers.handlers import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
@@ -12,8 +13,8 @@ from .handlers.student_data_upload import handle_applicant_data_upload
 
 class CustomAdminSite(AdminSite):
 
-    site_title  = "Boston College TA Management System"
-    site_header = "Boston College TA Management System"
+    site_title  = "Boston College TA Application System"
+    site_header = "Boston College TA Application System"
     index_title = "System Admin"
 
     def get_urls(self):
@@ -71,6 +72,8 @@ class CustomAdminSite(AdminSite):
 
 
 admin_site = CustomAdminSite()
-admin_site.register(User)
+admin_site.register(User, UserAdmin)
+admin_site.register(Profile)
 admin_site.register(Course)
 admin_site.register(Instructor)
+

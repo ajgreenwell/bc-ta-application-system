@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Course(models.Model):
@@ -28,3 +29,17 @@ class Instructor(models.Model):
 
     def __str__(self):
         return f'{self.name}'
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    eagle_id = models.PositiveSmallIntegerField(null=True, blank=True)
+    courses_taken = models.ManyToManyField(Course, related_name="students", blank=True)
+    ta_assignments = models.ManyToManyField(Course, related_name="tas", blank=True)
+
+    def __str__(self):
+        return f'{self.user.username} Profile'
+
+    class Meta:
+        verbose_name = "Student"
+        verbose_name_plural = "Students"
