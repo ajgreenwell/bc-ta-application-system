@@ -28,7 +28,7 @@ class Instructor(models.Model):
 
     def last_name(self):
         if ' ' in self.name:
-            return self.name.split(' ')[1]
+            return self.name.split(' ')[-1]
         return self.name
 
     def __str__(self):

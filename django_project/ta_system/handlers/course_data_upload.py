@@ -22,7 +22,6 @@ COURSE_DATA_VALUES = [
 ]
 
 
-
 def handle_course_data_upload(file):
     handle_file_upload(
         file=file,

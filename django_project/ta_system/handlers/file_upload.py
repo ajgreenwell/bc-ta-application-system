@@ -37,9 +37,11 @@ def validate_csv_data(file, expected_line_format):
     expected_line_format = re.compile(expected_line_format)
     for line_number, line in enumerate(file):
         if not is_valid_csv_line(line, expected_line_format):
-            raise TypeError(f'Invalidly formatted data on line {line_number + 1}. ' + 
-                            f'Click {UPLOAD_DATA_FORMATS_LINK} to see documentation ' +
-                             'on how your data should be formatted')
+            raise TypeError(
+                f'Invalidly formatted data on line {line_number + 1}. ' + 
+                f'Click {UPLOAD_DATA_FORMATS_LINK} to see documentation ' +
+                'on how your data should be formatted'
+            )
     file.seek(0)
 
 
