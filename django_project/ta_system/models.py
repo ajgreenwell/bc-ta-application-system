@@ -19,26 +19,30 @@ class Course(models.Model):
 
 
 class Instructor(models.Model):
-    name = models.CharField(max_length=50, unique=True, default="Sample")
+    name = models.CharField(max_length=50, unique=True)
 
     def first_name(self):
-        return name.split(' ')[0]
+        if ' ' in self.name:
+            return self.name.split(' ')[0]
+        return self.name
 
     def last_name(self):
-        return name.split(' ')[1]
+        if ' ' in self.name:
+            return self.name.split(' ')[1]
+        return self.name
 
     def __str__(self):
         return f'{self.name}'
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user")
     eagle_id = models.PositiveSmallIntegerField(null=True, blank=True)
     courses_taken = models.ManyToManyField(Course, related_name="students", blank=True)
     ta_assignments = models.ManyToManyField(Course, related_name="tas", blank=True)
 
     def __str__(self):
-        return f'{self.user.username} Profile'
+        return f'{self.user.username}'
 
     class Meta:
         verbose_name = "Student"

@@ -1,5 +1,6 @@
 from os import remove
 from uuid import uuid4
+from django.db import IntegrityError
 from ..models import Course, Instructor
 from .file_upload import (
     handle_file_upload,
@@ -8,6 +9,8 @@ from .file_upload import (
 )
 
 
+EXPECTED_LINE_FORMAT = '[A-Z]+\d+,\S+( \S+)*,\S+( \S+)*,[MTWRFAS](/[MTWRFAS])*,' + \
+                       '\d{2}:\d{2}(:\d{2})*/\d{2}:\d{2}(:\d{2})*,\S+( \S+)* \w+,\d+'
 COURSE_DATA_VALUES = [
     'course_number',
     'name',
@@ -17,6 +20,7 @@ COURSE_DATA_VALUES = [
     'building_and_room',
     'max_num_tas'
 ]
+
 
 
 def handle_course_data_upload(file):
@@ -29,7 +33,7 @@ def handle_course_data_upload(file):
 
 def process_course_data(fname):
     with open(fname, 'r') as courses:
-        validate_csv_data(courses, len(COURSE_DATA_VALUES))
+        validate_csv_data(courses, EXPECTED_LINE_FORMAT)
         for course in courses:
             process_course(course.split(','))
 
