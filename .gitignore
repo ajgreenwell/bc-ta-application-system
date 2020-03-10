@@ -1,7 +1,9 @@
-venv
+admin_config.txt
+vene
 get-pip.py
-.idea
-__pycache__
+.DS_Store
+*/__pycache__
 *.pyc
 db.sqlite3
-.DS_Store
+.idea
+venv

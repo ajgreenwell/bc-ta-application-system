@@ -1,3 +1,5 @@
+from django.contrib import admin
+from .models import Profile
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.admin import AdminSite
@@ -7,10 +9,12 @@ from .models import Course, Instructor
 from .forms import CourseDataUploadForm
 from .handlers import handle_course_data_upload, handle_bad_request
 
+admin.site.register(Profile)
+
 
 class CustomAdminSite(AdminSite):
 
-    site_title  = "Boston College TA Management System"
+    site_title = "Boston College TA Management System"
     site_header = "Boston College TA Management System"
     index_title = "System Admin"
 
@@ -19,8 +23,10 @@ class CustomAdminSite(AdminSite):
         urls = super().get_urls()
         urls = [
             path('', self.admin_view(self.index)),
-            path('course_data_upload', self.admin_view(self.course_data_upload), name='course_data_upload')
-            ] + urls
+            path('course_data_upload',
+                 self.admin_view(self.course_data_upload),
+                 name='course_data_upload')
+        ] + urls
         return urls
 
     def index(self, request):
