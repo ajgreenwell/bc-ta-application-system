@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.admin import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from django.db import IntegrityError
+from django.db import IntegrityError as AlreadyExistsError
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Course, Instructor, Profile
 from .forms import CourseDataUploadForm, ApplicantDataUploadForm
@@ -54,16 +54,16 @@ class CustomAdminSite(AdminSite):
                 handle_course_data_upload(request.FILES['file'])
             except TypeError as err:
                 messages.error(request, f'Course Data Upload Failed: {err}.')
-            except IntegrityError:
+            except ValueError as err:
                 messages.error(
                     request,
-                    f'Course Data Upload Failed: One or more courses already exists. ' +
-                    'Please delete all duplicate courses before uploading new course data.'
+                    f'Course Data Upload Failed: The course {err} is duplicated ' +
+                    'in your file. Please remove all duplicate courses and try again.'
                 )
             except Exception as err:
                 messages.error(
                     request,
-                    f'Course Data Upload Failed: The following uncaught error occurred: {err}.'
+                    f'Course Data Eupload Failed: The following uncaught error occurred: {err}'
                 )
             else:
                 messages.success(request, 'Course Data Uploaded Successfully.')

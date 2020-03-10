@@ -14,7 +14,7 @@ APPLICANT_DATA_VALUES = [
     'first_name',
     'username',
     'eagle_id',
-    'course_num',
+    'course_number',
     'course_title'
 ]
 
@@ -37,11 +37,11 @@ def process_applicant_data(fname):
 def process_applicant(applicant_data):
     applicant_data = dict(zip(APPLICANT_DATA_VALUES, applicant_data))
     try:
-        course = Course.objects.get(course_num=applicant_data['course_num'])
+        course = Course.objects.get(course_number=applicant_data['course_number'])
         applicant = Profile.objects.get(eagle_id=applicant_data['eagle_id'])
     except Course.DoesNotExist:
         raise ObjectDoesNotExist('The following course does not exist in our database: ' +
-                                f'{applicant_data["course_num"]}: {applicant_data["course_title"]}')
+                                f'{applicant_data["course_number"]}: {applicant_data["course_title"]}')
     except Profile.DoesNotExist:
         raise ObjectDoesNotExist('The following applicant does not exist in our database: ' +
                                 f'{applicant_data["first_name"]} {applicant_data["last_name"]}')

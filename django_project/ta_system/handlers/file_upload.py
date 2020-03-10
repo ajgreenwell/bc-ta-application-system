@@ -10,9 +10,8 @@ UPLOAD_DATA_FORMATS_LINK= f'<a href={UPLOAD_DATA_FORMATS_URL} target="_blank">he
 
 def handle_file_upload(file, destination, process_data_callback):
     extension = get_extension_from_fname(destination)
-    if not file.name.endswith(f'.{extension}'):
+    if not file.name.endswith(extension):
         raise TypeError(f'Invalid file type –– must upload a {extension} file')
-
     save_uploaded_file(file, destination)
     try:
         process_data_callback(destination)
@@ -24,7 +23,7 @@ def handle_file_upload(file, destination, process_data_callback):
 
 
 def get_extension_from_fname(fname):
-    return fname[fname.rfind('.') + 1:]
+    return fname[fname.rfind('.'):]
 
 
 def save_uploaded_file(file, destination):
@@ -47,3 +46,4 @@ def validate_csv_data(file, expected_line_format):
 
 def is_valid_csv_line(line, expected_line_format):
     return expected_line_format.fullmatch(line.rstrip('\n'))
+
