@@ -11,7 +11,6 @@ def register(request):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             eagle_id = profile_form.cleaned_data.get('eagle_id')
-            # ta_system_profile.eagle_id = eagle_id
             profile_form.save()
             username = user_form.cleaned_data.get('username')
             messages.success(request, f'Account Created For {username}!')

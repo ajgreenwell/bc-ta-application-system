@@ -23,8 +23,9 @@ class CustomAdminSite(AdminSite):
         urls = super().get_urls()
         urls = [
             path('', self.admin_view(self.index)),
-            path('course_data_upload', self.admin_view(
-                self.course_data_upload), name='course_data_upload')
+            path('course_data_upload',
+                 self.admin_view(self.course_data_upload),
+                 name='course_data_upload')
         ] + urls
         return urls
 
