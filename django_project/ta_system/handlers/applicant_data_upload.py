@@ -1,22 +1,15 @@
 from uuid import uuid4
 from django.core.exceptions import ObjectDoesNotExist
 from ta_system.models import Course, Profile
+from ta_system.data_formats.applicant_data_formats import (
+    DATA_FORMATS,
+    EXPECTED_LINE_FORMAT
+)
 from .file_upload import (
     handle_file_upload,
     validate_csv_data,
     FILE_UPLOAD_DESTINATION
 )
-
-EXPECTED_LINE_FORMAT = '\d{4}[FS],\S+,\S+,\S+,\d{8},[A-Z]+\d+,\S+( \S+)*'
-APPLICANT_DATA_VALUES = [
-    'term',
-    'last_name',
-    'first_name',
-    'username',
-    'eagle_id',
-    'course_number',
-    'course_title'
-]
 
 
 def handle_applicant_data_upload(file):
@@ -35,15 +28,22 @@ def process_applicant_data(fname):
 
 
 def process_applicant(applicant_data):
-    applicant_data = dict(zip(APPLICANT_DATA_VALUES, applicant_data))
+    applicant_data = dict(zip(DATA_FORMATS.keys(), applicant_data))
     try:
-        course = Course.objects.get(course_number=applicant_data['course_number'])
+        course = Course.objects.get(
+            semester__semester=applicant_data['semester'],
+            course_number=applicant_data['course_number']
+        )
         applicant = Profile.objects.get(eagle_id=applicant_data['eagle_id'])
     except Course.DoesNotExist:
-        raise ObjectDoesNotExist('The following course does not exist in our database: ' +
-                                f'{applicant_data["course_number"]}: {applicant_data["course_title"]}')
+        raise ObjectDoesNotExist(
+            'The following course does not exist in our database: ' +
+            f'{applicant_data["semester"]}: {applicant_data["course_number"]} - {applicant_data["course_title"]}'
+        )
     except Profile.DoesNotExist:
-        raise ObjectDoesNotExist('The following applicant does not exist in our database: ' +
-                                f'{applicant_data["first_name"]} {applicant_data["last_name"]}')
+        raise ObjectDoesNotExist(
+            'The following applicant does not exist in our database: ' +
+            f'{applicant_data["eagle_id"]}: {applicant_data["first_name"]} {applicant_data["last_name"]}'
+        )
     else:
         applicant.courses_taken.add(course)

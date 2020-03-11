@@ -46,4 +46,3 @@ def validate_csv_data(file, expected_line_format):
 
 def is_valid_csv_line(line, expected_line_format):
     return expected_line_format.fullmatch(line.rstrip('\n'))
-

@@ -1,3 +1,5 @@
+from django.contrib import admin
+from .models import Profile
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.admin import AdminSite
@@ -5,11 +7,13 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.db import IntegrityError as AlreadyExistsError
 from django.core.exceptions import ObjectDoesNotExist
-from .models import Course, Instructor, Profile
+from .models import Course, Semester, Instructor, Profile
 from .forms import CourseDataUploadForm, ApplicantDataUploadForm
 from .handlers.bad_request import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
 from .handlers.applicant_data_upload import handle_applicant_data_upload
+
+admin.site.register(Profile)
 
 
 class CustomAdminSite(AdminSite):
@@ -60,6 +64,12 @@ class CustomAdminSite(AdminSite):
                     f'Course Data Upload Failed: The course {err} is duplicated ' +
                     'in your file. Please remove all duplicate courses and try again.'
                 )
+            except AlreadyExistsError as err:
+                messages.error(
+                    request,
+                    f'Course Data Upload Failed: The course {err} already exists in our database. ' +
+                    'If you wish to overwrite this course, delete it and try again.'
+                )
             except Exception as err:
                 messages.error(
                     request,
@@ -98,4 +108,5 @@ admin_site = CustomAdminSite()
 admin_site.register(User, UserAdmin)
 admin_site.register(Profile)
 admin_site.register(Course)
+admin_site.register(Semester)
 admin_site.register(Instructor)
