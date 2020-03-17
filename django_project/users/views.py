@@ -6,8 +6,8 @@ from django.contrib.auth.decorators import login_required
 
 def register(request):
     if request.method == 'POST':
-        user_form = UserRegisterForm(request.POST)
-        profile_form = ProfileForm(request.POST)
+        user_form = UserRegisterForm(request.POST, instance=request.user)
+        profile_form = ProfileForm(request.POST, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             eagle_id = profile_form.cleaned_data.get('eagle_id')
@@ -18,8 +18,8 @@ def register(request):
         else:
             messages.error(request, f'Please Correct The Error Below.')
     else:
-        user_form = UserRegisterForm()
-        profile_form = ProfileForm()
+        user_form = UserRegisterForm(instance=request.user)
+        profile_form = ProfileForm(instance=request.user.profile)
     return render(request, 'users/register.html', {
         'user_form': user_form,
         'profile_form': profile_form
