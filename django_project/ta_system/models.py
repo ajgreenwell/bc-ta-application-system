@@ -60,10 +60,11 @@ class Course(models.Model):
 
     class Meta:
         unique_together = ('semester', 'course_number')
+        ordering = ('semester', 'course_number')
 
     def __str__(self):
         semester = self.semester if self.semester else 'NO SEMESTER'
-        return f'{semester}: {self.course_number} – {self.name}'
+        return f'{semester}: {self.course_number}'
 
 
 class Semester(models.Model):

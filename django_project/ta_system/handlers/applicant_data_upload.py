@@ -38,7 +38,7 @@ def process_applicant(applicant_data):
     except Course.DoesNotExist:
         raise ObjectDoesNotExist(
             'The following course does not exist in our database: ' +
-            f'{applicant_data["semester"]}: {applicant_data["course_number"]} - {applicant_data["course_title"]}'
+            f'{applicant_data["semester"]}: {applicant_data["course_number"]}'
         )
     except Profile.DoesNotExist:
         raise ObjectDoesNotExist(
