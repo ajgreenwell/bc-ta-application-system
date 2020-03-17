@@ -1,19 +1,16 @@
 from django.contrib import admin
-from .models import Profile
-from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.admin import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from django.db import IntegrityError as AlreadyExistsError
 from django.core.exceptions import ObjectDoesNotExist
-from .models import Course, Semester, Instructor, Profile
+from django.db import IntegrityError as AlreadyExistsError
+from django.shortcuts import render, redirect
 from .forms import CourseDataUploadForm, ApplicantDataUploadForm
 from .handlers.bad_request import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
 from .handlers.applicant_data_upload import handle_applicant_data_upload
-
-admin.site.register(Profile)
+from .models import Course, Semester, Instructor, Profile
 
 
 class CustomAdminSite(AdminSite):

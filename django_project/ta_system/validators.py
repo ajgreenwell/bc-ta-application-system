@@ -19,7 +19,7 @@ class DataValidator():
 
     def __eq__(self, other):
         return (
-            isinstance(other, CharFieldValidator) and
+            isinstance(other, DataValidator) and
             self.regex.pattern == other.regex.pattern and
             self.message == other.message
         )

@@ -58,6 +58,8 @@ class Course(models.Model):
     )
     assigned_tas = models.ManyToManyField('Profile', related_name="ta_courses", verbose_name="Assigned TAs", blank=True)
 
+    class Meta:
+        unique_together = ('semester', 'course_number')
 
     def __str__(self):
         semester = self.semester if self.semester else 'NO SEMESTER'
@@ -108,12 +110,8 @@ class Profile(models.Model):
     )
     courses_taken = models.ManyToManyField(Course, related_name="students", blank=True)
 
-    @property
-    def name(self):
-        return f'{self.user.first_name} {self.user.last_name}'
-
     def __str__(self):
-        return f'{self.eagle_id}: {self.name}'
+        return f'{self.eagle_id}: {self.user.first_name} {self.user.last_name}'
 
     class Meta:
         verbose_name = "Student"
