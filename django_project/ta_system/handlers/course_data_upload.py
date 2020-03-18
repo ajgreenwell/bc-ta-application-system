@@ -1,4 +1,3 @@
-from os import remove
 from uuid import uuid4
 from django.db import IntegrityError as AlreadyExistsError
 from ..models import Course, Semester, Instructor

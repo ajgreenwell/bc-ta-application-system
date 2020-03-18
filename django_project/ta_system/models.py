@@ -98,7 +98,7 @@ class Instructor(models.Model):
         return self.name
 
     def __str__(self):
-        return f'{self.name}'
+        return self.name
 
 
 class Profile(models.Model):
