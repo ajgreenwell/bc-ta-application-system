@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib import messages
-from django.contrib.admin import AdminSite
+from django.contrib.admin import AdminSite, ModelAdmin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -101,9 +101,17 @@ class CustomAdminSite(AdminSite):
         return redirect('admin:index')
 
 
+class CourseAdmin(ModelAdmin):
+    filter_vertical = ('teaching_assistants',)
+
+
+class ProfileAdmin(ModelAdmin):
+    filter_vertical = ('courses_taken', 'ta_assignments')
+
+
 admin_site = CustomAdminSite()
 admin_site.register(User, UserAdmin)
-admin_site.register(Profile)
-admin_site.register(Course)
+admin_site.register(Profile, ProfileAdmin)
+admin_site.register(Course, CourseAdmin)
 admin_site.register(Semester)
 admin_site.register(Instructor)
