@@ -23,7 +23,7 @@ class Course(models.Model):
     days_of_week = models.CharField(max_length=13, verbose_name="Days of the Week (e.g. M/W/F)",
         validators=[DataValidator(
             regex=COURSE_DATA_FORMATS['days_of_week'], 
-            message="Please specify the days of the week this class meets separated" + 
+            message="Please specify the days of the week this class meets separated " + 
                     "by slashes, e.g. 'T/R'."
         )]
     )
@@ -48,14 +48,14 @@ class Course(models.Model):
     room_number = models.CharField(max_length=6,
         validators=[DataValidator(
             regex=COURSE_DATA_FORMATS['room_number'], 
-            message="Please enter the number of the room this class meets in, e.g. '250'." + 
+            message="Please enter the number of the room this class meets in, e.g. '250'. " + 
                     "One letter building codes may be included, e.g. '250S'."
         )]
     )
     max_num_tas = models.PositiveIntegerField(default=2, verbose_name="Max Number of TAs",
         validators=[DataValidator(
             regex=COURSE_DATA_FORMATS['max_num_tas'], 
-            message="Please enter the maximum number of TAs that can be assigned to this" +
+            message="Please enter the maximum number of TAs that can be assigned to this " +
                     "course, e.g. '3'. This field defaults to '2'."
         )]
     )
@@ -79,6 +79,9 @@ class Semester(models.Model):
             message="Please specify the year followed by the semester, e.g. '2020F'."
         )]
     )
+
+    class Meta:
+        ordering = ('-semester',)
 
     def __str__(self):
         return self.semester
@@ -107,7 +110,7 @@ class Instructor(models.Model):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     eagle_id = models.CharField(max_length=8, unique=True, null=True, blank=True, verbose_name="Eagle ID",
         validators=[DataValidator(
             regex=APPILCANT_DATA_FORMATS['eagle_id'], 

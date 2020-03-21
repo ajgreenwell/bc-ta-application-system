@@ -6,11 +6,13 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError as AlreadyExistsError
 from django.shortcuts import render, redirect
-from .forms import CourseDataUploadForm, ApplicantDataUploadForm
+from django.urls import path
 from .handlers.bad_request import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
 from .handlers.applicant_data_upload import handle_applicant_data_upload
-from .models import Course, Semester, Instructor, Profile
+from .handlers.assignment_data_download import handle_assignment_data_download
+import ta_system.models as models
+import ta_system.forms as forms
 
 
 class CustomAdminSite(AdminSite):
@@ -20,7 +22,6 @@ class CustomAdminSite(AdminSite):
     index_title = "System Admin"
 
     def get_urls(self):
-        from django.urls import path
         urls = super().get_urls()
         urls = [
             path('', self.admin_view(self.index)),
@@ -29,7 +30,10 @@ class CustomAdminSite(AdminSite):
                 name='course_data_upload'),
             path('applicant_data_upload', 
                 self.admin_view(self.applicant_data_upload), 
-                name='student_data_upload')
+                name='student_data_upload'),
+            path('assignment_data_download',
+                self.admin_view(self.assignment_data_download),
+                name='assignment_data_download')
         ] + urls
         return urls
 
@@ -39,8 +43,9 @@ class CustomAdminSite(AdminSite):
             **self.each_context(request),
             'title': self.index_title,
             'app_list': app_list,
-            'course_data_upload_form': CourseDataUploadForm(),
-            'applicant_data_upload_form': ApplicantDataUploadForm(),
+            'course_data_upload_form': forms.CourseDataUploadForm(),
+            'applicant_data_upload_form': forms.ApplicantDataUploadForm(),
+            'assignment_data_download_form': forms.AssignmentDataDownloadForm()
         }
         request.current_app = self.name
         return render(request, 'admin/index.html', context)
@@ -49,7 +54,7 @@ class CustomAdminSite(AdminSite):
         if request.method != 'POST':
             return handle_bad_request(request, app='admin', expected_method='POST')
 
-        form = CourseDataUploadForm(request.POST, request.FILES)
+        form = forms.CourseDataUploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 handle_course_data_upload(request.FILES['file'])
@@ -80,7 +85,7 @@ class CustomAdminSite(AdminSite):
         if request.method != 'POST':
             return handle_bad_request(request, app='admin', expected_method='POST')
 
-        form = ApplicantDataUploadForm(request.POST, request.FILES)
+        form = forms.ApplicantDataUploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 handle_applicant_data_upload(request.FILES['file'])
@@ -100,6 +105,23 @@ class CustomAdminSite(AdminSite):
                 messages.success(request, 'Applicant Data Uploaded Successfully.')
         return redirect('admin:index')
 
+    def assignment_data_download(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+
+        form = forms.AssignmentDataDownloadForm(request.GET)
+        if form.is_valid():
+            semester = form.cleaned_data.get('semester')
+            try:
+                response = handle_assignment_data_download(semester)
+                return response
+            except ValueError as err:
+                messages.error(
+                    request,
+                    f'TA Assignment Data Download Failed: {err}.'
+                )
+        return redirect('admin:index')
+
 
 class CourseAdmin(ModelAdmin):
     filter_vertical = ('teaching_assistants',)
@@ -110,8 +132,8 @@ class ProfileAdmin(ModelAdmin):
 
 
 admin_site = CustomAdminSite()
-admin_site.register(User, UserAdmin)
-admin_site.register(Profile, ProfileAdmin)
-admin_site.register(Course, CourseAdmin)
-admin_site.register(Semester)
-admin_site.register(Instructor)
+admin_site.register(models.User, UserAdmin)
+admin_site.register(models.Profile, ProfileAdmin)
+admin_site.register(models.Course, CourseAdmin)
+admin_site.register(models.Semester)
+admin_site.register(models.Instructor)
