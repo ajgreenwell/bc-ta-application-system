@@ -27,6 +27,8 @@ class UserRegisterForm(UserCreationForm):
 
 
 class ProfileForm(forms.ModelForm):
+    eagle_id = forms.IntegerField(required=True)
+
     class Meta:
         model = Profile
-        fields = ('eagle_id',)
+        fields = ['eagle_id']

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    eagle_id = models.PositiveSmallIntegerField(null=True, blank=True)
+    eagle_id = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.user.username} Profile'
