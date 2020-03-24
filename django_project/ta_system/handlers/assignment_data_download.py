@@ -47,12 +47,12 @@ def handle_assignment_data_download(semester):
 
 
 def write_ta_assignment_data(csv_writer, semester):
-    num_unassigned_courses = 0
+    semester_has_assigned_tas = False
     courses = Semester.objects.get(semester=semester).course_set.all()
     for course in courses:
         tas = course.teaching_assistants.all()
-        if not tas:
-            num_unassigned_courses += 1
+        if not semester_has_assigned_tas and tas:
+            semester_has_assigned_tas = True
         for ta in tas:
             row = [
                 course.semester,
@@ -65,7 +65,7 @@ def write_ta_assignment_data(csv_writer, semester):
                 ta.user.email
             ]
             csv_writer.writerow(row)
-    if num_unassigned_courses == len(courses):
+    if not semester_has_assigned_tas:
         raise ValueError(
             f'The semester ({get_verbose_semester(semester)}) has no ' +
             'courses to which any teaching assistants have been assigned'

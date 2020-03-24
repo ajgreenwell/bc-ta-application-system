@@ -105,6 +105,9 @@ class Instructor(models.Model):
             return self.name.split(' ')[-1]
         return self.name
 
+    class Meta:
+        ordering = ('name',)
+
     def __str__(self):
         return self.name
 
