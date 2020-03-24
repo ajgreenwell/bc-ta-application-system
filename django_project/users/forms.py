@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, get_user_model
 from ta_system.models import Profile
+from ta_system.validators import DataValidator
 
 
 class UserRegisterForm(UserCreationForm):
@@ -27,8 +28,13 @@ class UserRegisterForm(UserCreationForm):
 
 
 class ProfileForm(forms.ModelForm):
-    eagle_id = forms.CharField(required=True)
+    eagle_id = forms.CharField(max_length=8, required=True,
+        validators=[DataValidator(
+            regex=APPILCANT_DATA_FORMATS['eagle_id'], 
+            message="Please enter a valid 8-digit eagle id, e.g. '58704254'."
+        )]
+    )
 
     class Meta:
         model = Profile
-        fields = ('eagle_id',)
+        fields = ['eagle_id']
