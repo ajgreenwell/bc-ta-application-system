@@ -113,7 +113,7 @@ class Instructor(models.Model):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     eagle_id = models.CharField(max_length=8, unique=True, null=True, blank=True, verbose_name="Eagle ID",
         validators=[DataValidator(
             regex=APPILCANT_DATA_FORMATS['eagle_id'], 
