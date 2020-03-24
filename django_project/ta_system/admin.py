@@ -9,8 +9,6 @@ from .models import Course, Instructor
 from .forms import CourseDataUploadForm
 from .handlers import handle_course_data_upload, handle_bad_request
 
-admin.site.register(Profile)
-
 
 class CustomAdminSite(AdminSite):
 
@@ -62,3 +60,4 @@ admin_site = CustomAdminSite()
 admin_site.register(Course)
 admin_site.register(Instructor)
 admin_site.register(User)
+admin_site.register(Profile)
