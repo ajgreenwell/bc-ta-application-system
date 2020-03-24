@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, get_user_model
 from ta_system.models import Profile
 from ta_system.validators import DataValidator
+from ta_system.data_formats.applicant_data_formats \
+    import DATA_FORMATS as APPILCANT_DATA_FORMATS
 
 
 class UserRegisterForm(UserCreationForm):

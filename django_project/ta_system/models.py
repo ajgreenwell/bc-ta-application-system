@@ -1,8 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
-from ta_system.data_formats.course_data_formats import DATA_FORMATS as COURSE_DATA_FORMATS
-from ta_system.data_formats.applicant_data_formats import DATA_FORMATS as APPILCANT_DATA_FORMATS
 from .validators import DataValidator
+from .data_formats.course_data_formats \
+    import DATA_FORMATS as COURSE_DATA_FORMATS
+from .data_formats.applicant_data_formats \
+    import DATA_FORMATS as APPILCANT_DATA_FORMATS
 
 
 class Course(models.Model):
