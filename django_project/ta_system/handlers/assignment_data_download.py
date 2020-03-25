@@ -22,14 +22,8 @@ def handle_assignment_data_download(semester):
     csv_buffer = StringIO()
     csv_writer = writer(csv_buffer)
     headers = [
-        'Semester',
-        'Course Number',
-        'Course Title',
-        'Professor',
-        'TA Eagle ID',
-        'TA First Name',
-        'TA Last Name',
-        'TA Email'
+        'Semester', 'Course Number', 'Course Title', 'Professor',
+        'TA Eagle ID', 'TA First Name', 'TA Last Name', 'TA Email'
     ]
     csv_writer.writerow(headers)
 
@@ -55,14 +49,10 @@ def write_ta_assignment_data(csv_writer, semester):
             semester_has_assigned_tas = True
         for ta in tas:
             row = [
-                course.semester,
-                course.course_number,
-                course.name,
-                course.instructor.name,
-                ta.eagle_id,
-                ta.user.first_name,
-                ta.user.last_name,
-                ta.user.email
+                course.semester, course.course_number,
+                course.name, course.instructor.name,
+                ta.eagle_id, ta.user.first_name,
+                ta.user.last_name, ta.user.email
             ]
             csv_writer.writerow(row)
     if not semester_has_assigned_tas:
