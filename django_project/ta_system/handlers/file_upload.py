@@ -1,11 +1,13 @@
 from django.utils import timezone
 from os import remove as delete_uploaded_file
+
 import re
+import ta_system.html_utils as html
 
 
 FILE_UPLOAD_DESTINATION = 'ta_system/static/file_uploads/'
 UPLOAD_DATA_FORMATS_URL = 'https://docs.google.com/document/d/1d5URLk7UtipN-KJIybzBFmEEip9_YA8Ove4UV3uLBwQ/edit?usp=sharing'
-UPLOAD_DATA_FORMATS_LINK= f'<a href={UPLOAD_DATA_FORMATS_URL} target="_blank">here</a>'
+UPLOAD_DATA_FORMATS_LINK= html.link('here', UPLOAD_DATA_FORMATS_URL)
 
 
 def handle_file_upload(file, destination, process_data_callback):

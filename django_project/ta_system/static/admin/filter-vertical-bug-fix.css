@@ -1,0 +1,15 @@
+.active.selector-add {
+     background-position: 0 -40px!important;
+}
+
+.active.selector-add:focus, .active.selector-add:hover {
+     background-position: 0 -60px!important;
+}
+
+.active.selector-remove {
+     background-position: 0 0px!important;
+}
+
+.active.selector-remove:focus, .active.selector-remove:hover {
+    background-position: 0 -20px!important;
+}

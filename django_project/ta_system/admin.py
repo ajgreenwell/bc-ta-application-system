@@ -6,11 +6,20 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError as AlreadyExistsError
 from django.shortcuts import render, redirect
+from django.utils.html import format_html
+
 from .forms import CourseDataUploadForm, ApplicantDataUploadForm
 from .handlers.bad_request import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
 from .handlers.applicant_data_upload import handle_applicant_data_upload
-from .models import Course, Semester, Instructor, Profile
+from .handlers.file_upload import UPLOAD_DATA_FORMATS_URL as DATA_FORMATS_URL
+from .models import Course, Instructor, Profile, Semester
+
+import ta_system.html_utils as html
+
+
+EMPTY = '---'
+UL_STYLE = "margin: 0 0 0 6px; padding-left: 6px;"
 
 
 class CustomAdminSite(AdminSite):
@@ -102,16 +111,121 @@ class CustomAdminSite(AdminSite):
 
 
 class CourseAdmin(ModelAdmin):
-    filter_vertical = ('teaching_assistants',)
+    filter_horizontal = ('teaching_assistants',)
+    list_filter = ('semester__semester', 'instructor__name')
+    list_display_links = ('course_number', 'name')
+    list_display = (
+        'semester', 'course_number', 'name',
+        'instructor', 'get_teaching_assistants'
+    )
+    fieldsets = (
+        ('Assign TAs to this Course', {
+            'fields': ('teaching_assistants',)
+        }),
+        ('Edit Course Information', {
+            'fields': (
+                'semester', 'course_number',
+                'name', 'instructor',
+                'days_of_week', 'start_time',
+                'end_time', 'building',
+                'room_number', 'max_num_tas'
+            )
+        })
+    )
+
+    def get_teaching_assistants(self, obj):
+        tas = obj.teaching_assistants.all()
+        if tas:
+            ta_names = [ta.full_name for ta in tas]
+            return html.ul(ta_names, UL_STYLE)
+        return EMPTY
+
+    get_teaching_assistants.short_description = 'Teaching Assistants'
+
+    class Media:
+        css = {
+            'all': ('admin/filter-horizontal-bug-fix.css',)
+        }
 
 
 class ProfileAdmin(ModelAdmin):
     filter_vertical = ('courses_taken', 'ta_assignments')
+    list_display = (
+        'eagle_id', 'get_first_name', 'get_last_name',
+        'get_email', 'get_ta_assignments'
+    )
+    fieldsets = (
+        ('Select the Courses for which this Student is a TA', {
+            'fields': ('ta_assignments',)
+        }),
+        ('Select which Courses this Student has Taken', {
+            'fields': ('courses_taken',)
+        }),
+        ('Edit Student Information', {
+            'fields': ('user', 'eagle_id')
+        })
+    )
+
+    def get_first_name(self, obj):
+        return obj.user.first_name
+
+    def get_last_name(self, obj):
+        return obj.user.last_name
+
+    def get_email(self, obj):
+        return obj.user.email
+
+    def get_ta_assignments(self, obj):
+        courses = obj.ta_assignments.all()
+        if courses:
+            course_names = [str(course) for course in courses]
+            return html.ul(course_names, UL_STYLE)
+        return EMPTY
+
+    get_first_name.short_description = 'First Name'
+    get_last_name.short_description = 'Last Name'
+    get_email.short_description = 'Email'
+    get_ta_assignments.short_description = 'TA Assignments'
+
+    class Media:
+        css = {
+            'all': ('admin/filter-vertical-bug-fix.css',)
+        }
+
+
+class InstructorAdmin(ModelAdmin):
+    list_display = ('name', 'get_courses')
+
+    def get_courses(self, obj):
+        courses = obj.course_set.all()
+        if courses:
+            course_names = [str(course) for course in courses]
+            return html.ul(course_names, UL_STYLE)
+        return EMPTY
+
+    get_courses.short_description = 'Courses'
+
+
+class SemesterAdmin(ModelAdmin):
+    list_display = ('semester', 'get_num_courses', 'get_num_assigned_tas')
+
+    def get_num_courses(self, obj):
+        return len(obj.course_set.all())
+
+    def get_num_assigned_tas(self, obj):
+        num_tas = 0
+        courses = obj.course_set.all()
+        for course in courses:
+            num_tas += len(course.teaching_assistants.all())
+        return num_tas
+
+    get_num_courses.short_description = '# Courses'
+    get_num_assigned_tas.short_description = '# Assigned TAs'
 
 
 admin_site = CustomAdminSite()
 admin_site.register(User, UserAdmin)
-admin_site.register(Profile, ProfileAdmin)
 admin_site.register(Course, CourseAdmin)
-admin_site.register(Semester)
-admin_site.register(Instructor)
+admin_site.register(Instructor, InstructorAdmin)
+admin_site.register(Profile, ProfileAdmin)
+admin_site.register(Semester, SemesterAdmin)
