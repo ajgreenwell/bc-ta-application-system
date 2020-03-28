@@ -25,7 +25,7 @@ class Course(models.Model):
     days_of_week = models.CharField(max_length=13, verbose_name="Days of the Week (e.g. M/W/F)",
         validators=[DataValidator(
             regex=COURSE_DATA_FORMATS['days_of_week'], 
-            message="Please specify the days of the week this class meets separated" + 
+            message="Please specify the days of the week this class meets separated " + 
                     "by slashes, e.g. 'T/R'."
         )]
     )
@@ -50,14 +50,14 @@ class Course(models.Model):
     room_number = models.CharField(max_length=6,
         validators=[DataValidator(
             regex=COURSE_DATA_FORMATS['room_number'], 
-            message="Please enter the number of the room this class meets in, e.g. '250'." + 
+            message="Please enter the number of the room this class meets in, e.g. '250'. " + 
                     "One letter building codes may be included, e.g. '250S'."
         )]
     )
     max_num_tas = models.PositiveIntegerField(default=2, verbose_name="Max Number of TAs",
         validators=[DataValidator(
             regex=COURSE_DATA_FORMATS['max_num_tas'], 
-            message="Please enter the maximum number of TAs that can be assigned to this" +
+            message="Please enter the maximum number of TAs that can be assigned to this " +
                     "course, e.g. '3'. This field defaults to '2'."
         )]
     )
@@ -82,6 +82,9 @@ class Semester(models.Model):
         )]
     )
 
+    class Meta:
+        ordering = ('-semester',)
+
     def __str__(self):
         return self.semester
 
@@ -103,6 +106,9 @@ class Instructor(models.Model):
         if ' ' in self.name:
             return self.name.split(' ')[-1]
         return self.name
+
+    class Meta:
+        ordering = ('name',)
 
     def __str__(self):
         return self.name

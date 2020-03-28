@@ -17,7 +17,7 @@ class UserRegisterForm(UserCreationForm):
 
         widgets = {
             'username': forms.EmailInput(attrs={
-                'placeholder': 'BC Email',
+                'placeholder': 'Your BC Email...'
             }),
             'email': forms.HiddenInput,
         }

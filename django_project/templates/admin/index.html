@@ -111,5 +111,15 @@
             <button type="submit">Upload</button>
         </fieldset>
     </form>
+    <form method="GET" action="{% url 'admin:assignment_data_download' %}" enctype="multipart/form-data" class="mt-30">
+        {% csrf_token %}
+        <header>Download Files</header>
+        <fieldset class="mt-8">
+            <div class="mt-8">
+                {{ assignment_data_download_form.as_p }}
+                <button type="submit">Download TA Assignment Data</button>
+            </div>
+        </fieldset>
+    </form>
 </div>
 {% endblock %}
