@@ -119,6 +119,9 @@ class Semester(models.Model):
     def __str__(self):
         return self.semester
 
+    class Meta:
+        ordering = ('-semester',)
+
 
 class Instructor(models.Model):
     name = models.CharField(

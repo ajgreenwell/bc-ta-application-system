@@ -154,6 +154,7 @@ class ProfileAdmin(ModelAdmin):
         'eagle_id', 'get_first_name', 'get_last_name',
         'get_email', 'get_ta_assignments'
     )
+    list_display_links = ('eagle_id', 'get_first_name', 'get_last_name')
     fieldsets = (
         ('Select the Courses for which this Student is a TA', {
             'fields': ('ta_assignments',)
@@ -194,16 +195,30 @@ class ProfileAdmin(ModelAdmin):
 
 
 class InstructorAdmin(ModelAdmin):
+    fields = ('name', 'get_all_courses')
+    readonly_fields = ('get_all_courses',)
     list_display = ('name', 'get_courses')
 
-    def get_courses(self, obj):
+    def get_courses(self, obj, max_num_courses=2):
         courses = obj.course_set.all()
         if courses:
             course_names = [str(course) for course in courses]
+            if len(course_names) > max_num_courses:
+                course_names = course_names[:max_num_courses]
+                return html.ul_abbreviated(course_names, UL_STYLE)
             return html.ul(course_names, UL_STYLE)
         return EMPTY
 
+    def get_all_courses(self, obj):
+        courses = obj.course_set.all()
+        if courses:
+            course_names = [str(course) for course in courses]
+            style = "margin: 0 0 0 0; padding-left: 0;"
+            return html.ul(course_names, style)
+        return EMPTY
+
     get_courses.short_description = 'Courses'
+    get_all_courses.short_description = 'Courses'
 
 
 class SemesterAdmin(ModelAdmin):

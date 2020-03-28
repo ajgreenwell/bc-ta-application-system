@@ -7,6 +7,12 @@ def ul(elements, style=""):
     return format_html(ul, *elements)
 
 
+def ul_abbreviated(elements, style=""):
+    ul_abbreviated = ul(elements, style)
+    ul_abbreviated += '<div>{}</div>'
+    return format_html(ul_abbreviated, '...')
+
+
 def link(content, href, style=""):
     link = '<a href={} target="_blank" style={}>{}</a>'
     return format_html(link, href, style, content)
