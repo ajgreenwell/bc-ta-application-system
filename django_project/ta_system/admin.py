@@ -17,8 +17,7 @@ from .models import Course, Instructor, Profile, Semester
 
 import ta_system.html_utils as html
 
-
-EMPTY = '---'
+MAX_NUM_TO_DISPLAY = 1
 UL_STYLE = "margin: 0 0 0 6px; padding-left: 6px;"
 
 
@@ -135,10 +134,11 @@ class CourseAdmin(ModelAdmin):
 
     def get_teaching_assistants(self, obj):
         tas = obj.teaching_assistants.all()
-        if tas:
-            ta_names = [ta.full_name for ta in tas]
-            return html.ul(ta_names, UL_STYLE)
-        return EMPTY
+        return html.generate_ul(
+            model_objects=tas,
+            display_func=lambda ta: ta.full_name,
+            style=UL_STYLE
+        )
 
     get_teaching_assistants.short_description = 'Teaching Assistants'
 
@@ -178,10 +178,12 @@ class ProfileAdmin(ModelAdmin):
 
     def get_ta_assignments(self, obj):
         courses = obj.ta_assignments.all()
-        if courses:
-            course_names = [str(course) for course in courses]
-            return html.ul(course_names, UL_STYLE)
-        return EMPTY
+        return html.generate_ul(
+            model_objects=courses,
+            display_func=str,
+            style=UL_STYLE,
+            max_to_display=MAX_NUM_TO_DISPLAY
+        )
 
     get_first_name.short_description = 'First Name'
     get_last_name.short_description = 'Last Name'
@@ -195,47 +197,79 @@ class ProfileAdmin(ModelAdmin):
 
 
 class InstructorAdmin(ModelAdmin):
-    fields = ('name', 'get_all_courses')
-    readonly_fields = ('get_all_courses',)
-    list_display = ('name', 'get_courses')
+    fields = ('name', 'get_all_courses', 'get_all_teaching_assistants')
+    readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
+    list_display = ('name', 'get_courses', 'get_teaching_assistants')
 
-    def get_courses(self, obj, max_num_courses=2):
-        courses = obj.course_set.all()
-        if courses:
-            course_names = [str(course) for course in courses]
-            if len(course_names) > max_num_courses:
-                course_names = course_names[:max_num_courses]
-                return html.ul_abbreviated(course_names, UL_STYLE)
-            return html.ul(course_names, UL_STYLE)
-        return EMPTY
+    def get_tas_from_courses(self, courses):
+        tas = []
+        for course in courses:
+            course_tas = course.teaching_assistants.all()
+            for ta in course_tas:
+                if ta not in tas:
+                    tas.append(ta)
+        return tas
 
-    def get_all_courses(self, obj):
+    def get_courses(self, obj, display_func=str):
         courses = obj.course_set.all()
-        if courses:
-            course_names = [str(course) for course in courses]
-            style = "margin: 0 0 0 0; padding-left: 0;"
-            return html.ul(course_names, style)
-        return EMPTY
+        return html.generate_ul(
+            model_objects=courses,
+            display_func=display_func,
+            style=UL_STYLE,
+            max_to_display=MAX_NUM_TO_DISPLAY
+        )
+
+    def get_all_courses(self, obj, display_func=str):
+        courses = obj.course_set.all()
+        ul_style = "margin: 0 0 0 0; padding-left: 0;"
+        return html.generate_ul(
+            model_objects=courses,
+            display_func=display_func,
+            style=ul_style
+        )
+
+    def get_teaching_assistants(self, obj):
+        courses = obj.course_set.all()
+        tas = self.get_tas_from_courses(courses)
+        return html.generate_ul(
+            model_objects=tas,
+            display_func=lambda ta: ta.full_name,
+            style=UL_STYLE,
+            max_to_display=MAX_NUM_TO_DISPLAY
+        )
+
+    def get_all_teaching_assistants(self, obj):
+        courses = obj.course_set.all()
+        tas = self.get_tas_from_courses(courses)
+        ul_style = "margin: 0 0 0 0; padding-left: 0;"
+        return html.generate_ul(
+            model_objects=tas,
+            display_func=str,
+            style=ul_style
+        )
 
     get_courses.short_description = 'Courses'
     get_all_courses.short_description = 'Courses'
+    get_teaching_assistants.short_description = 'Teaching Assistants'
+    get_all_teaching_assistants.short_description = 'Teaching Assistants'
 
 
-class SemesterAdmin(ModelAdmin):
-    list_display = ('semester', 'get_num_courses', 'get_num_assigned_tas')
+class SemesterAdmin(InstructorAdmin):
+    fields = ('semester', 'get_all_courses', 'get_all_teaching_assistants')
+    readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
+    list_display = ('semester', 'get_courses', 'get_teaching_assistants')
 
-    def get_num_courses(self, obj):
-        return len(obj.course_set.all())
+    def display_course(self, course):
+        return course.course_number_and_name
 
-    def get_num_assigned_tas(self, obj):
-        num_tas = 0
-        courses = obj.course_set.all()
-        for course in courses:
-            num_tas += len(course.teaching_assistants.all())
-        return num_tas
+    def get_courses(self, obj):
+        return super().get_courses(obj, display_func=self.display_course)
 
-    get_num_courses.short_description = '# Courses'
-    get_num_assigned_tas.short_description = '# Assigned TAs'
+    def get_all_courses(self, obj):
+        return super().get_all_courses(obj, display_func=self.display_course)
+
+    get_courses.short_description = 'Courses'
+    get_all_courses.short_description = 'Courses'
 
 
 admin_site = CustomAdminSite()

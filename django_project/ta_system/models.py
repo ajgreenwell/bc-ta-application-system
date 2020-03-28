@@ -99,9 +99,13 @@ class Course(models.Model):
         unique_together = ('semester', 'course_number')
         ordering = ('semester', 'course_number')
 
+    @property
+    def course_number_and_name(self):
+        return f'{self.course_number} - {self.name}'
+
     def __str__(self):
         semester = self.semester if self.semester else 'NO SEMESTER'
-        return f'{semester}: {self.course_number} - {self.name}'
+        return f'{semester}: {self.course_number_and_name}'
 
 
 class Semester(models.Model):
