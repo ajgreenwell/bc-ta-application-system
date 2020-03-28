@@ -17,7 +17,7 @@ from .models import Course, Instructor, Profile, Semester
 
 import ta_system.html_utils as html
 
-MAX_NUM_TO_DISPLAY = 1
+MAX_NUM_TO_DISPLAY = 4
 UL_STYLE = "margin: 0 0 0 6px; padding-left: 6px;"
 
 
