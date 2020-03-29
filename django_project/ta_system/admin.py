@@ -155,11 +155,14 @@ class CourseAdmin(ModelAdmin):
         })
     )
 
+    def display_ta(self, ta):
+        return ta.full_name
+
     def get_teaching_assistants(self, obj):
         tas = obj.teaching_assistants.all()
         return html.generate_ul(
             model_objects=tas,
-            display_func=lambda ta: ta.full_name,
+            display_func=self.display_ta,
             style=UL_STYLE
         )
 
