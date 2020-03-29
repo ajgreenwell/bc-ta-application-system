@@ -155,6 +155,9 @@ class CourseAdmin(ModelAdmin):
         })
     )
 
+    class Media:
+        css = {'all': ('admin/filter-horizontal-bug-fix.css',)}
+
     def display_ta(self, ta):
         return ta.full_name
 
@@ -167,11 +170,6 @@ class CourseAdmin(ModelAdmin):
         )
 
     get_teaching_assistants.short_description = 'Teaching Assistants'
-
-    class Media:
-        css = {
-            'all': ('admin/filter-horizontal-bug-fix.css',)
-        }
 
 
 class ProfileAdmin(ModelAdmin):
@@ -192,6 +190,9 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('user', 'eagle_id')
         })
     )
+
+    class Media:
+        css = {'all': ('admin/filter-vertical-bug-fix.css',)}
 
     def get_first_name(self, obj):
         return obj.user.first_name
@@ -215,11 +216,6 @@ class ProfileAdmin(ModelAdmin):
     get_last_name.short_description = 'Last Name'
     get_email.short_description = 'Email'
     get_ta_assignments.short_description = 'TA Assignments'
-
-    class Media:
-        css = {
-            'all': ('admin/filter-vertical-bug-fix.css',)
-        }
 
 
 class InstructorAdmin(ModelAdmin):
