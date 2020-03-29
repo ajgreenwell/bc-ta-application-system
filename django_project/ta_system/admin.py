@@ -9,13 +9,11 @@ from django.shortcuts import render, redirect
 from django.urls import path
 from django.utils.html import format_html
 
-from .forms import CourseDataUploadForm, ApplicantDataUploadForm
 from .handlers.bad_request import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
 from .handlers.applicant_data_upload import handle_applicant_data_upload
 from .handlers.assignment_data_download import handle_assignment_data_download
 from .handlers.file_upload import UPLOAD_DATA_FORMATS_URL as DATA_FORMATS_URL
-from .models import Course, Instructor, Profile, Semester
 
 import ta_system.html_utils as html
 import ta_system.forms as forms
