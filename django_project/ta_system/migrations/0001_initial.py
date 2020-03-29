@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('course_number', models.CharField(max_length=10, validators=[ta_system.validators.DataValidator(message="Please enter a valid full course number, e.g. 'CSCI110101'.", regex='[A-Z]{4}\\d{6}')], verbose_name='Course Number (e.g. CSCI110101)')),
                 ('name', models.CharField(max_length=60, validators=[ta_system.validators.DataValidator(message="Please enter the name of the course, e.g. 'Computer Science I'.", regex='\\S+( \\S+)*')])),
-                ('days_of_week', models.CharField(max_length=13, validators=[ta_system.validators.DataValidator(message="Please specify the days of the week this class meets separatedby slashes, e.g. 'T/R'.", regex='[MTWRFAS](/[MTWRFAS])*')], verbose_name='Days of the Week (e.g. M/W/F)')),
+                ('days_of_week', models.CharField(max_length=13, validators=[ta_system.validators.DataValidator(message="Please specify the days of the week this class meets separated by slashes, e.g. 'T/R'.", regex='[MTWRFAS](/[MTWRFAS])*')], verbose_name='Days of the Week (e.g. M/W/F)')),
                 ('start_time', models.TimeField(validators=[ta_system.validators.DataValidator(message="Please enter the time this class starts (in millitary time), e.g. '14:00'.", regex='\\d{2}:\\d{2}(:\\d{2})*')], verbose_name='Start Time (e.g. 14:00)')),
                 ('end_time', models.TimeField(validators=[ta_system.validators.DataValidator(message="Please enter the time this class ends (in millitary time), e.g. '14:50'.", regex='\\d{2}:\\d{2}(:\\d{2})*')], verbose_name='End Time (e.g. 14:50)')),
                 ('building', models.CharField(max_length=30, validators=[ta_system.validators.DataValidator(message="Please enter the building this class meets in, e.g. 'Fulton'.", regex='\\S+( \\S+)*')])),
@@ -38,6 +38,9 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=60, unique=True, validators=[ta_system.validators.DataValidator(message="Please enter the name of the Instructor, e.g. 'Robert Muller'.", regex='\\S+( \\S+)*')])),
             ],
+            options={
+                'ordering': ('name',),
+            },
         ),
         migrations.CreateModel(
             name='Semester',
@@ -45,6 +48,9 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('semester', models.CharField(max_length=5, unique=True, validators=[ta_system.validators.DataValidator(message="Please specify the year followed by the semester, e.g. '2020F'.", regex='\\d{4}[FS]')], verbose_name='Semester (e.g. 2020F)')),
             ],
+            options={
+                'ordering': ('-semester',),
+            },
         ),
         migrations.CreateModel(
             name='Profile',
