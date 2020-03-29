@@ -22,7 +22,7 @@ import ta_system.forms as forms
 import ta_system.models as models
 
 
-MAX_NUM_TO_DISPLAY = 4
+MAX_NUM_TO_DISPLAY = 3
 UL_STYLE = "margin: 0 0 0 6px; padding-left: 6px;"
 
 
@@ -224,6 +224,7 @@ class ProfileAdmin(ModelAdmin):
 class InstructorAdmin(ModelAdmin):
     fields = ('name', 'get_all_courses', 'get_all_teaching_assistants')
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
+    list_display = ('name', 'get_courses')
 
     def get_tas_from_courses(self, courses):
         tas = []
@@ -252,16 +253,6 @@ class InstructorAdmin(ModelAdmin):
             style=ul_style
         )
 
-    def get_teaching_assistants(self, obj):
-        courses = obj.course_set.all()
-        tas = self.get_tas_from_courses(courses)
-        return html.generate_ul(
-            model_objects=tas,
-            display_func=lambda ta: ta.full_name,
-            style=UL_STYLE,
-            max_to_display=MAX_NUM_TO_DISPLAY
-        )
-
     def get_all_teaching_assistants(self, obj):
         courses = obj.course_set.all()
         tas = self.get_tas_from_courses(courses)
@@ -274,14 +265,13 @@ class InstructorAdmin(ModelAdmin):
 
     get_courses.short_description = 'Courses'
     get_all_courses.short_description = 'Courses'
-    get_teaching_assistants.short_description = 'Teaching Assistants'
     get_all_teaching_assistants.short_description = 'Teaching Assistants'
 
 
 class SemesterAdmin(InstructorAdmin):
     fields = ('semester', 'get_all_courses', 'get_all_teaching_assistants')
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
-    list_display = ('semester', 'get_courses', 'get_teaching_assistants')
+    list_display = ('semester', 'get_courses')
 
     def display_course(self, course):
         return course.course_number_and_name
