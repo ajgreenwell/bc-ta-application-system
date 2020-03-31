@@ -1,4 +1,13 @@
 {% extends "ta_system/base.html" %}
+{% load static %}
+{% block extra-head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'ta_system/home.css' %}" />
+    <script src="{% static 'ta_system/home.js' %}" defer ></script>
+{% endblock %}
 {% block content %}
-    <h1>Home Page</h1>
-{% endblock content %}
+    <div class="content-section">
+        <h2>Apply Here</h2>
+        <div id="cs-lab-hour-form"></div>
+    </div>
+{% endblock content 
+    
