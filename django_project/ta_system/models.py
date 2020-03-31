@@ -5,62 +5,65 @@ from .data_formats.course_data_formats \
     import DATA_FORMATS as COURSE_DATA_FORMATS
 from .data_formats.applicant_data_formats \
     import DATA_FORMATS as APPILCANT_DATA_FORMATS
+from datetime import datetime
 
 
 class Course(models.Model):
-    semester = models.ForeignKey('Semester', on_delete=models.SET_NULL, null=True, blank=True)
+    semester = models.ForeignKey(
+        'Semester', on_delete=models.SET_NULL, null=True, blank=True)
     course_number = models.CharField(max_length=10, verbose_name="Course Number (e.g. CSCI110101)",
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['course_number'], 
-            message="Please enter a valid full course number, e.g. 'CSCI110101'."
-        )]
-    )
+                                     validators=[DataValidator(
+                                         regex=COURSE_DATA_FORMATS['course_number'],
+                                         message="Please enter a valid full course number, e.g. 'CSCI110101'."
+                                     )]
+                                     )
     name = models.CharField(max_length=60,
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['name'], 
-            message="Please enter the name of the course, e.g. 'Computer Science I'."
-        )]
-    )
-    instructor = models.ForeignKey('Instructor', on_delete=models.SET_NULL, null=True, blank=True)
+                            validators=[DataValidator(
+                                regex=COURSE_DATA_FORMATS['name'],
+                                message="Please enter the name of the course, e.g. 'Computer Science I'."
+                            )]
+                            )
+    instructor = models.ForeignKey(
+        'Instructor', on_delete=models.SET_NULL, null=True, blank=True)
     days_of_week = models.CharField(max_length=13, verbose_name="Days of the Week (e.g. M/W/F)",
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['days_of_week'], 
-            message="Please specify the days of the week this class meets separated " + 
-                    "by slashes, e.g. 'T/R'."
-        )]
-    )
+                                    validators=[DataValidator(
+                                        regex=COURSE_DATA_FORMATS['days_of_week'],
+                                        message="Please specify the days of the week this class meets separated " +
+                                        "by slashes, e.g. 'T/R'."
+                                    )]
+                                    )
     start_time = models.TimeField(verbose_name="Start Time (e.g. 14:00)",
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['start_time'], 
-            message="Please enter the time this class starts (in millitary time), e.g. '14:00'."
-        )]
-    )
+                                  validators=[DataValidator(
+                                      regex=COURSE_DATA_FORMATS['start_time'],
+                                      message="Please enter the time this class starts (in millitary time), e.g. '14:00'."
+                                  )]
+                                  )
     end_time = models.TimeField(verbose_name="End Time (e.g. 14:50)",
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['end_time'], 
-            message="Please enter the time this class ends (in millitary time), e.g. '14:50'."
-        )]
-    )
+                                validators=[DataValidator(
+                                    regex=COURSE_DATA_FORMATS['end_time'],
+                                    message="Please enter the time this class ends (in millitary time), e.g. '14:50'."
+                                )]
+                                )
     building = models.CharField(max_length=30,
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['building'], 
-            message="Please enter the building this class meets in, e.g. 'Fulton'."
-        )]
-    )
+                                validators=[DataValidator(
+                                    regex=COURSE_DATA_FORMATS['building'],
+                                    message="Please enter the building this class meets in, e.g. 'Fulton'."
+                                )]
+                                )
     room_number = models.CharField(max_length=6,
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['room_number'], 
-            message="Please enter the number of the room this class meets in, e.g. '250'. " + 
-                    "One letter building codes may be included, e.g. '250S'."
-        )]
-    )
+                                   validators=[DataValidator(
+                                       regex=COURSE_DATA_FORMATS['room_number'],
+                                       message="Please enter the number of the room this class meets in, e.g. '250'. " +
+                                       "One letter building codes may be included, e.g. '250S'."
+                                   )]
+                                   )
     max_num_tas = models.PositiveIntegerField(default=2, verbose_name="Max Number of TAs",
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['max_num_tas'], 
-            message="Please enter the maximum number of TAs that can be assigned to this " +
-                    "course, e.g. '3'. This field defaults to '2'."
-        )]
-    )
+                                              validators=[DataValidator(
+                                                  regex=COURSE_DATA_FORMATS['max_num_tas'],
+                                                  message="Please enter the maximum number of TAs that can be assigned to this " +
+                                                  "course, e.g. '3'. This field defaults to '2'."
+                                              )]
+                                              )
     teaching_assistants = models.ManyToManyField(
         'Profile', verbose_name="Teaching Assistants", blank=True
     )
@@ -76,11 +79,11 @@ class Course(models.Model):
 
 class Semester(models.Model):
     semester = models.CharField(max_length=5, unique=True, verbose_name="Semester (e.g. 2020F)",
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['semester'],
-            message="Please specify the year followed by the semester, e.g. '2020F'."
-        )]
-    )
+                                validators=[DataValidator(
+                                    regex=COURSE_DATA_FORMATS['semester'],
+                                    message="Please specify the year followed by the semester, e.g. '2020F'."
+                                )]
+                                )
 
     class Meta:
         ordering = ('-semester',)
@@ -91,11 +94,11 @@ class Semester(models.Model):
 
 class Instructor(models.Model):
     name = models.CharField(max_length=60, unique=True,
-        validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['instructor'], 
-            message="Please enter the name of the Instructor, e.g. 'Robert Muller'."
-        )]
-    )
+                            validators=[DataValidator(
+                                regex=COURSE_DATA_FORMATS['instructor'],
+                                message="Please enter the name of the Instructor, e.g. 'Robert Muller'."
+                            )]
+                            )
 
     def first_name(self):
         if ' ' in self.name:
@@ -117,11 +120,11 @@ class Instructor(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     eagle_id = models.CharField(max_length=8, unique=True, null=True, blank=True, verbose_name="Eagle ID",
-        validators=[DataValidator(
-            regex=APPILCANT_DATA_FORMATS['eagle_id'], 
-            message="Please enter a valid 8-digit eagle id, e.g. '58704254'."
-        )]
-    )
+                                validators=[DataValidator(
+                                    regex=APPILCANT_DATA_FORMATS['eagle_id'],
+                                    message="Please enter a valid 8-digit eagle id, e.g. '58704254'."
+                                )]
+                                )
     courses_taken = models.ManyToManyField(
         Course, related_name="students", verbose_name="Courses Taken", blank=True
     )
@@ -136,3 +139,11 @@ class Profile(models.Model):
         ordering = ('user__last_name',)
         verbose_name = "Student"
         verbose_name_plural = "Students"
+
+
+class SystemStatus(models.Model):
+    status = models.BooleanField(default=False)
+    date_changed = models.DateField(default=datetime.now())
+
+    class Meta:
+        verbose_name = "System Status"

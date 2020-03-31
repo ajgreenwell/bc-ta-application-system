@@ -1,4 +1,10 @@
 {% extends "ta_system/base.html" %}
 {% block content %}
     <h1>Home Page</h1>
+    {% if last_system_status.status %}
+        <h2> The TA Application System is Open. Apply now!</h2>
+        <h2> Application Form here </h2>
+    {% else %}
+        <h2> The TA Application System is Closed at {{last_system_status.date_changed}}</h2>
+    {% endif %}
 {% endblock content %}
