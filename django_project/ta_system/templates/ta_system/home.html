@@ -2,12 +2,11 @@
 {% load static %}
 {% block extra-head %}
     <link rel="stylesheet" type="text/css" href="{% static 'ta_system/home.css' %}" />
-    <script src="{% static 'ta_system/home.js' %}" defer ></script>
+    <script src="{% static 'ta_system/home.js' %}" type="module" ></script>
 {% endblock %}
 {% block content %}
     <div class="content-section">
         <h2>Apply Here</h2>
         <div id="cs-lab-hour-form"></div>
     </div>
-{% endblock content 
-    
+{% endblock content %}

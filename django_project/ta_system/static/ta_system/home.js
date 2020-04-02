@@ -1,14 +1,20 @@
-let mouseDown = false;
-let isSelected = [];
+import {
+    getLabHourConstraints,
+    getStartAndEndHour,
+    initSelectedMatrix
+} from './utils.js';
 
-const rowHeight = 20;
-const startHour = 9;
-const endHour = 18;
-const numSlotsInHour = 4;
-const daysOpen = [
-    'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
-    'Thursday', 'Friday', 'Saturday'
-];
+import {
+    numSlotsInHour,
+    rowHeight,
+    daysOpen
+} from './cs-lab-hour-settings.js';
+
+const constraints = getLabHourConstraints();
+const [startHour, endHour] = getStartAndEndHour(constraints);
+
+let mouseDown = false;
+let isSelected = initSelectedMatrix(constraints);
 
 function renderLabHourForm() {
     document.querySelector('#cs-lab-hour-form').innerHTML = LabHourGrid();
@@ -68,26 +74,25 @@ function getLabHourGridStyle(numColumns, numRows) {
     return `grid-template-columns: ${columns}; grid-template-rows: ${rows}`;
 }
 
-function GridItems(numRows, numColumns, startHour, endHour) {
-    const numGridItems = numColumns * numRows;
+function GridItems(numRows, numColumns) {
     let gridItems = '';
     for (let row = 0; row < numRows; row++) {
-        isSelected.push([]);
         for (let col = 0; col < numColumns; col++) {
-            const id = `row:${row},col:${col}`;
-            const isHour = (row + 1) % 4 == 0;
-            isSelected[row].push(false);
-            if (!isHour)
-                gridItems += `<div id="${id}" class="grid-item non-hour"></div>`;
-            else
-                gridItems += `<div id="${id}" class="grid-item"></div>`;
+            const adjustedRow = row + (startHour * numSlotsInHour);
+            const id = `row:${adjustedRow},col:${col}`;
+            const isHour = (row + 1) % numSlotsInHour == 0;
+            const isOpen = constraints[adjustedRow][col];
+            let className = "grid-item";
+            if (!isOpen) className += ' closed';
+            if (!isHour) className += ' non-hour';
+            gridItems += `<div id="${id}" class="${className}"></div>`;
         }
     }
     return gridItems;
 }
 
 function generateTimes(startHour, endHour) {
-    times = [];
+    let times = [];
     for (let hour = startHour; hour <= endHour; hour++) {
         let time = convertFromMillitary(hour);
         times.push(time);
@@ -101,8 +106,10 @@ function convertFromMillitary(hour) {
         time = `${hour - 12}:00 PM`;
     else if (hour == 12)
         time = `${hour}:00 PM`;
-    else
+    else {
+        hour = hour == 0 ? 12 : hour;
         time = `${hour}:00 AM`;
+    }
     return time;
 }
 
@@ -112,13 +119,18 @@ function submitApplicationForm() {
 
 function selectFromHere(e) {
     mouseDown = true;
+    const className = e.target.className;
     const [row, col] = getRowAndColFromId(e.target.id);
-    if (!e.target.className.includes('selected')) {
+    const isClosed = !constraints[row][col];
+    if (isClosed) return;
+    if (className.includes('selected')) {
+        e.target.className = rstrip(className, ' selected');
+        isSelected[row][col] = false;
+        console.log(isSelected);
+    } else {
         e.target.className += ' selected';
         isSelected[row][col] = true;
-    } else {
-        e.target.className = rstrip(e.target.className, ' selected');
-        isSelected[row][col] = false;
+        console.log(isSelected);
     }
 }
 
