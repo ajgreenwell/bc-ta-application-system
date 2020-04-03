@@ -147,3 +147,4 @@ class SystemStatus(models.Model):
 
     class Meta:
         verbose_name = "System Status"
+        verbose_name_plural = "System Status"

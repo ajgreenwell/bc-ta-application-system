@@ -18,9 +18,9 @@
 {% if last_system_status.status %}
     <h2>The TA Application System is Open.</h2>
 {% else %}
-    <h2>The TA Application System is Closed.</h2>
+    <h2 >The TA Application System is Closed.</h2>
 {% endif%}
-<h2>Please do not change the course information when the TA application system is open.</h2>
+<h3 class="mb-30">Please do not change the course information when the TA application system is open.</h3>
 {% if app_list %}
     {% for app in app_list %}
         <div class="app-{{ app.app_label }} module">
@@ -99,21 +99,25 @@
 <div class="custom-content">
     <form  action="{% url 'admin:change_system_status' %}" method = "POST">
         {% csrf_token %}
-        {% if last_system_status.status %}
-            <header>Close the TA Application System</header>
-        {% else %}
-            <header>Open the TA Application System</header>
-        {% endif %}
-        <input id='system_buttom' type="submit" value="Toggle System">
+        <header>Update TA Application System Status</header>
+        <fieldset class="mt-8">
+            <div class="mt-8">
+                {% if last_system_status.status %}
+                    <input id='close_system' type="submit" value="Close TA Application System">
+                {% else %}
+                    <input id='open_system' type="submit" value="Open TA Application System">
+                {% endif %}
+            </div>
+        </fieldset>
     </form>
-    <form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data">
+    <form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data" class="mt-30">
         {% csrf_token %}
         <header>Upload Files</header>
         <fieldset class="mt-8">
             <div class="mt-8">
                 {{ course_data_upload_form }}
             </div>
-            <button type="submit">Upload</button>
+            <input type="submit" value="Upload">
         </fieldset>
     </form>
     <form method="POST" action="{% url 'admin:student_data_upload' %}" enctype="multipart/form-data" class="mt-8">
@@ -122,7 +126,7 @@
             <div>
                 {{ applicant_data_upload_form }}
             </div>
-            <button type="submit">Upload</button>
+            <input type="submit" value="Upload">
         </fieldset>
     </form>
     <form method="GET" action="{% url 'admin:assignment_data_download' %}" enctype="multipart/form-data" class="mt-30">
@@ -131,7 +135,7 @@
         <fieldset class="mt-8">
             <div class="mt-8">
                 {{ assignment_data_download_form.as_p }}
-                <button type="submit">Download TA Assignment Data</button>
+                <input type="submit" value="Download TA Assignment Data">
             </div>
         </fieldset>
     </form>
