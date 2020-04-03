@@ -16,8 +16,8 @@ function renderLabHourForm() {
     timeSlots.forEach(slot => {
         slot.onmousedown = selectFromHere;
         slot.onmouseover = selectToHere;
-        slot.onmouseup = stopSelecting;
     });
+    window.onmouseup = stopSelecting;
     window.onresize = resizeColHeaders;
 }
 
