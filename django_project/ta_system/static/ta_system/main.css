@@ -25,6 +25,12 @@ a:hover {
   color: var(--bc-gold);
 }
 
+.bc-crest {
+  width: 35px;
+  height: auto;
+  margin-right: 12px;
+}
+
 .btn-red {
   border-color: var(--bc-red);
   color: var(--bc-red);

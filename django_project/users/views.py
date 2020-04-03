@@ -7,6 +7,8 @@ from django.contrib.auth import login as auth_login
 
 
 def register(request):
+    user_form = UserRegisterForm()
+    profile_form = ProfileForm()
     if request.method == 'POST':
         user_form = UserRegisterForm(request.POST)
         if user_form.is_valid():
@@ -23,9 +25,6 @@ def register(request):
                 return redirect('ta_system:home')
         else:
             messages.error(request, f'Please Correct The Error Below.')
-    else:
-        user_form = UserRegisterForm()
-        profile_form = ProfileForm()
     return render(request, 'users/register.html', {
         'user_form': user_form,
         'profile_form': profile_form

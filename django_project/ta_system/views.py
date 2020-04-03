@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 from .models import SystemStatus
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def home(request):
     date_list = SystemStatus.objects.order_by('id')
     date_list = date_list.reverse()
