@@ -3,5 +3,7 @@ from . import views
 
 app_name = 'ta_system'
 urlpatterns = [
-    path('', views.home, name='home')
+    path('', views.home, name='home'),
+    path('profile/', views.profile, name='profile')
+
 ]

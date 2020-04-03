@@ -22,3 +22,8 @@ def home(request):
     if utils.has_submitted_application(student):
         context['user_has_submitted_application'] = True
     return render(request, 'ta_system/home.html', context=context)
+
+
+@login_required
+def profile(request):
+    return render(request, 'users/profile.html')
