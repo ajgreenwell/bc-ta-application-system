@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from .validators import DataValidator
 from .data_formats.course_data_formats \
     import DATA_FORMATS as COURSE_DATA_FORMATS
@@ -184,6 +185,7 @@ class Profile(models.Model):
         verbose_name="TA Assignments",
         blank=True
     )
+    lab_hour_preferences = JSONField(default=list)
 
     @property
     def full_name(self):
