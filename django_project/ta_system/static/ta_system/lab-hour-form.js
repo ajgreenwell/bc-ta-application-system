@@ -18,6 +18,7 @@ function renderLabHourForm() {
         slot.onmouseover = selectToHere;
         slot.onmouseup = stopSelecting;
     });
+    window.onresize = resizeColHeaders;
 }
 
 function LabHourGrid() {
@@ -25,9 +26,10 @@ function LabHourGrid() {
     const numColumns = settings.daysOpen.length;
     const numRows = numHoursInDay * settings.numSlotsInHour;
     const style = utils.getLabHourGridStyle(numColumns, numRows);
+    const numLetters = utils.getNumColHeaderLetters(window);
     return `
         <div class="col-headers flex">
-            ${ColumnHeaders(settings.daysOpen)}
+            ${ColumnHeaders(settings.daysOpen, numLetters)}
         </div>
         <div class="flex">
             <div class="grid-container" style="${style}" >
@@ -37,15 +39,18 @@ function LabHourGrid() {
                 ${RowHeaders(startHour, endHour)}
             </div>
         </div>
-        <button id="lab-hour-submit-button" class="btn btn-outline-info btn-red">
-            Submit
-        </button>
+        <div class="flex">
+            <button id="lab-hour-submit-button" class="btn btn-outline-info btn-red">
+                Submit
+            </button>
+            ${Legend()}
+        </div>
     `;
 }
 
-function ColumnHeaders(daysOpen) {
+function ColumnHeaders(daysOpen, numLetters) {
     return daysOpen.map(day =>
-        `<span class="col-header">${day.substring(0, 3)}</span>`
+        `<span class="col-header">${day.substring(0, numLetters)}</span>`
     ).join('');
 }
 
@@ -74,13 +79,22 @@ function RowHeaders(startHour, endHour) {
     }).join('');
 }
 
-function Success() {
+function Legend() {
     return `
-        <h2>Success! Your Application has been submitted.</h2>
-        <p>
-            To edit your account info or update your CS Lab availability,
-            head on over to your <a href= "/profile">profile</a> page.
-        </p>
+        <div class="legend flex">
+            <div class="legend-column">
+                <div class="legend-desc">N/A</div>
+                <div class="legend-item closed"></div>
+            </div>
+            <div class="legend-column">
+                <div class="legend-desc">Busy</div>
+                <div class="legend-item"></div>
+            </div>
+            <div class="legend-column">
+                <div class="legend-desc">Free</div>
+                <div class="legend-item selected"></div>
+            </div>
+        </div>
     `;
 }
 
@@ -122,6 +136,13 @@ function selectToHere(e) {
 
 function stopSelecting(e) {
     mouseDown = false;
+}
+
+function resizeColHeaders(e) {
+    const colHeaders = document.querySelector('.col-headers');
+    const numLetters = utils.getNumColHeaderLetters(e.target);
+    colHeaders.innerHTML = ColumnHeaders(settings.daysOpen, numLetters);
+
 }
 
 renderLabHourForm();

@@ -42,6 +42,10 @@ export function initSelectedMatrix(constraints) {
     return isSelected;
 }
 
+export function getNumColHeaderLetters(windowObj) {
+    return windowObj.screen.width < 400 ? 2 : 3;
+}
+
 export function getLabHourGridStyle(numColumns, numRows) {
     let columns = '';
     let rows = '';
