@@ -1,4 +1,20 @@
 {% extends "ta_system/base.html" %}
+{% load static %}
+{% block extra-head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'ta_system/home.css' %}" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.mjs"></script>
+    <script src="{% static 'ta_system/lab-hour-form.js' %}" type="module" ></script>
+{% endblock %}
 {% block content %}
-    <h1>Home Page</h1>
+    <div class="content-section">
+        {% if user_has_submitted_application %}
+            <h2>Thank you for applying.</h2>
+            <p>
+                To edit your account info or update your CS Lab availability, go to your <a href= "{% url 'ta_system:profile' %}">profile</a> page.
+            </p>
+        {% else %}
+            <h2>Apply Here</h2>
+            <div id="lab-hour-form"></div>
+        {% endif %}
+    </div>
 {% endblock content %}
