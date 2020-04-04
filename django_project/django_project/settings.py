@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'django_db_signals'
 ]
 
@@ -88,8 +89,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'ajg123',
-        # 'PASSWORD': '<3',
+        # 'PASSWORD': 'ajg123',
+        'PASSWORD': '<3',
         'HOST': 'localhost',
         'PORT': '',
     }
