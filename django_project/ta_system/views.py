@@ -13,11 +13,11 @@ def home(request):
     if request.method not in ('GET', 'POST'):
         return handle_bad_request(request, app='ta_system', expected='GET, POST')
 
-    date_list = SystemStatus.objects.order_by('id')
-    date_list = date_list.reverse()
+    # date_list = SystemStatus.objects.order_by('id')
+    # date_list = date_list.reverse()
     context = {
-        'system_status': date_list,
-        'last_system_status': date_list.first()
+        # 'system_status': date_list,
+        'system_is_open': SystemStatus.objects.order_by('id').last().status
     }
     student = request.user.profile
     if request.method == 'POST':

@@ -7,25 +7,23 @@
 {% endblock %}
 {% block content %}
     <div class="content-section">
-        {% if last_system_status.status %}
+        {% if system_is_open %}
             <h3> The TA Application System is Open. Apply now!</h3>
-        {% elif last_system_status.date_changed %}
-            <h3> The TA Application System is Closed at {{last_system_status.date_changed}}.</h3>
         {% else %}
             <h3> The TA Application System is Closed.</h3>
         {% endif %}
     </div>
-    <div class="content-section">
-        {% if not last_system_status.status %}
-            <h2>Application Form Not Available</h2>
-        {% elif last_system_status.status and not user_has_submitted_application %}
+    {% if system_is_open and not user_has_submitted_application %}
+        <div class="content-section">
             <h2>Apply Here</h2>
             <div id="lab-hour-form"></div>
-        {% else %}
+        </div>
+    {% elif system_is_open and user_has_submitted_application %}
+        <div class="content-section">
             <h2>Thank you for applying.</h2>
             <p>
                 To edit your account info or update your CS Lab availability, go to your <a href= "{% url 'ta_system:profile' %}">profile</a> page.
             </p>
-        {% endif %}
-    </div>
+        </div>
+    {% endif %}
 {% endblock content %}

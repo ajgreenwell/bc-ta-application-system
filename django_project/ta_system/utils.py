@@ -15,11 +15,14 @@ def save_preferences(student, preferences):
         'semester': get_current_semester(),
         'preferences': preferences
     }
-    student.lab_hour_preferences.append(new_preferences)
+    student.lab_hour_preferences.update(new_preferences)
     student.save()
 
 
 def has_submitted_application(student):
     current_semester = get_current_semester()
-    semesters = [obj[0] for obj in student.lab_hour_preferences]
+    semesters = student.lab_hour_preferences.get("semester")
+    # semesters = [obj["semester"] for obj in student.lab_hour_preferences]
+    # print(current_semester)
+    # print(semesters)
     return current_semester in semesters
