@@ -6,7 +6,7 @@ from .data_formats.course_data_formats \
     import DATA_FORMATS as COURSE_DATA_FORMATS
 from .data_formats.applicant_data_formats \
     import DATA_FORMATS as APPILCANT_DATA_FORMATS
-from datetime import datetime
+from django.utils.timezone import now
 
 
 class Course(models.Model):
@@ -186,7 +186,7 @@ class Profile(models.Model):
         verbose_name="TA Assignments",
         blank=True
     )
-    lab_hour_preferences = JSONField(default=list)
+    lab_hour_preferences = JSONField(default=list, blank=True)
 
     @property
     def full_name(self):
@@ -203,7 +203,7 @@ class Profile(models.Model):
 
 class SystemStatus(models.Model):
     status = models.BooleanField(default=False)
-    date_changed = models.DateField(default=datetime.now())
+    date_changed = models.DateField(default=now)
 
     class Meta:
         verbose_name = "System Status"

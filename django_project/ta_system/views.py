@@ -13,15 +13,13 @@ def home(request):
     if request.method not in ('GET', 'POST'):
         return handle_bad_request(request, app='ta_system', expected='GET, POST')
 
-    # date_list = SystemStatus.objects.order_by('id')
-    # date_list = date_list.reverse()
     context = {
-        # 'system_status': date_list,
-        'system_is_open': SystemStatus.objects.order_by('id').last().status
+        'system_is_open': SystemStatus.objects.order_by('id').last()
     }
     student = request.user.profile
     if request.method == 'POST':
         preferences = loads(request.body)['lab_hour_preferences']
+        print(student.lab_hour_preferences)
         utils.save_preferences(student, preferences)
         return HttpResponse(status=200)
 

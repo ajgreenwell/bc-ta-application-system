@@ -7,18 +7,18 @@
 {% endblock %}
 {% block content %}
     <div class="content-section">
-        {% if system_is_open %}
+        {% if system_is_open.status %}
             <h3> The TA Application System is Open. Apply now!</h3>
         {% else %}
             <h3> The TA Application System is Closed.</h3>
         {% endif %}
     </div>
-    {% if system_is_open and not user_has_submitted_application %}
+    {% if system_is_open.status and not user_has_submitted_application %}
         <div class="content-section">
             <h2>Apply Here</h2>
             <div id="lab-hour-form"></div>
         </div>
-    {% elif system_is_open and user_has_submitted_application %}
+    {% elif system_is_open.status and user_has_submitted_application %}
         <div class="content-section">
             <h2>Thank you for applying.</h2>
             <p>

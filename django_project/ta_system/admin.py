@@ -5,9 +5,8 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError as AlreadyExistsError
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import path, reverse
+from django.shortcuts import render, redirect
+from django.urls import path
 from django.utils.html import format_html
 
 from .handlers.bad_request import handle_bad_request
@@ -211,7 +210,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id')
+            'fields': ('user', 'eagle_id', 'lab_hour_preferences')
         })
     )
 
