@@ -19,7 +19,6 @@ def home(request):
     student = request.user.profile
     if request.method == 'POST':
         preferences = loads(request.body)['lab_hour_preferences']
-        print(student.lab_hour_preferences)
         utils.save_preferences(student, preferences)
         return HttpResponse(status=200)
 

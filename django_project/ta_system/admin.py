@@ -52,7 +52,6 @@ class CustomAdminSite(AdminSite):
     def index(self, request):
         app_list = self.get_app_list(request)
         status_list = models.SystemStatus.objects.order_by('id')
-        status_list = status_list.reverse()
         context = {
             **self.each_context(request),
             'title': self.index_title,
@@ -60,8 +59,7 @@ class CustomAdminSite(AdminSite):
             'course_data_upload_form': forms.CourseDataUploadForm(),
             'applicant_data_upload_form': forms.ApplicantDataUploadForm(),
             'assignment_data_download_form': forms.AssignmentDataDownloadForm(),
-            'system_status': status_list,
-            'last_system_status': status_list.first()
+            'last_system_status': status_list.last()
         }
         request.current_app = self.name
         return render(request, 'admin/index.html', context)
@@ -143,13 +141,12 @@ class CustomAdminSite(AdminSite):
     def change_system_status(self, request):
         if request.method != 'POST':
             return handle_bad_request(request, app='admin', expected_method='POST')
+        new_system_status = models.SystemStatus()
         if models.SystemStatus.objects.count() > 0:
             previous_system_status = models.SystemStatus.objects.order_by(
                 'id').last()
-            new_system_status = models.SystemStatus()
             new_system_status.status = not previous_system_status.status
         else:
-            new_system_status = models.SystemStatus()
             new_system_status.status = True
         new_system_status.save()
         return redirect('admin:index')
@@ -210,7 +207,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id', 'lab_hour_preferences')
+            'fields': ('user', 'eagle_id')
         })
     )
 
