@@ -26,7 +26,7 @@ UL_STYLE = "margin: 0 0 0 6px; padding-left: 6px;"
 
 class CustomAdminSite(AdminSite):
 
-    site_title  = "Boston College TA Application System"
+    site_title = "Boston College TA Application System"
     site_header = "Boston College TA Application System"
     index_title = "System Admin"
 
@@ -34,27 +34,32 @@ class CustomAdminSite(AdminSite):
         urls = super().get_urls()
         urls = [
             path('', self.admin_view(self.index)),
-            path('course_data_upload', 
-                self.admin_view(self.course_data_upload), 
-                name='course_data_upload'),
-            path('applicant_data_upload', 
-                self.admin_view(self.applicant_data_upload), 
-                name='student_data_upload'),
+            path('course_data_upload',
+                 self.admin_view(self.course_data_upload),
+                 name='course_data_upload'),
+            path('applicant_data_upload',
+                 self.admin_view(self.applicant_data_upload),
+                 name='student_data_upload'),
             path('assignment_data_download',
-                self.admin_view(self.assignment_data_download),
-                name='assignment_data_download')
+                 self.admin_view(self.assignment_data_download),
+                 name='assignment_data_download'),
+            path('change_system_status',
+                 self.admin_view(self.change_system_status),
+                 name='change_system_status')
         ] + urls
         return urls
 
     def index(self, request):
         app_list = self.get_app_list(request)
+        status_list = models.SystemStatus.objects.order_by('id')
         context = {
             **self.each_context(request),
             'title': self.index_title,
             'app_list': app_list,
             'course_data_upload_form': forms.CourseDataUploadForm(),
             'applicant_data_upload_form': forms.ApplicantDataUploadForm(),
-            'assignment_data_download_form': forms.AssignmentDataDownloadForm()
+            'assignment_data_download_form': forms.AssignmentDataDownloadForm(),
+            'last_system_status': status_list.last()
         }
         request.current_app = self.name
         return render(request, 'admin/index.html', context)
@@ -99,7 +104,8 @@ class CustomAdminSite(AdminSite):
             try:
                 handle_applicant_data_upload(request.FILES['file'])
             except TypeError as err:
-                messages.error(request, f'Applicant Data Upload Failed: {err}.')
+                messages.error(
+                    request, f'Applicant Data Upload Failed: {err}.')
             except ObjectDoesNotExist as err:
                 messages.error(
                     request,
@@ -111,7 +117,8 @@ class CustomAdminSite(AdminSite):
                     f'Applicant Data Upload Failed: The following uncaught error occurred: {err}.'
                 )
             else:
-                messages.success(request, 'Applicant Data Uploaded Successfully.')
+                messages.success(
+                    request, 'Applicant Data Uploaded Successfully.')
         return redirect('admin:index')
 
     def assignment_data_download(self, request):
@@ -129,6 +136,19 @@ class CustomAdminSite(AdminSite):
                     request,
                     f'TA Assignment Data Download Failed: {err}.'
                 )
+        return redirect('admin:index')
+
+    def change_system_status(self, request):
+        if request.method != 'POST':
+            return handle_bad_request(request, app='admin', expected_method='POST')
+        new_system_status = models.SystemStatus()
+        if models.SystemStatus.objects.count() > 0:
+            previous_system_status = models.SystemStatus.objects.order_by(
+                'id').last()
+            new_system_status.status = not previous_system_status.status
+        else:
+            new_system_status.status = True
+        new_system_status.save()
         return redirect('admin:index')
 
 
@@ -283,9 +303,14 @@ class SemesterAdmin(InstructorAdmin):
     get_all_courses.short_description = 'Courses'
 
 
+class SystemStatusAdmin(ModelAdmin):
+    list_display = ('id', 'status', 'date_changed')
+
+
 admin_site = CustomAdminSite()
 admin_site.register(models.User, UserAdmin)
 admin_site.register(models.Course, CourseAdmin)
 admin_site.register(models.Profile, ProfileAdmin)
 admin_site.register(models.Instructor, InstructorAdmin)
 admin_site.register(models.Semester, SemesterAdmin)
+admin_site.register(models.SystemStatus, SystemStatusAdmin)
