@@ -1,9 +1,9 @@
 {% extends "ta_system/base.html" %}
 {% load static %}
 {% block extra-head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'ta_system/home.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'ta_system/lab-hour-form.css' %}" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.mjs"></script>
-    <script src="{% static 'ta_system/lab-hour-form.js' %}" type="module" ></script>
+    <script src="{% static 'ta_system/home-lab-hour-form.js' %}" type="module" ></script>
 {% endblock %}
 {% block content %}
     <div class="content-section">
@@ -14,7 +14,12 @@
             </p>
         {% else %}
             <h2>Apply Here</h2>
-            <div id="lab-hour-form"></div>
+            <form method="POST" action="{% url 'ta_system:home' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ application_form }}
+                <!-- includes form submit button -->
+                <div id="lab-hour-form"></div>
+             </form>
         {% endif %}
     </div>
 {% endblock content %}

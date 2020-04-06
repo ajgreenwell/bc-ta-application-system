@@ -185,7 +185,7 @@ class Profile(models.Model):
         verbose_name="TA Assignments",
         blank=True
     )
-    lab_hour_preferences = JSONField(default=list)
+    lab_hour_preferences = JSONField(default=list, blank=True)
 
     @property
     def full_name(self):

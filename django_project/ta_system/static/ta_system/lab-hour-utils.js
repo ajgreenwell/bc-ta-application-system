@@ -1,16 +1,35 @@
 import { numSlotsInHour, rowHeight } from './lab-hour-settings.js';
 
+export function initLabHourGrid(value) {
+    let grid = [];
+    for (let row = 0; row < 24 * numSlotsInHour; row++) {
+        let row = [];
+        for (let col = 0; col < 7; col++)
+            row.push(value);
+        grid.push(row);
+    }
+    return grid;
+}
+
 export function getLabHourConstraints() {
-    const falseConstraintRow = [false, false, false, false, false, false, false];
-    const trueConstraintRow = [false, true, true, true, true, true, false];
-    const constraints = [];
-    for (let i = 0; i < 38; i++)
-        constraints.push(falseConstraintRow);
-    for (let j = 0; j < 32; j++)
-        constraints.push(trueConstraintRow);
-    for (let k = 0; k < 26; k++)
-        constraints.push(falseConstraintRow);
-    return constraints;
+    // const falseConstraintRow = [false, false, false, false, false, false, false];
+    // const trueConstraintRow = [false, true, true, true, true, true, false];
+    // const constraints = [];
+    // for (let i = 0; i < 38; i++)
+    //     constraints.push(falseConstraintRow);
+    // for (let j = 0; j < 32; j++)
+    //     constraints.push(trueConstraintRow);
+    // for (let k = 0; k < 26; k++)
+    //     constraints.push(falseConstraintRow);
+    // return constraints;
+    return initLabHourGrid(true);
+}
+
+export async function getLabHourPreferences() {
+    const res = await fetch('/get_lab_hour_preferences/');
+    const data = await res.json();
+    if (data) return data;
+    return initLabHourGrid(false);
 }
 
 export function getStartAndEndHour(constraints) {
@@ -31,15 +50,6 @@ export function getStartAndEndHour(constraints) {
     const startHour = Math.floor(startRow / numSlotsInHour);
     const endHour = Math.ceil((endRow + 1) / numSlotsInHour);
     return [startHour, endHour];
-}
-
-export function initSelectedMatrix(constraints) {
-    let isSelected = [];
-    constraints.forEach(row => {
-        let initRow = row.map( _ => false);
-        isSelected.push(initRow);
-    });
-    return isSelected;
 }
 
 export function getNumColHeaderLetters(windowObj) {
