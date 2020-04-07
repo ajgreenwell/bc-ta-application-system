@@ -23,7 +23,7 @@ def get_preferences(student, semester):
 # PROFILE BEFORE SUBMITTING AN APPLICATION.
 def has_submitted_application(student):
     current_semester = get_current_semester()
-    semesters = [obj['semester'] for obj in student.lab_hour_preferences]
+    semesters = [obj["semester"] for obj in student.lab_hour_preferences]
     return current_semester in semesters
 
 

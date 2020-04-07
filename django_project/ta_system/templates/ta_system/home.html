@@ -7,19 +7,21 @@
 {% endblock %}
 {% block content %}
     <div class="content-section">
-        {% if user_has_submitted_application %}
-            <h2>Thank you for applying.</h2>
-            <p>
-                To edit your account info or update your CS Lab availability, go to your <a href= "{% url 'ta_system:profile' %}">profile</a> page.
-            </p>
-        {% else %}
-            <h2>Apply Here</h2>
-            <form method="POST" action="{% url 'ta_system:home' %}" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ application_form }}
-                <!-- includes form submit button -->
-                <div id="lab-hour-form"></div>
-             </form>
-        {% endif %}
+    {% if not system_is_open.status %}
+        <h2> The TA Application System is Closed.</h2>
+    {% elif system_is_open.status and not user_has_submitted_application %}
+        <h2>Apply Here</h2>
+        <form method="POST" action="{% url 'ta_system:home' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ application_form }}
+            <!-- includes form submit button -->
+            <div id="lab-hour-form"></div>
+         </form>
+    {% elif system_is_open.status and user_has_submitted_application %}
+        <h2>Thank you for applying.</h2>
+        <p>
+            To edit your account info or update your CS Lab availability, go to your <a href= "{% url 'ta_system:profile' %}">profile</a> page.
+        </p>
+    {% endif %}
     </div>
 {% endblock content %}

@@ -6,6 +6,7 @@ from json import dumps
 
 from .handlers.bad_request import handle_bad_request
 from .forms import ApplicationForm, ProfileForm
+from .models import SystemStatus
 
 import ta_system.utils as utils
 
@@ -15,7 +16,9 @@ def home(request):
     if request.method not in ('GET', 'POST'):
         return handle_bad_request(request, app='ta_system', expected='GET, POST')
 
-    context = {}
+    context = {
+        'system_is_open': SystemStatus.objects.order_by('id').last()
+    }
     student = request.user.profile
     form = ApplicationForm()
     if request.method == 'POST':

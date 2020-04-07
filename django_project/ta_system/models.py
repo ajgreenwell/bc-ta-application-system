@@ -6,6 +6,7 @@ from .data_formats.course_data_formats \
     import DATA_FORMATS as COURSE_DATA_FORMATS
 from .data_formats.applicant_data_formats \
     import DATA_FORMATS as APPILCANT_DATA_FORMATS
+from django.utils.timezone import now
 
 
 class Course(models.Model):
@@ -20,14 +21,14 @@ class Course(models.Model):
         verbose_name="Course Number",
         help_text="A full BC course number, e.g. CSCI110101.",
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['course_number'], 
+            regex=COURSE_DATA_FORMATS['course_number'],
             message="Please enter a valid full course number, e.g. 'CSCI110101'."
         )]
     )
     name = models.CharField(
         max_length=60,
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['name'], 
+            regex=COURSE_DATA_FORMATS['name'],
             message="Please enter the name of the course, e.g. 'Computer Science I'."
         )]
     )
@@ -42,7 +43,7 @@ class Course(models.Model):
         verbose_name="Days of the Week",
         help_text="The 1-character days of the week this class meets, separated by slashes, eg. T/R.",
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['days_of_week'], 
+            regex=COURSE_DATA_FORMATS['days_of_week'],
             message="M = Mon; T = Tues; W = Wed; R = Thurs; F = Fri; A = Sat; S = Sun... e.g. M/W/F"
         )]
     )
@@ -50,7 +51,7 @@ class Course(models.Model):
         verbose_name="Start Time",
         help_text="The time of day this class begins in millitary time, e.g. 14:00.",
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['start_time'], 
+            regex=COURSE_DATA_FORMATS['start_time'],
             message="Please enter the time this class starts (in millitary time), e.g. '14:00'."
         )]
     )
@@ -58,7 +59,7 @@ class Course(models.Model):
         verbose_name="End Time",
         help_text="The time of day this class ends in millitary time, e.g. 14:50.",
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['end_time'], 
+            regex=COURSE_DATA_FORMATS['end_time'],
             message="Please enter the time this class ends (in millitary time), e.g. '14:50'."
         )]
     )
@@ -66,7 +67,7 @@ class Course(models.Model):
         max_length=30,
         help_text="The building this class meets in, e.g. Fulton.",
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['building'], 
+            regex=COURSE_DATA_FORMATS['building'],
             message="Please enter the building this class meets in, e.g. 'Fulton'."
         )]
     )
@@ -75,8 +76,8 @@ class Course(models.Model):
         verbose_name="Room Number",
         help_text="The room this class meets in. May contain a 1-digit building code, e.g. 250S.",
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['room_number'], 
-            message="Please enter the number of the room this class meets in, e.g. '250'. " + 
+            regex=COURSE_DATA_FORMATS['room_number'],
+            message="Please enter the number of the room this class meets in, e.g. '250'. " +
                     "One letter building codes may be included, e.g. '250S'."
         )]
     )
@@ -85,7 +86,7 @@ class Course(models.Model):
         verbose_name="Max Number of TAs",
         help_text="The maximum number of teaching assistants that can be assigned to this course, e.g. 2.",
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['max_num_tas'], 
+            regex=COURSE_DATA_FORMATS['max_num_tas'],
             message="Please enter the maximum number of TAs that can be assigned to this " +
                     "course, e.g. '3'. This field defaults to '2'."
         )]
@@ -138,7 +139,7 @@ class Instructor(models.Model):
         verbose_name="Instructor",
         help_text="The name of this instructor.",
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['instructor'], 
+            regex=COURSE_DATA_FORMATS['instructor'],
             message="Please enter the name of the Instructor, e.g. 'Robert Muller'."
         )]
     )
@@ -169,7 +170,7 @@ class Profile(models.Model):
         blank=True,
         verbose_name="Eagle ID",
         validators=[DataValidator(
-            regex=APPILCANT_DATA_FORMATS['eagle_id'], 
+            regex=APPILCANT_DATA_FORMATS['eagle_id'],
             message="Please enter a valid 8-digit eagle id, e.g. '58704254'."
         )]
     )
@@ -198,3 +199,12 @@ class Profile(models.Model):
         ordering = ('user__last_name',)
         verbose_name = "Student"
         verbose_name_plural = "Students"
+
+
+class SystemStatus(models.Model):
+    status = models.BooleanField(default=False)
+    date_changed = models.DateField(default=now)
+
+    class Meta:
+        verbose_name = "System Status"
+        verbose_name_plural = "System Status"
