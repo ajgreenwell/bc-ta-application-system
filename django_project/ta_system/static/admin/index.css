@@ -1,0 +1,24 @@
+header {
+    font-weight: bold;
+    color: #666;
+}
+
+.custom-content-separator {
+    height: 231px;
+}
+
+.student-upload-fieldset {
+    border-top: 0px;
+}
+
+.mt-8 {
+    margin-top: 8px;
+}
+
+.mt-30 {
+    margin-top: 30px;
+}
+
+.mb-30 {
+    margin-bottom: 30px;
+}

@@ -1,7 +1,11 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "admin/index.css" %}">
+{% endblock %}
 
 {% block coltype %}colMS{% endblock %}
 
@@ -11,7 +15,12 @@
 
 {% block content %}
 <div id="content-main">
-
+{% if last_system_status.status %}
+    <h2>The TA Application System is Open.</h2>
+{% else %}
+    <h2 >The TA Application System is Closed.</h2>
+{% endif%}
+<h3 class="mb-30">Please do not change the course information when the TA application system is open.</h3>
 {% if app_list %}
     {% for app in app_list %}
         <div class="app-{{ app.app_label }} module">
@@ -86,12 +95,49 @@
 {% endblock %}
 
 {% block custom-content %}
-<form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data">
-    {% csrf_token %}
-    <fieldset>
-        <legend>Upload Files</legend>
-        {{ form }}
-    </fieldset>
-    <button type="submit">Upload</button>
-</form>
+<div class="custom-content-separator"></div>
+<div class="custom-content">
+    <form  action="{% url 'admin:change_system_status' %}" method = "POST">
+        {% csrf_token %}
+        <header>Update TA Application System Status</header>
+        <fieldset class="mt-8">
+            <div class="mt-8">
+                {% if last_system_status.status %}
+                    <input id='close_system' type="submit" value="Close TA Application System">
+                {% else %}
+                    <input id='open_system' type="submit" value="Open TA Application System">
+                {% endif %}
+            </div>
+        </fieldset>
+    </form>
+    <form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data" class="mt-30">
+        {% csrf_token %}
+        <header>Upload Files</header>
+        <fieldset class="mt-8">
+            <div class="mt-8">
+                {{ course_data_upload_form }}
+            </div>
+            <input type="submit" value="Upload">
+        </fieldset>
+    </form>
+    <form method="POST" action="{% url 'admin:student_data_upload' %}" enctype="multipart/form-data" class="mt-8">
+        {% csrf_token %}
+        <fieldset class="student-upload-fieldset">
+            <div>
+                {{ applicant_data_upload_form }}
+            </div>
+            <input type="submit" value="Upload">
+        </fieldset>
+    </form>
+    <form method="GET" action="{% url 'admin:assignment_data_download' %}" enctype="multipart/form-data" class="mt-30">
+        {% csrf_token %}
+        <header>Download Files</header>
+        <fieldset class="mt-8">
+            <div class="mt-8">
+                {{ assignment_data_download_form.as_p }}
+                <input type="submit" value="Download TA Assignment Data">
+            </div>
+        </fieldset>
+    </form>
+</div>
 {% endblock %}
