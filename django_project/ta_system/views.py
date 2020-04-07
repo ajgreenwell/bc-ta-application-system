@@ -28,7 +28,8 @@ def home(request):
             else:
                 messages.error(
                     request,
-                    'Error: Please specify which times you would be available to tend the CS Lab.'
+                    'Error: Please specify which times you ' +
+                    'would be available to tend the CS Lab.'
                 )
     elif utils.has_submitted_application(student):
         context['user_has_submitted_application'] = True
@@ -57,9 +58,9 @@ def profile(request):
             else:
                 messages.error(
                     request,
-                    'Error: Please specify which times you would be available to tend the CS Lab.'
+                    'Error: Please specify which times you ' +
+                    'would be available to tend the CS Lab.'
                 )
-
     context = {'profile_form': form}
     return render(request, 'ta_system/profile.html', context=context)
 

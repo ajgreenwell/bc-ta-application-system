@@ -12,17 +12,16 @@ export function initLabHourGrid(value) {
 }
 
 export function getLabHourConstraints() {
-    // const falseConstraintRow = [false, false, false, false, false, false, false];
-    // const trueConstraintRow = [false, true, true, true, true, true, false];
-    // const constraints = [];
-    // for (let i = 0; i < 38; i++)
-    //     constraints.push(falseConstraintRow);
-    // for (let j = 0; j < 32; j++)
-    //     constraints.push(trueConstraintRow);
-    // for (let k = 0; k < 26; k++)
-    //     constraints.push(falseConstraintRow);
-    // return constraints;
-    return initLabHourGrid(true);
+    const falseConstraintRow = [false, false, false, false, false, false, false];
+    const trueConstraintRow = [false, true, true, true, true, true, false];
+    const constraints = [];
+    for (let i = 0; i < 38; i++)
+        constraints.push(falseConstraintRow);
+    for (let j = 0; j < 32; j++)
+        constraints.push(trueConstraintRow);
+    for (let k = 0; k < 26; k++)
+        constraints.push(falseConstraintRow);
+    return constraints;
 }
 
 export async function getLabHourPreferences() {
@@ -46,7 +45,7 @@ export function getStartAndEndHour(constraints) {
         endRow--;
     }
     if (endRow <= startRow)
-        return [0, constraints.length];
+        return [0, constraints.length - 1];
     const startHour = Math.floor(startRow / numSlotsInHour);
     const endHour = Math.ceil((endRow + 1) / numSlotsInHour);
     return [startHour, endHour];
