@@ -1,5 +1,16 @@
 import { numSlotsInHour, rowHeight } from './lab-hour-settings.js';
 
+export function initLabHourGrid(value) {
+    let grid = [];
+    for (let row = 0; row < 24 * numSlotsInHour; row++) {
+        let row = [];
+        for (let col = 0; col < 7; col++)
+            row.push(value);
+        grid.push(row);
+    }
+    return grid;
+}
+
 export function getLabHourConstraints() {
     const falseConstraintRow = [false, false, false, false, false, false, false];
     const trueConstraintRow = [false, true, true, true, true, true, false];
@@ -11,6 +22,13 @@ export function getLabHourConstraints() {
     for (let k = 0; k < 26; k++)
         constraints.push(falseConstraintRow);
     return constraints;
+}
+
+export async function getLabHourPreferences() {
+    const res = await fetch('/get_lab_hour_preferences/');
+    const data = await res.json();
+    if (data) return data;
+    return initLabHourGrid(false);
 }
 
 export function getStartAndEndHour(constraints) {
@@ -27,19 +45,10 @@ export function getStartAndEndHour(constraints) {
         endRow--;
     }
     if (endRow <= startRow)
-        return [0, constraints.length];
+        return [0, constraints.length - 1];
     const startHour = Math.floor(startRow / numSlotsInHour);
     const endHour = Math.ceil((endRow + 1) / numSlotsInHour);
     return [startHour, endHour];
-}
-
-export function initSelectedMatrix(constraints) {
-    let isSelected = [];
-    constraints.forEach(row => {
-        let initRow = row.map( _ => false);
-        isSelected.push(initRow);
-    });
-    return isSelected;
 }
 
 export function getNumColHeaderLetters(windowObj) {

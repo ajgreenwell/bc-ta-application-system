@@ -15,14 +15,14 @@
     display: grid;
     flex: 1;
     margin-top: 10px;
-    border-top: 1.5px solid #73131d;
-    border-right: 1.5px solid #73131d;
+    border-top: 2px solid #73131d;
+    border-right: 2px solid #73131d;
 
 }
 
 .grid-item {
-    border-bottom: 1.5px solid #73131d;
-    border-left: 1.5px solid #73131d;
+    border-bottom: 2px solid #73131d;
+    border-left: 2px solid #73131d;
 }
 
 .grid-item.closed {
