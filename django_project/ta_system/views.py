@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from json import dumps
 
 from .handlers.bad_request import handle_bad_request
-from .forms import ApplicationForm, ProfileForm
+from .forms import ApplicationForm, ProfileForm, UserUpdateForm
 from .models import SystemStatus
 
 import ta_system.utils as utils
@@ -46,12 +46,15 @@ def profile(request):
     if request.method not in ('GET', 'POST'):
         return handle_bad_request(request, app='ta_system', expected='GET, POST')
 
-    form = ProfileForm()
+    u_form = UserUpdateForm(instance=request.user)
+    p_form = ProfileForm(instance=request.user.profile)
     if request.method == 'POST':
-        form = ProfileForm(request.POST)
-        if form.is_valid():
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileForm(request.POST)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
             student = request.user.profile
-            preferences = form.cleaned_data.get('lab_hour_preferences')
+            preferences = p_form.cleaned_data.get('lab_hour_preferences')
             if utils.is_valid_preferences(preferences):
                 utils.save_preferences(student, preferences)
                 messages.success(
@@ -64,7 +67,10 @@ def profile(request):
                     'Error: Please specify which times you ' +
                     'would be available to tend the CS Lab.'
                 )
-    context = {'profile_form': form}
+    context = {
+        'u_form': u_form,
+        'p_form': p_form
+    }
     return render(request, 'ta_system/profile.html', context=context)
 
 
