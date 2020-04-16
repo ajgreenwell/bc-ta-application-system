@@ -12,16 +12,17 @@ export function initLabHourGrid(value) {
 }
 
 export function getLabHourConstraints() {
-    const falseConstraintRow = [false, false, false, false, false, false, false];
-    const trueConstraintRow = [false, true, true, true, true, true, false];
-    const constraints = [];
-    for (let i = 0; i < 38; i++)
-        constraints.push(falseConstraintRow);
-    for (let j = 0; j < 32; j++)
-        constraints.push(trueConstraintRow);
-    for (let k = 0; k < 26; k++)
-        constraints.push(falseConstraintRow);
-    return constraints;
+    // const falseConstraintRow = [false, false, false, false, false, false, false];
+    // const trueConstraintRow = [false, true, true, true, true, true, false];
+    // const constraints = [];
+    // for (let i = 0; i < 38; i++)
+    //     constraints.push(falseConstraintRow);
+    // for (let j = 0; j < 32; j++)
+    //     constraints.push(trueConstraintRow);
+    // for (let k = 0; k < 26; k++)
+    //     constraints.push(falseConstraintRow);
+    // return constraints;
+    return initLabHourGrid(true);
 }
 
 export async function getLabHourPreferences() {
