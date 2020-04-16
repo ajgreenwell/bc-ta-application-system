@@ -27,9 +27,12 @@ class ApplicationForm(forms.Form):
         widget=forms.HiddenInput(), required=False)
 
 
-class ProfileForm(forms.ModelForm):
+class ProfileForm(forms.Form):
     lab_hour_preferences = JSONField(
         widget=forms.HiddenInput(), required=False)
+
+
+class EagleIdForm(forms.ModelForm):
     eagle_id = forms.CharField(max_length=8, label="Eagle ID",
                                validators=[DataValidator(
                                    regex=APPILCANT_DATA_FORMATS['eagle_id'],
@@ -39,7 +42,7 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['eagle_id', 'lab_hour_preferences']
+        fields = ['eagle_id']
 
 
 class UserUpdateForm(forms.ModelForm):

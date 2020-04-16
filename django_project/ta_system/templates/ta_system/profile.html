@@ -9,14 +9,15 @@
     <div class="content-section">
       <div class="media">
         <div class="media-body">
-          <h2 class="account-heading">{{ user.username }}</h2>
-          <p class="text-secondary">{{ user.first_name }} {{ user.last_name }}</p>
+          <h2 class="account-heading">Profile Page</h2>
         </div>
       </div>
       <form method="POST" action="{% url 'ta_system:profile' %}" enctype="multipart/form-data">
         {% csrf_token %}
         {{ u_form|crispy }}
+        {{ e_form|crispy }}
         {{ p_form|crispy }}
+        <font size="4">Lab Hour Preferences:</font>
         <div id="lab-hour-form"></div>
       </form>
     </div>
