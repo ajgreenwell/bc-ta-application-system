@@ -270,7 +270,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id', 'lab_hour_preferences')
+            'fields': ('user', 'eagle_id')
         })
     )
 

@@ -11,8 +11,8 @@ export function initLabHourGrid(value) {
     return grid;
 }
 
-export async function getLabHourConstraints(defaultValue) {
-    const res = await fetch('/get_lab_hour_constraints/');
+export async function getLabHourConstraints(endpoint, defaultValue) {
+    const res = await fetch(endpoint);
     const data = await res.json();
     if (data && data.length) return data;
     return initLabHourGrid(defaultValue);
