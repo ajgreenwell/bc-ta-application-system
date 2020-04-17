@@ -1,21 +1,8 @@
 from ..models import Semester
+from ..utils import get_verbose_semester
 from csv import writer
 from django.http import HttpResponse
 from io import StringIO
-
-
-def get_semester_choices():
-    semesters = [str(semester) for semester in Semester.objects.all()]
-    verbose_semesters = [get_verbose_semester(sem) for sem in semesters]
-    semester_choices = list(zip(semesters, verbose_semesters))
-    return sorted(semester_choices, key=lambda choice: choice[1], reverse=True)
-
-
-def get_verbose_semester(semester):
-    year = semester[:4]
-    semester_code = semester[-1]
-    verbose_semester = 'Spring' if semester_code == 'S' else 'Fall'
-    return f'{year} {verbose_semester}'
 
 
 def handle_assignment_data_download(semester):

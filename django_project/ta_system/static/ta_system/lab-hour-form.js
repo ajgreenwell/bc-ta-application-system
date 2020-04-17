@@ -1,12 +1,12 @@
 import * as utils from './lab-hour-utils.js';
 import * as settings from './lab-hour-settings.js';
-import Cookies from 'https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.mjs';
 
 
-export async function renderLabHourForm({ redirect }) {
-    const constraints = utils.getLabHourConstraints();
+export async function renderLabHourForm(props) {
+    const { getConstraints, getStartingGrid, extraJS } = props;
+    const constraints = await getConstraints();
     const [startHour, endHour] = utils.getStartAndEndHour(constraints);
-    let labHourPreferences = await utils.getLabHourPreferences();
+    let selected = await getStartingGrid();
     let mouseDown = false;
 
     function LabHourGrid() {
@@ -47,7 +47,7 @@ export async function renderLabHourForm({ redirect }) {
                 const adjustedRow = row + (startHour * settings.numSlotsInHour);
                 const id = utils.getId(adjustedRow, col);
                 const isOpen = constraints[adjustedRow][col];
-                const isSelected = labHourPreferences[adjustedRow][col];
+                const isSelected = selected[adjustedRow][col];
                 const isHour = (row + 1) % settings.numSlotsInHour == 0;
                 let className = "grid-item";
                 if (!isHour)
@@ -73,16 +73,16 @@ export async function renderLabHourForm({ redirect }) {
     function Legend() {
         return `
             <div class="legend flex">
-                <div class="legend-column">
+                <div id="legend-closed" class="legend-column">
                     <div class="legend-desc">N/A</div>
                     <div class="legend-item closed"></div>
                 </div>
                 <div class="legend-column">
-                    <div class="legend-desc">Busy</div>
+                    <div id="legend-desc-busy" class="legend-desc">Busy</div>
                     <div class="legend-item"></div>
                 </div>
                 <div class="legend-column">
-                    <div class="legend-desc">Free</div>
+                    <div id="legend-desc-free" class="legend-desc">Free</div>
                     <div class="legend-item selected"></div>
                 </div>
             </div>
@@ -94,18 +94,18 @@ export async function renderLabHourForm({ redirect }) {
         const className = e.target.className;
         const [row, col] = utils.getRowAndCol(e.target.id);
         const isClosed = !constraints[row][col];
-        const isSelected = className.includes('selected');
+        const isSelected = selected[row][col];
         if (isClosed)
             return;
         if (isSelected) {
             e.target.className = utils.rstrip(className, ' selected');
-            labHourPreferences[row][col] = false;
+            selected[row][col] = false;
 
         } else {
             e.target.className += ' selected';
-            labHourPreferences[row][col] = true;
+            selected[row][col] = true;
         }
-        outputLabHourPreferences()
+        outputSelected()
     }
 
     function selectToHere(e) {
@@ -122,9 +122,9 @@ export async function renderLabHourForm({ redirect }) {
         colHeaders.innerHTML = ColumnHeaders(settings.daysOpen, numLetters);
     }
 
-    function outputLabHourPreferences() {
-        const labHourInput = document.querySelector('#id_lab_hour_preferences');
-        labHourInput.value = JSON.stringify(labHourPreferences);
+    function outputSelected() {
+        const labHourInput = document.querySelector('#id_lab_hour_data');
+        labHourInput.value = JSON.stringify(selected);
     }
 
     const labHourFormRoot = document.querySelector('#lab-hour-form');
@@ -137,5 +137,6 @@ export async function renderLabHourForm({ redirect }) {
     });
     window.onmouseup = stopSelecting;
     window.onresize = resizeColHeaders;
-    outputLabHourPreferences();
+    outputSelected();
+    if (extraJS) extraJS();
 }

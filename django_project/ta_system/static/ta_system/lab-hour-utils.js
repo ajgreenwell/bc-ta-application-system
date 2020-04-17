@@ -11,41 +11,34 @@ export function initLabHourGrid(value) {
     return grid;
 }
 
-export function getLabHourConstraints() {
-    // const falseConstraintRow = [false, false, false, false, false, false, false];
-    // const trueConstraintRow = [false, true, true, true, true, true, false];
-    // const constraints = [];
-    // for (let i = 0; i < 38; i++)
-    //     constraints.push(falseConstraintRow);
-    // for (let j = 0; j < 32; j++)
-    //     constraints.push(trueConstraintRow);
-    // for (let k = 0; k < 26; k++)
-    //     constraints.push(falseConstraintRow);
-    // return constraints;
-    return initLabHourGrid(true);
+export async function getLabHourConstraints(defaultValue) {
+    const res = await fetch('/get_lab_hour_constraints/');
+    const data = await res.json();
+    if (data && data.length) return data;
+    return initLabHourGrid(defaultValue);
 }
 
 export async function getLabHourPreferences() {
     const res = await fetch('/get_lab_hour_preferences/');
     const data = await res.json();
-    if (data) return data;
+    if (data && data.length) return data;
     return initLabHourGrid(false);
 }
 
 export function getStartAndEndHour(constraints) {
     let [startRow, endRow] = [0, constraints.length - 1];
     let [isStart, isEnd] = [false, false];
-    while (startRow < endRow) {
+    while (startRow <= endRow) {
         isStart = constraints[startRow].includes(true);
         if (isStart) break;
         startRow++;
     }
-    while (startRow < endRow) {
+    while (startRow <= endRow) {
         isEnd = constraints[endRow].includes(true);
         if (isEnd) break;
         endRow--;
     }
-    if (endRow <= startRow)
+    if (endRow < startRow)
         return [0, constraints.length - 1];
     const startHour = Math.floor(startRow / numSlotsInHour);
     const endHour = Math.ceil((endRow + 1) / numSlotsInHour);
