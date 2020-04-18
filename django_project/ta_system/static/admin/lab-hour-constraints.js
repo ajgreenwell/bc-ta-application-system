@@ -4,7 +4,7 @@ import { initLabHourGrid, getLabHourConstraints } from '../ta_system/lab-hour-ut
 async function getStartingGrid() {
     const semester = document.querySelector('#lab-hour-semester').value;
     const endpoint = `/admin/get_lab_hour_constraints?semester=${semester}`;
-    getLabHourConstraints(endpoint, false);
+    return getLabHourConstraints(endpoint, false);
 }
 
 function moodifyForConstraintsForm() {

@@ -8,6 +8,7 @@ export async function renderLabHourForm(props) {
     const [startHour, endHour] = utils.getStartAndEndHour(constraints);
     let selected = await getStartingGrid();
     let mouseDown = false;
+    let shouldSelect = true;
 
     function LabHourGrid() {
         const numHoursInDay = endHour - startHour;
@@ -100,16 +101,34 @@ export async function renderLabHourForm(props) {
         if (isSelected) {
             e.target.className = utils.rstrip(className, ' selected');
             selected[row][col] = false;
+            shouldSelect = false;
 
         } else {
             e.target.className += ' selected';
             selected[row][col] = true;
+            shouldSelect = true;
         }
-        outputSelected()
+        outputSelected();
     }
 
     function selectToHere(e) {
-        if (mouseDown) selectFromHere(e);
+        if (!mouseDown) return;
+        mouseDown = true;
+        const className = e.target.className;
+        const [row, col] = utils.getRowAndCol(e.target.id);
+        const isClosed = !constraints[row][col];
+        const isSelected = selected[row][col];
+        if (isClosed)
+            return;
+        if (isSelected && !shouldSelect) {
+            e.target.className = utils.rstrip(className, ' selected');
+            selected[row][col] = false;
+
+        } else if (!isSelected && shouldSelect) {
+            e.target.className += ' selected';
+            selected[row][col] = true;
+        }
+        outputSelected();
     }
 
     function stopSelecting(e) {
