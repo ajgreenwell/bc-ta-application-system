@@ -94,10 +94,10 @@ export async function renderLabHourForm(props) {
     }
 
     function selectFromHere(e) {
+        e.preventDefault();
         const [row, col] = utils.getRowAndCol(e.target.id);
         const isClosed = !constraints[row][col];
         if (isClosed) return;
-        mouseDown = true;
         const isSelected = selected[row][col];
         if (isSelected) {
             toggleSelection(row, col, !isSelected);
@@ -108,6 +108,7 @@ export async function renderLabHourForm(props) {
         }
         fromCoordinates = {row, col};
         outputSelected();
+        mouseDown = true;
     }
 
     function toggleSelection(row, col, shouldSelectThisElement) {
@@ -129,83 +130,58 @@ export async function renderLabHourForm(props) {
 
     function selectToHere(e) {
         if (!mouseDown) return;
+        e.preventDefault();
         let {row: rowTo, col: colTo} = toCoordinates;
         const isGridCell = e.target.className.includes('grid-item');
         if (isGridCell) {
             [rowTo, colTo] = utils.getRowAndCol(e.target.id);
             toCoordinates = {row: rowTo, col: colTo};
         }
-        toggleSelectionFromTo();
+        toggleFromTo(toggleSelection);
         outputSelected();
         mouseDown = false;
     }
 
-    function toggleSelectionFromTo() {
+    function toggleFromTo(toggle) {
         const {row: rowFrom, col: colFrom} = fromCoordinates;
         const {row: rowTo, col: colTo} = toCoordinates;
 
         // up and left
         for (let col = colFrom; col >= colTo; col--) {
             for (let row = rowFrom; row >= rowTo; row--) {
-                toggleSelection(row, col, shouldSelect);
+                toggle(row, col, shouldSelect);
             }
         }
         // up and right
         for (let col = colFrom; col <= colTo; col++) {
             for (let row = rowFrom; row >= rowTo; row--) {
-                toggleSelection(row, col, shouldSelect);
+                toggle(row, col, shouldSelect);
             }
         }
         // down and left
         for (let col = colFrom; col >= colTo; col--) {
             for (let row = rowFrom; row <= rowTo; row++) {
-                toggleSelection(row, col, shouldSelect);
+                toggle(row, col, shouldSelect);
             }
         }
         // down and right
         for (let col = colFrom; col <= colTo; col++) {
             for (let row = rowFrom; row <= rowTo; row++) {
-                toggleSelection(row, col, shouldSelect);
+                toggle(row, col, shouldSelect);
             }
         }
     }
 
-
     function highlightToHere(e) {
         if (!mouseDown) return;
+        e.preventDefault();
         const [rowTo, colTo] = utils.getRowAndCol(e.target.id);
         toCoordinates = {row: rowTo, col: colTo};
         toggleHighlightFromTo();
     }
 
     function toggleHighlightFromTo() {
-        const {row: rowFrom, col: colFrom} = fromCoordinates;
-        const {row: rowTo, col: colTo} = toCoordinates;
-
-        // up and left
-        for (let col = colFrom; col >= colTo; col--) {
-            for (let row = rowFrom; row >= rowTo; row--) {
-                toggleHighlight(row, col, shouldSelect);
-            }
-        }
-        // up and right
-        for (let col = colFrom; col <= colTo; col++) {
-            for (let row = rowFrom; row >= rowTo; row--) {
-                toggleHighlight(row, col, shouldSelect);
-            }
-        }
-        // down and left
-        for (let col = colFrom; col >= colTo; col--) {
-            for (let row = rowFrom; row <= rowTo; row++) {
-                toggleHighlight(row, col, shouldSelect);
-            }
-        }
-        // down and right
-        for (let col = colFrom; col <= colTo; col++) {
-            for (let row = rowFrom; row <= rowTo; row++) {
-                toggleHighlight(row, col, shouldSelect);
-            }
-        }
+        toggleFromTo(toggleHighlight);
 
         // undo toggleHighlights from past mouseenter events for
         // all grid cells not within the new from - to rectangular plane
@@ -277,6 +253,8 @@ export async function renderLabHourForm(props) {
         slot.onmouseenter = highlightToHere;
         slot.onmouseup = selectToHere;
     });
+    const grid = document.querySelector('.grid-container');
+    grid.oncontextmenu = e => e.preventDefault();
     window.onmouseup = selectToHere;
     window.onresize = resizeColHeaders;
     outputSelected();
