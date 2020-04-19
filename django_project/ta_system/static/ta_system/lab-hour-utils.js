@@ -89,10 +89,11 @@ export function getRowAndCol(id) {
     let [row, col] = id.split(',');
     row = row.split(':')[1];
     col = col.split(':')[1];
-    return [row, col];
+    return [parseInt(row), parseInt(col)];
 }
 
 export function rstrip(str, substr) {
     const index = str.indexOf(substr);
+    if (index == -1) return str;
     return str.substring(0, index);
 }

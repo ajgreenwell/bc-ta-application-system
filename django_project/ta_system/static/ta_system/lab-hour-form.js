@@ -7,6 +7,7 @@ export async function renderLabHourForm(props) {
     const constraints = await getConstraints();
     const [startHour, endHour] = utils.getStartAndEndHour(constraints);
     let selected = await getStartingGrid();
+    let fromCoordinates = {row: 0, col: 0};
     let mouseDown = false;
     let shouldSelect = true;
 
@@ -90,44 +91,73 @@ export async function renderLabHourForm(props) {
         `;
     }
 
+    function toggleSelectionFromTo(fromCoordinates, toCoordinates) {
+        const {row: rowFrom, col: colFrom} = fromCoordinates;
+        const {row: rowTo, col: colTo} = toCoordinates;
+
+        // up and left
+        for (let col = colFrom; col >= colTo; col--) {
+            for (let row = rowFrom; row >= rowTo; row--) {
+                toggleSelection(row, col, shouldSelect);
+            }
+        }
+        // up and right
+        for (let col = colFrom; col <= colTo; col++) {
+            for (let row = rowFrom; row >= rowTo; row--) {
+                toggleSelection(row, col, shouldSelect);
+            }
+        }
+        // down and left
+        for (let col = colFrom; col >= colTo; col--) {
+            for (let row = rowFrom; row <= rowTo; row++) {
+                toggleSelection(row, col, shouldSelect);
+            }
+        }
+        // down and right
+        for (let col = colFrom; col <= colTo; col++) {
+            for (let row = rowFrom; row <= rowTo; row++) {
+                toggleSelection(row, col, shouldSelect);
+            }
+        }
+    }
+
+    function toggleSelection(row, col, shouldSelectThisElement) {
+        const isClosed = !constraints[row][col];
+        if (isClosed) return;
+        const id = utils.getId(row, col);
+        const element = document.getElementById(id);
+        const isSelected = selected[row][col];
+        selected[row][col] = shouldSelectThisElement;
+        if (!isSelected && shouldSelectThisElement)
+            element.className += ' selected';
+        else if (isSelected && !shouldSelectThisElement)
+            element.className = utils.rstrip(element.className, ' selected');
+    }
+
     function selectFromHere(e) {
-        mouseDown = true;
-        const className = e.target.className;
         const [row, col] = utils.getRowAndCol(e.target.id);
         const isClosed = !constraints[row][col];
+        if (isClosed) return;
+        mouseDown = true;
         const isSelected = selected[row][col];
-        if (isClosed)
-            return;
         if (isSelected) {
-            e.target.className = utils.rstrip(className, ' selected');
-            selected[row][col] = false;
+            toggleSelection(row, col, !isSelected);
             shouldSelect = false;
-
         } else {
-            e.target.className += ' selected';
-            selected[row][col] = true;
+            toggleSelection(row, col, !isSelected);
             shouldSelect = true;
         }
+        fromCoordinates = {row, col};
         outputSelected();
     }
 
     function selectToHere(e) {
         if (!mouseDown) return;
-        mouseDown = true;
-        const className = e.target.className;
-        const [row, col] = utils.getRowAndCol(e.target.id);
-        const isClosed = !constraints[row][col];
-        const isSelected = selected[row][col];
-        if (isClosed)
-            return;
-        if (isSelected && !shouldSelect) {
-            e.target.className = utils.rstrip(className, ' selected');
-            selected[row][col] = false;
-
-        } else if (!isSelected && shouldSelect) {
-            e.target.className += ' selected';
-            selected[row][col] = true;
-        }
+        const [rowTo, colTo] = utils.getRowAndCol(e.target.id);
+        const isClosed = !constraints[rowTo][colTo];
+        if (isClosed) return;
+        const toCoordinates = {row: rowTo, col: colTo};
+        toggleSelectionFromTo(fromCoordinates, toCoordinates);
         outputSelected();
     }
 
@@ -152,7 +182,7 @@ export async function renderLabHourForm(props) {
     const timeSlots = document.querySelectorAll('.grid-item');
     timeSlots.forEach(slot => {
         slot.onmousedown = selectFromHere;
-        slot.onmouseover = selectToHere;
+        slot.onmouseenter = selectToHere;
     });
     window.onmouseup = stopSelecting;
     window.onresize = resizeColHeaders;
