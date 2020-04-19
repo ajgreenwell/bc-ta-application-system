@@ -39,7 +39,7 @@ export function getStartAndEndHour(constraints) {
         endRow--;
     }
     if (endRow < startRow)
-        return [0, constraints.length - 1];
+        return [0, Math.ceil(constraints.length / numSlotsInHour)];
     const startHour = Math.floor(startRow / numSlotsInHour);
     const endHour = Math.ceil((endRow + 1) / numSlotsInHour);
     return [startHour, endHour];

@@ -6,15 +6,18 @@ export async function renderLabHourForm(props) {
     const { getConstraints, getStartingGrid, extraJS } = props;
     const constraints = await getConstraints();
     const [startHour, endHour] = utils.getStartAndEndHour(constraints);
+    console.log(startHour, endHour);
+    const numHoursInDay = endHour - startHour;
+    const numColumns = settings.daysOpen.length;
+    const numRows = numHoursInDay * settings.numSlotsInHour;
+
     let selected = await getStartingGrid();
     let fromCoordinates = {row: 0, col: 0};
+    let toCoordinates = {row: 0, col: 0};
     let mouseDown = false;
     let shouldSelect = true;
 
     function LabHourGrid() {
-        const numHoursInDay = endHour - startHour;
-        const numColumns = settings.daysOpen.length;
-        const numRows = numHoursInDay * settings.numSlotsInHour;
         const style = utils.getLabHourGridStyle(numColumns, numRows);
         const numLetters = utils.getNumColHeaderLetters(window);
         return `
@@ -76,7 +79,7 @@ export async function renderLabHourForm(props) {
         return `
             <div class="legend flex">
                 <div id="legend-closed" class="legend-column">
-                    <div class="legend-desc">N/A</div>
+                    <div class="legend-desc">Closed</div>
                     <div class="legend-item closed"></div>
                 </div>
                 <div class="legend-column">
@@ -91,7 +94,7 @@ export async function renderLabHourForm(props) {
         `;
     }
 
-    function toggleSelectionFromTo(fromCoordinates, toCoordinates) {
+    function toggleSelectionFromTo() {
         const {row: rowFrom, col: colFrom} = fromCoordinates;
         const {row: rowTo, col: colTo} = toCoordinates;
 
@@ -121,6 +124,80 @@ export async function renderLabHourForm(props) {
         }
     }
 
+    function isWithinFromToPlane(row, col) {
+        const {row: rowFrom, col: colFrom} = fromCoordinates;
+        const {row: rowTo, col: colTo} = toCoordinates;
+
+        // up and left
+        if (rowTo <= rowFrom && colTo <= colFrom) {
+            return ((rowTo <= row) && (row <= rowFrom))
+                && ((colTo <= col) && (col <= colFrom));
+        }
+        // up and right
+        if (rowTo <= rowFrom && colFrom <= colTo) {
+            return ((rowTo <= row) && (row <= rowFrom))
+                && ((colFrom <= col) && (col <= colTo));
+        }
+        // down and right
+        if (rowFrom <= rowTo && colFrom <= colTo) {
+            return ((rowFrom <= row) && (row <= rowTo))
+                && ((colFrom <= col) && (col <= colTo));
+        }
+        // down and left
+        if (rowFrom <= rowTo && colTo <= colFrom) {
+            return ((rowFrom <= row) && (row <= rowTo))
+                && ((colTo <= col) && (col <= colFrom));
+        }
+    }
+
+
+    function toggleHighlightFromTo() {
+        const {row: rowFrom, col: colFrom} = fromCoordinates;
+        const {row: rowTo, col: colTo} = toCoordinates;
+
+        // up and left
+        for (let col = colFrom; col >= colTo; col--) {
+            for (let row = rowFrom; row >= rowTo; row--) {
+                toggleHighlight(row, col, shouldSelect);
+            }
+        }
+        // up and right
+        for (let col = colFrom; col <= colTo; col++) {
+            for (let row = rowFrom; row >= rowTo; row--) {
+                toggleHighlight(row, col, shouldSelect);
+            }
+        }
+        // down and left
+        for (let col = colFrom; col >= colTo; col--) {
+            for (let row = rowFrom; row <= rowTo; row++) {
+                toggleHighlight(row, col, shouldSelect);
+            }
+        }
+        // down and right
+        for (let col = colFrom; col <= colTo; col++) {
+            for (let row = rowFrom; row <= rowTo; row++) {
+                toggleHighlight(row, col, shouldSelect);
+            }
+        }
+
+        // unhighlight all cells not within from - to rectangle
+        for (let row = 0; row < numRows; row++) {
+            for (let col = 0; col < numColumns; col++) {
+                const isOpen = constraints[row][col];
+                if (isOpen && !isWithinFromToPlane(row, col)) {
+                    const id = utils.getId(row, col);
+                    const element = document.getElementById(id);
+                    const isHighlighted = element.className.includes('selected');
+                    const isSelected = selected[row][col];
+                    if (isSelected && !isHighlighted)
+                         element.className += ' selected';
+                    else if (!isSelected && isHighlighted)
+                        element.className = utils.rstrip(element.className, ' selected');
+                }
+            }
+        }
+    }
+
     function toggleSelection(row, col, shouldSelectThisElement) {
         const isClosed = !constraints[row][col];
         if (isClosed) return;
@@ -131,6 +208,18 @@ export async function renderLabHourForm(props) {
         if (!isSelected && shouldSelectThisElement)
             element.className += ' selected';
         else if (isSelected && !shouldSelectThisElement)
+            element.className = utils.rstrip(element.className, ' selected');
+    }
+
+    function toggleHighlight(row, col, shouldHighlightThisElement) {
+        const isClosed = !constraints[row][col];
+        if (isClosed) return;
+        const id = utils.getId(row, col);
+        const element = document.getElementById(id);
+        const isHighlighted = element.className.includes('selected');
+        if (!isHighlighted && shouldHighlightThisElement)
+            element.className += ' selected';
+        else if (isHighlighted && !shouldHighlightThisElement)
             element.className = utils.rstrip(element.className, ' selected');
     }
 
@@ -151,17 +240,23 @@ export async function renderLabHourForm(props) {
         outputSelected();
     }
 
-    function selectToHere(e) {
+    function highlightToHere(e) {
         if (!mouseDown) return;
         const [rowTo, colTo] = utils.getRowAndCol(e.target.id);
-        const isClosed = !constraints[rowTo][colTo];
-        if (isClosed) return;
-        const toCoordinates = {row: rowTo, col: colTo};
-        toggleSelectionFromTo(fromCoordinates, toCoordinates);
-        outputSelected();
+        toCoordinates = {row: rowTo, col: colTo};
+        toggleHighlightFromTo();
     }
 
-    function stopSelecting(e) {
+    function selectToHere(e) {
+        if (!mouseDown) return;
+        let {row: rowTo, col: colTo} = toCoordinates;
+        const isGridCell = e.target.className.includes('grid-item');
+        if (isGridCell) {
+            [rowTo, colTo] = utils.getRowAndCol(e.target.id);
+            toCoordinates = {row: rowTo, col: colTo};
+        }
+        toggleSelectionFromTo();
+        outputSelected();
         mouseDown = false;
     }
 
@@ -182,9 +277,10 @@ export async function renderLabHourForm(props) {
     const timeSlots = document.querySelectorAll('.grid-item');
     timeSlots.forEach(slot => {
         slot.onmousedown = selectFromHere;
-        slot.onmouseenter = selectToHere;
+        slot.onmouseenter = highlightToHere;
+        slot.onmouseup = selectToHere;
     });
-    window.onmouseup = stopSelecting;
+    window.onmouseup = selectToHere;
     window.onresize = resizeColHeaders;
     outputSelected();
     if (extraJS) extraJS();
