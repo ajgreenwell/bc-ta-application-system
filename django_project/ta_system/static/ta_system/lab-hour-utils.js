@@ -92,6 +92,11 @@ export function getRowAndCol(id) {
     return [parseInt(row), parseInt(col)];
 }
 
+export function getElement(row, col) {
+    const id = getId(row, col);
+    return document.getElementById(id);
+}
+
 export function rstrip(str, substr) {
     const index = str.indexOf(substr);
     if (index == -1) return str;
