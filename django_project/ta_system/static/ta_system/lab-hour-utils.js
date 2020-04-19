@@ -102,33 +102,3 @@ export function rstrip(str, substr) {
     if (index == -1) return str;
     return str.substring(0, index);
 }
-
-export function toggleFromTo(toggle) {
-    const {row: rowFrom, col: colFrom} = fromCoordinates;
-    const {row: rowTo, col: colTo} = toCoordinates;
-
-    // up and left
-    for (let col = colFrom; col >= colTo; col--) {
-        for (let row = rowFrom; row >= rowTo; row--) {
-            toggle(row, col, shouldSelect);
-        }
-    }
-    // up and right
-    for (let col = colFrom; col <= colTo; col++) {
-        for (let row = rowFrom; row >= rowTo; row--) {
-            toggle(row, col, shouldSelect);
-        }
-    }
-    // down and left
-    for (let col = colFrom; col >= colTo; col--) {
-        for (let row = rowFrom; row <= rowTo; row++) {
-            toggle(row, col, shouldSelect);
-        }
-    }
-    // down and right
-    for (let col = colFrom; col <= colTo; col++) {
-        for (let row = rowFrom; row <= rowTo; row++) {
-            toggle(row, col, shouldSelect);
-        }
-    }
-}
