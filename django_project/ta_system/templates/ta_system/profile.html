@@ -14,9 +14,9 @@
       </div>
       <form method="POST" action="{% url 'ta_system:profile' %}" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ u_form|crispy }}
-        {{ e_form|crispy }}
-        {{ p_form|crispy }}
+        {{ user_form|crispy }}
+        {{ eagleid_form|crispy }}
+        {{ preference_form }}
         <font size="4">Lab Hour Preferences:</font>
         <div id="lab-hour-form"></div>
       </form>

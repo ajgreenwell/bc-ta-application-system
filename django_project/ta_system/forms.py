@@ -27,7 +27,7 @@ class ApplicationForm(forms.Form):
         widget=forms.HiddenInput(), required=False)
 
 
-class ProfileForm(forms.Form):
+class LabHourPreferencesForm(forms.Form):
     lab_hour_preferences = JSONField(
         widget=forms.HiddenInput(), required=False)
 
