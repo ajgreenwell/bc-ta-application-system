@@ -8,4 +8,7 @@ urlpatterns = [
     path('get_lab_hour_preferences/',
         views.get_lab_hour_preferences,
         name='get_lab_hour_preferences'),
+    path('get_lab_hour_constraints/',
+        views.get_lab_hour_constraints,
+        name='get_lab_hour_constraints'),
 ]

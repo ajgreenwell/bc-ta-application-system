@@ -1,0 +1,26 @@
+:root {
+    --grid-color: #417690;
+}
+
+body {
+    background-color: #fafafa;
+}
+
+#cs-lab-hour-constraints-header {
+    margin-bottom: 40px;
+    font-size: 32px;
+}
+
+.content-section {
+    background-color: white;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+}
+
+#legend-closed {
+    display: none;
+}
+
+#lab-hour-submit-button {
+    font-size: 16px;
+}
