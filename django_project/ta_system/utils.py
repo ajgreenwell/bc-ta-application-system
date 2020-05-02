@@ -1,11 +1,15 @@
 from datetime import date
 from .models import Semester
 
+
+def get_year_and_semester_code(semester):
+    return (semester[:4], semester[-1])
+
+
 def get_semester_choices():
     semesters = [str(semester) for semester in Semester.objects.all()]
     verbose_semesters = [get_verbose_semester(sem) for sem in semesters]
-    semester_choices = list(zip(semesters, verbose_semesters))
-    return sorted(semester_choices, key=lambda choice: choice[1], reverse=True)
+    return list(zip(semesters, verbose_semesters))
 
 
 def get_verbose_semester(semester):
@@ -68,11 +72,16 @@ def is_valid_preferences(preferences):
 
 
 def get_constraints(semester):
-    semester_obj = Semester.objects.get(semester=semester)
+    year, semester_code = get_year_and_semester_code(semester)
+    semester_obj = Semester.objects.get(
+        year=year,
+        semester_code=semester_code
+    )
     return semester_obj.lab_hour_constraints
 
 
 def save_constraints(semester, constraints):
-    semester_obj = Semester.objects.get(semester=semester)
+    year, semester_code = get_year_and_semester_code(semester)
+    semester_obj = Semester.objects.get(year=year, semester_code=semester_code)
     semester_obj.lab_hour_constraints = constraints
     semester_obj.save()

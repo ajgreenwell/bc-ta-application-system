@@ -1,15 +1,33 @@
 .active.selector-add {
-     background-position: 0 -40px!important;
+    background-position: 0 -40px!important;
 }
 
 .active.selector-add:focus, .active.selector-add:hover {
-     background-position: 0 -60px!important;
+    background-position: 0 -60px!important;
 }
 
 .active.selector-remove {
-     background-position: 0 0px!important;
+    background-position: 0 0px!important;
 }
 
 .active.selector-remove:focus, .active.selector-remove:hover {
     background-position: 0 -20px!important;
+}
+
+@media (min-width: 1024px) {
+    .active.selector-add {
+        background-position: 0 -32px!important;
+    }
+
+    .active.selector-add:focus, .active.selector-add:hover {
+        background-position: 0 -48px!important;
+    }
+
+    .active.selector-remove {
+        background-position: 0 0px!important;
+    }
+
+    .active.selector-remove:focus, .active.selector-remove:hover {
+        background-position: 0 -16px!important;
+    }
 }

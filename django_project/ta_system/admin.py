@@ -217,7 +217,7 @@ class CustomAdminSite(AdminSite):
 
 class CourseAdmin(ModelAdmin):
     filter_horizontal = ('teaching_assistants',)
-    list_filter = ('semester__semester', 'instructor__name')
+    list_filter = ('semester', 'instructor__name')
     list_display_links = ('course_number', 'name')
     list_display = (
         'semester', 'course_number', 'name',
@@ -349,9 +349,12 @@ class InstructorAdmin(ModelAdmin):
 
 
 class SemesterAdmin(InstructorAdmin):
-    fields = ('semester', 'get_all_courses', 'get_all_teaching_assistants')
+    fields = ('year', 'semester_code', 'get_all_courses', 'get_all_teaching_assistants')
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
-    list_display = ('semester', 'get_courses')
+    list_display = ('get_semester', 'get_courses')
+
+    def get_semester(self, obj):
+        return obj.semester
 
     def display_course(self, course):
         return course.course_number_and_name
@@ -362,6 +365,7 @@ class SemesterAdmin(InstructorAdmin):
     def get_all_courses(self, obj):
         return super().get_all_courses(obj, display_func=self.display_course)
 
+    get_semester.short_description = 'Semester'
     get_courses.short_description = 'Courses'
     get_all_courses.short_description = 'Courses'
 
