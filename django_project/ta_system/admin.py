@@ -57,7 +57,16 @@ class CustomAdminSite(AdminSite):
                  name='get_lab_hour_constraints'),
             path('set_lab_hour_constraints',
                  self.admin_view(self.set_lab_hour_constraints),
-                 name='set_lab_hour_constraints')
+                 name='set_lab_hour_constraints'),
+            path('assign_lab_hours',
+                 self.admin_view(self.assign_lab_hours),
+                 name='assign_lab_hours'),
+            path('get_lab_hour_preferences',
+                 self.admin_view(self.get_lab_hour_preferences),
+                 name='get_lab_hour_preferences'),
+            path('get_lab_hour_assignments',
+                 self.admin_view(self.get_lab_hour_assignments),
+                 name='get_lab_hour_assignments')
         ] + urls
         return urls
 
@@ -70,8 +79,7 @@ class CustomAdminSite(AdminSite):
             'app_list': app_list,
             'course_data_upload_form': forms.CourseDataUploadForm(),
             'applicant_data_upload_form': forms.ApplicantDataUploadForm(),
-            'assignment_data_download_form': forms.SemesterForm(),
-            'view_lab_hour_constraints_form': forms.SemesterForm(),
+            'semester_form': forms.SemesterForm(),
             'last_system_status': status_list.last()
         }
         request.current_app = self.name
@@ -213,6 +221,53 @@ class CustomAdminSite(AdminSite):
                 'CS Lab Hours Update Failed: Invalid Form Data.'
             )
         return redirect('admin:index')
+
+    def assign_lab_hours(self, request):
+        if request.method == 'GET':
+            context = {
+                **self.each_context(request),
+                'assign_lab_hours_form': forms.AssignLabHoursForm()
+            }
+            form = forms.SemesterForm(request.GET)
+            if form.is_valid():
+                semester = form.cleaned_data.get('semester')
+                context['semester'] = semester
+                context['verbose_semester'] = utils.get_verbose_semester(semester)
+                return render(request, 'admin/assign_lab_hours.html', context)
+            else:
+                messages.error(request, 'Error, Invalid Semester Selected.')
+                return redirect('admin:index')
+        elif request.method == 'POST':
+            pass
+        else:
+            return handle_bad_request(request, app='admin', expected_method='GET, POST')
+
+    def get_lab_hour_preferences(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+        
+        semester = request.GET.get('semester')
+        eagle_id = request.GET.get('eagle_id')
+        student = models.Profile.objects.get(eagle_id=eagle_id)
+        preferences = utils.get_preferences(student, semester)
+        return HttpResponse(
+            dumps(preferences),
+            content_type='application/json',
+            status=200
+        )
+
+    def get_lab_hour_assignments(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+        
+        semester_string = request.GET.get('semester')
+        year, semester_code = utils.get_year_and_semester_code(semester_string)
+        semester = models.Semester.objects.get(year=year, semester_code=semester_code)
+        return HttpResponse(
+            dumps(semester.lab_hour_assignments),
+            content_type='application/json',
+            status=200
+        )
 
 
 class CourseAdmin(ModelAdmin):

@@ -1,0 +1,66 @@
+:root {
+    --grid-color: #417690;
+    --unavailable-color: #BBD9E7 ;
+}
+
+body {
+    background-color: #fafafa;
+}
+
+#cs-lab-hour-constraints-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 35px;
+}
+
+#cs-lab-hour-constraints-header h1 {
+    display: inline-block;
+    margin: 0;
+    font-size: 32px;
+    width: max-content;
+}
+
+#cs-lab-hour-constraints-header a {
+    color: white;
+    margin-right: 5vw;
+    font-size: 20px;
+    background-color: #79aec8;
+    padding: 10px 20px 10px 20px;
+    border-radius: 5px;
+}
+
+#cs-lab-hour-constraints-header a:hover {
+    background-color: #609ab6;
+}
+
+#cs-lab-hour-constraints-header a:focus {
+    text-decoration: none;
+}
+
+#lab-hour-submit-button {
+    font-size: 16px;
+}
+
+#lab-hour-assignment-form {
+    display: flex;
+    justify-content: space-between;
+}
+
+.content-section {
+    background-color: white;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+}
+
+.unavailable {
+    background-color: var(--unavailable-color);
+}
+
+.closed {
+    background-color: #de8791!important;
+}
+
+.lab-hour-assignment-grid {
+    width: 45%;
+}

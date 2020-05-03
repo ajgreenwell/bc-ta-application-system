@@ -22,7 +22,12 @@
 
 }
 
+.grid-container:hover {
+    cursor: pointer;
+}
+
 .grid-item {
+    box-sizing: border-box;
     border-bottom: 2px solid var(--grid-color);
     border-left: 2px solid var(--grid-color);
     background-color: var(--unselected-color);

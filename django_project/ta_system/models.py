@@ -133,6 +133,7 @@ class Semester(models.Model):
     )
 
     lab_hour_constraints = JSONField(default=list, blank=True)
+    lab_hour_assignments = JSONField(default=list, blank=True)
 
     class Meta:
         unique_together = ('year', 'semester_code')

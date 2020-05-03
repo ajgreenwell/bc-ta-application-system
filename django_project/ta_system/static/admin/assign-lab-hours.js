@@ -1,20 +1,58 @@
-import * as utils from './lab-hour-utils.js';
-import * as settings from './lab-hour-settings.js';
+import * as utils from '../ta_system/lab-hour-utils.js';
+import * as settings from '../ta_system/lab-hour-settings.js';
 
+const semester = document.querySelector('#lab-hour-semester').value;
+const eagleId = '58704254';
 
-export async function renderLabHourForm(props) {
-    const { getConstraints, getStartingGrid, extraJS } = props;
-    const constraints = await getConstraints();
+function getConstraints(semester) {
+    return utils.getLabHourData({
+        endpoint: `get_lab_hour_constraints?semester=${semester}`,
+        defaultValue: false
+    });
+}
+
+function getPreferences(semester, eagleId) {
+    return utils.getLabHourData({
+        endpoint: 'get_lab_hour_preferences' +
+                  `?semester=${semester}&eagle_id=${eagleId}`,
+        defaultValue: false
+    });
+}
+
+function getAllAssignments(semester, eagleId) {
+    return utils.getLabHourData({
+        endpoint: `get_lab_hour_assignments?semester=${semester}`,
+        defaultValue: false
+    });
+}
+
+function getAssignment(assignments, eagleId) {
+    return assignments.map(row => row.map(id => id == eagleId));
+}
+
+export async function renderLabHourAssignmentForm() {
+    const constraints = await getConstraints(semester);
+    const preferences = await getPreferences(semester, eagleId);
+    const assignments = await getAllAssignments(semester);
     const [startHour, endHour] = utils.getStartAndEndHour(constraints);
     const numHoursInDay = endHour - startHour;
     const numColumns = settings.daysOpen.length;
     const numRows = numHoursInDay * settings.numSlotsInHour;
 
-    let selected = await getStartingGrid();
+    let selected = getAssignment(assignments, eagleId);
     let fromCoordinates = {row: 0, col: 0};
     let toCoordinates = {row: 0, col: 0};
     let mouseDown = false;
     let shouldSelect = true;
+
+    function LabHourAssignmentForm() {
+        return `
+            <div id="lab-hour-assignment-form">
+                <div class="lab-hour-assignment-grid">${LabHourGrid()}</div>
+                <div class="lab-hour-assignment-grid">${LabHourGrid()}</div>
+            </div>
+        `;
+    }
 
     function LabHourGrid() {
         const style = utils.getLabHourGridStyle(numColumns, numRows);
@@ -51,6 +89,7 @@ export async function renderLabHourForm(props) {
                 const adjustedRow = row + (startHour * settings.numSlotsInHour);
                 const id = utils.getId(adjustedRow, col);
                 const isOpen = constraints[adjustedRow][col];
+                const isAvailable = preferences[adjustedRow][col];
                 const isSelected = selected[adjustedRow][col];
                 const isHour = (row + 1) % settings.numSlotsInHour == 0;
                 let className = "grid-item";
@@ -58,7 +97,9 @@ export async function renderLabHourForm(props) {
                     className += ' non-hour';
                 if (!isOpen)
                     className += ' closed';
-                if (isOpen && isSelected)
+                if (!isAvailable)
+                    className += ' unavailable';
+                if (isOpen && isAvailable && isSelected)
                     className += ' selected';
                 gridItems += `<div id="${id}" class="${className}"></div>`;
             }
@@ -83,10 +124,14 @@ export async function renderLabHourForm(props) {
                 </div>
                 <div class="legend-column">
                     <div id="legend-desc-busy" class="legend-desc">Busy</div>
-                    <div class="legend-item"></div>
+                    <div class="legend-item unavailable"></div>
                 </div>
                 <div class="legend-column">
                     <div id="legend-desc-free" class="legend-desc">Free</div>
+                    <div class="legend-item"></div>
+                </div>
+                <div class="legend-column">
+                    <div id="legend-desc-assigned" class="legend-desc">Assigned</div>
                     <div class="legend-item selected"></div>
                 </div>
             </div>
@@ -97,18 +142,20 @@ export async function renderLabHourForm(props) {
         e.preventDefault();
         const {row, col} = utils.getRowAndCol(e.target.id);
         const isOpen = constraints[row][col];
-        if (!isOpen) return;
+        const isAvailable = preferences[row][col];
+        if (!isOpen || !isAvailable) return;
         const isSelected = selected[row][col];
-        toggleSelection(row, col, !isSelected);
         shouldSelect = !isSelected;
+        toggleSelection(row, col, !isSelected);
         fromCoordinates = {row, col};
         outputSelected();
         mouseDown = true;
     }
 
     function toggleSelection(row, col, shouldSelectThisElement) {
-        const isClosed = !constraints[row][col];
-        if (isClosed) return;
+        const isOpen = constraints[row][col];
+        const isAvailable = preferences[row][col];
+        if (!isOpen || !isAvailable) return;
         const element = utils.getElement(row, col);
         const isSelected = selected[row][col];
         selected[row][col] = shouldSelectThisElement;
@@ -179,7 +226,8 @@ export async function renderLabHourForm(props) {
         for (let row = 0; row < numRows; row++) {
             for (let col = 0; col < numColumns; col++) {
                 const isOpen = constraints[row][col];
-                if (isOpen && !isWithinFromToPlane(row, col)) {
+                const isAvailable = preferences[row][col];
+                if (isOpen && isAvailable && !isWithinFromToPlane(row, col)) {
                     const element = utils.getElement(row, col);
                     const isHighlighted = element.className.includes('selected');
                     const isSelected = selected[row][col];
@@ -193,8 +241,9 @@ export async function renderLabHourForm(props) {
     }
 
     function toggleHighlight(row, col, shouldHighlightThisElement) {
-        const isClosed = !constraints[row][col];
-        if (isClosed) return;
+        const isOpen = constraints[row][col];
+        const isAvailable = preferences[row][col];
+        if (!isOpen || !isAvailable) return;
         const element = utils.getElement(row, col);
         const isHighlighted = element.className.includes('selected');
         if (!isHighlighted && shouldHighlightThisElement)
@@ -236,7 +285,7 @@ export async function renderLabHourForm(props) {
     }
 
     const labHourFormRoot = document.querySelector('#lab-hour-form');
-    labHourFormRoot.innerHTML = LabHourGrid();
+    labHourFormRoot.innerHTML = LabHourAssignmentForm();
     const timeSlots = document.querySelectorAll('.grid-item');
     timeSlots.forEach(slot => {
         slot.onmousedown = selectFromHere;
@@ -248,5 +297,6 @@ export async function renderLabHourForm(props) {
     window.onmouseup = selectToHere;
     window.onresize = resizeColHeaders;
     outputSelected();
-    if (extraJS) extraJS();
 }
+
+renderLabHourAssignmentForm();

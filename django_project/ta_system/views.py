@@ -62,7 +62,7 @@ def profile(request):
                 messages.error(
                     request,
                     'Error: Please specify which times you ' +
-                    'would be available to tend the CS Lab.'
+                    'would be available to tend the CS Lab. '
                 )
     context = {'profile_form': form}
     return render(request, 'ta_system/profile.html', context=context)

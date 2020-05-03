@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "ta_system/lab-hour-form.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "admin/assign-lab-hours.css" %}">
+{% endblock %}
+
+{% block title %}Boston College TA Application System{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="{% static 'admin/assign-lab-hours.js' %}" type="module" ></script>
+{% endblock %}
+
+{% block coltype %}{% endblock %}
+
+{% block bodyclass %}{{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <header id="cs-lab-hour-constraints-header">
+        <h1>Assign TAs to Lab Hours ({{ verbose_semester }})</h1>
+        <a href="{% url 'admin:index' %}">Back</a>
+    </header>
+    <input id="lab-hour-semester" type="hidden" value="{{ semester }}" />
+    <form method="POST" action="{% url 'admin:assign_lab_hours' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ assign_lab_hours_form }}
+        <!-- includes form submit button -->
+        <div id="lab-hour-form"></div>
+    </form>
+</div>
+{% endblock %}

@@ -27,3 +27,8 @@ class ProfileForm(forms.Form):
 class LabHourConstraintsForm(forms.Form):
     semester = forms.CharField(widget=forms.HiddenInput(), required=False)
     lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)
+
+
+class AssignLabHoursForm(forms.Form):
+    semester = forms.CharField(widget=forms.HiddenInput(), required=False)
+    lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)
