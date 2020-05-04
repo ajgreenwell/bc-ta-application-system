@@ -7,21 +7,32 @@ body {
     background-color: #fafafa;
 }
 
-#cs-lab-hour-constraints-header {
+#assign-button {
+    background: #79aec8;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 32px;
+    font-size: 16px;
+}
+
+#assign-lab-hours-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 35px;
+    margin-bottom: 20px;
 }
 
-#cs-lab-hour-constraints-header h1 {
+#assign-lab-hours-header h1 {
     display: inline-block;
     margin: 0;
     font-size: 32px;
     width: max-content;
 }
 
-#cs-lab-hour-constraints-header a {
+#assign-lab-hours-header a {
     color: white;
     margin-right: 5vw;
     font-size: 20px;
@@ -30,12 +41,18 @@ body {
     border-radius: 5px;
 }
 
-#cs-lab-hour-constraints-header a:hover {
+#assign-lab-hours-header a:hover {
     background-color: #609ab6;
 }
 
-#cs-lab-hour-constraints-header a:focus {
+#assign-lab-hours-header a:focus {
     text-decoration: none;
+}
+
+#assignment-grid-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
 #lab-hour-submit-button {
@@ -45,6 +62,15 @@ body {
 #lab-hour-assignment-form {
     display: flex;
     justify-content: space-between;
+}
+
+#left-grid-header {
+    width: 47.5%;
+    text-align: center;
+}
+
+#left-grid-header-content {
+    margin-right: 62px;
 }
 
 .content-section {
@@ -61,6 +87,39 @@ body {
     background-color: #de8791!important;
 }
 
-.lab-hour-assignment-grid {
-    width: 45%;
+.read-only-grid-container {
+    display: grid;
+    flex: 1;
+    margin-top: 10px;
+    border-top: 2px solid var(--grid-color);
+    border-right: 2px solid var(--grid-color);
+
+}
+
+.read-only-grid-item {
+    box-sizing: border-box;
+    border-bottom: 2px solid var(--grid-color);
+    border-left: 2px solid var(--grid-color);
+    background-color: var(--unselected-color);
+}
+
+.read-only-grid-item.closed {
+    background-color: var(--closed-color);
+}
+
+.read-only-grid-item.selected {
+    background-color: var(--selected-color);
+}
+
+.left-assignment-grid {
+    width: 47.5%;
+}
+
+.right-assignment-grid {
+    width: 47.5%;
+}
+
+.footer {
+    display: flex;
+    width: 100%;
 }

@@ -85,3 +85,31 @@ def save_constraints(semester, constraints):
     semester_obj = Semester.objects.get(year=year, semester_code=semester_code)
     semester_obj.lab_hour_constraints = constraints
     semester_obj.save()
+
+
+def save_assignments(semester, assignments):
+    year, semester_code = get_year_and_semester_code(semester)
+    semester_obj = Semester.objects.get(year=year, semester_code=semester_code)
+    semester_obj.lab_hour_assignments = assignments
+    semester_obj.save()
+
+
+def get_tas_from_courses(courses):
+    tas = []
+    for course in courses:
+        course_tas = course.teaching_assistants.all()
+        for ta in course_tas:
+            if ta not in tas:
+                tas.append(ta)
+    return tas
+
+
+def get_tas_from_semester(semester):
+    tas = {}
+    year, semester_code = get_year_and_semester_code(semester)
+    semester_obj = Semester.objects.get(year=year, semester_code=semester_code)
+    for course in semester_obj.course_set.all():
+        course_tas = course.teaching_assistants.all()
+        for ta in course_tas:
+            tas[ta.eagle_id] = ta.full_name
+    return tas

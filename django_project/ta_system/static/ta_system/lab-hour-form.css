@@ -42,7 +42,7 @@
 }
 
 .non-hour {
-    border-bottom: 1px dashed var(--grid-color);
+    border-bottom: 1px dashed var(--grid-color)!important;
 }
 
 .col-headers {

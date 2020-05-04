@@ -209,11 +209,12 @@ class CustomAdminSite(AdminSite):
         form = forms.LabHourConstraintsForm(request.POST)
         if form.is_valid():
             semester = form.cleaned_data.get('semester')
+            verbose_semester = utils.get_verbose_semester(semester)
             constraints = form.cleaned_data.get('lab_hour_data')
             utils.save_constraints(semester, constraints)
             messages.success(
                 request,
-                "Success! You have saved the CS Lab's Hours of Operation."
+                f"Success! You have saved the CS Lab's Hours of Operation for {verbose_semester}."
             )
         else:
             messages.error(
@@ -233,12 +234,35 @@ class CustomAdminSite(AdminSite):
                 semester = form.cleaned_data.get('semester')
                 context['semester'] = semester
                 context['verbose_semester'] = utils.get_verbose_semester(semester)
+                teaching_assistants = utils.get_tas_from_semester(semester)
+                context['teaching_assistants'] = dumps(teaching_assistants)
+                if not teaching_assistants:
+                    messages.error(
+                        request,
+                        'Error: There are no teaching assistants that ' +
+                        'have been assigned for this semester.'
+                    )
                 return render(request, 'admin/assign_lab_hours.html', context)
             else:
                 messages.error(request, 'Error, Invalid Semester Selected.')
                 return redirect('admin:index')
         elif request.method == 'POST':
-            pass
+            form = forms.AssignLabHoursForm(request.POST)
+            if form.is_valid():
+                semester = form.cleaned_data.get('semester')
+                verbose_semester = utils.get_verbose_semester(semester)
+                assignments = form.cleaned_data.get('lab_hour_data')
+                utils.save_assignments(semester, assignments)
+                messages.success(
+                    request,
+                    f'Success! You have saved the Lab Hour Assignments for {verbose_semester}.'
+                )
+            else:
+                messages.error(
+                    request,
+                    'Assignment of Lab Hours Failed: Invalid Form Data.'
+                )
+            return redirect('admin:index')
         else:
             return handle_bad_request(request, app='admin', expected_method='GET, POST')
 
@@ -361,15 +385,6 @@ class InstructorAdmin(ModelAdmin):
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
     list_display = ('name', 'get_courses')
 
-    def get_tas_from_courses(self, courses):
-        tas = []
-        for course in courses:
-            course_tas = course.teaching_assistants.all()
-            for ta in course_tas:
-                if ta not in tas:
-                    tas.append(ta)
-        return tas
-
     def get_courses(self, obj, display_func=str):
         courses = obj.course_set.all()
         return html.generate_ul(
@@ -390,7 +405,7 @@ class InstructorAdmin(ModelAdmin):
 
     def get_all_teaching_assistants(self, obj):
         courses = obj.course_set.all()
-        tas = self.get_tas_from_courses(courses)
+        tas = utils.get_tas_from_courses(courses)
         ul_style = "margin: 0 0 0 0; padding-left: 0;"
         return html.generate_ul(
             model_objects=tas,
