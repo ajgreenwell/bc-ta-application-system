@@ -23,9 +23,13 @@
 
 {% block content %}
 <div class="content-section">
+
+    <!-- The following hidden inputs are used to pass data from django backend to assign-lab-hours.js -->
     <input id="lab-hour-semester" type="hidden" value="{{ semester }}" />
     <input id="lab-hour-verbose-semester" type="hidden" value="{{ verbose_semester }}"/>
     <input id="lab-hour-tas" type="hidden" value="{{ teaching_assistants }}"/>
+    <input id="lab-hour-ta-colors" type="hidden" value="{{ ta_colors }}"/>
+
     <form method="POST" action="{% url 'admin:assign_lab_hours' %}" enctype="multipart/form-data">
         {% csrf_token %}
         {{ assign_lab_hours_form }}
@@ -34,7 +38,7 @@
             <h1>Assign TAs to Lab Hours ({{ verbose_semester }})</h1>
             <input type="submit" class="btn btn-outline-info"/>
         </header>
-        <!-- includes form submit button -->
+        <!-- includes submit button for this form -->
         <div id="lab-hour-form"></div>
     </form>
 </div>

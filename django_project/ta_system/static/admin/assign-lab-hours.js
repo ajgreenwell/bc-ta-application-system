@@ -47,6 +47,7 @@ function getAssignment(assignments, eagleId) {
 export async function renderLabHourAssignmentForm() {
     const semester = document.querySelector('#lab-hour-semester').value;
     const tas = JSON.parse(document.querySelector('#lab-hour-tas').value);
+    const taColors = JSON.parse(document.querySelector('#lab-hour-ta-colors').value);
     const eagleIds = getSortedEagleIds(tas);
     const constraints = await getConstraints(semester);
     const assignments = await getAllAssignments(semester);
@@ -55,8 +56,9 @@ export async function renderLabHourAssignmentForm() {
     const numColumns = settings.daysOpen.length;
     const numRows = numHoursInDay * settings.numSlotsInHour;
 
-    let preferences = await getPreferences(semester, eagleIds[0]);
-    let selected = getAssignment(assignments, eagleIds[0]);
+    let selectedEagleId = eagleIds[0];
+    let preferences = await getPreferences(semester, selectedEagleId);
+    let selected = getAssignment(assignments, selectedEagleId);
     let fromCoordinates = {row: 0, col: 0};
     let toCoordinates = {row: 0, col: 0};
     let mouseDown = false;
@@ -77,10 +79,23 @@ export async function renderLabHourAssignmentForm() {
     }
 
     function Header() {
-        const verboseSemester = document.querySelector('#lab-hour-verbose-semester').value;
         const options = eagleIds.map(eagleId =>
-            `<option value="${eagleId}">${tas[eagleId]}</option>`
+            `<option value="${eagleId}">${tas[parseInt(eagleId)]}</option>`
         ).join('');
+        const verboseSemester = document.querySelector('#lab-hour-verbose-semester').value;
+        const taLegendColumns = eagleIds.map(eagleId => {
+            const name = tas[parseInt(eagleId)];
+            const [r, g, b] = taColors[parseInt(eagleId)];
+            const color = `rgb(${r}, ${g}, ${b})`;
+            const style = `background-color: ${color}`;
+            return `
+            <div class="legend-column">
+                <div class="legend-desc">${name}</div>
+                <div class="legend-item" style="${style}"></div>
+            </div>
+            `;
+        }).join('');
+
 
         return `
         <header id="assignment-grid-header">
@@ -102,11 +117,15 @@ export async function renderLabHourAssignmentForm() {
                             <div class="legend-item closed"></div>
                         </div>
                         <div class="legend-column">
-                            <div id="legend-desc-busy" class="legend-desc">N/A</div>
+                            <div id="legend-desc-busy" class="legend-desc">Busy</div>
+                            <div class="legend-item busy"></div>
+                        </div>
+                        <div class="legend-column">
+                            <div id="legend-desc-" class="legend-desc">N/A</div>
                             <div class="legend-item unavailable"></div>
                         </div>
                         <div class="legend-column">
-                            <div id="legend-desc-free" class="legend-desc">Free</div>
+                            <div id="legend-desc-free" class="legend-desc">Unassigned</div>
                             <div class="legend-item"></div>
                         </div>
                         <div class="legend-column">
@@ -133,10 +152,7 @@ export async function renderLabHourAssignmentForm() {
                             <div id="legend-desc-free" class="legend-desc">Unassigned</div>
                             <div class="legend-item"></div>
                         </div>
-                        <div class="legend-column">
-                            <div id="legend-desc-assigned" class="legend-desc">Assigned</div>
-                            <div class="legend-item selected"></div>
-                        </div>
+                        ${taLegendColumns}
                     </div>
                 </div>
             </div>
@@ -181,16 +197,18 @@ export async function renderLabHourAssignmentForm() {
                     className += ' non-hour';
                 if (!isOpen)
                     className += ' closed';
-                if (!isAvailable || (isAssigned && !isSelected))
+                else if (!isAvailable)
+                    className += ' busy';
+                else if (isAssigned && !isSelected)
                     className += ' unavailable';
-                if (isOpen && isAvailable && isSelected)
+                else if (isOpen && isAvailable && isSelected)
                     className += ' selected';
                 gridItems += `<div id="${id}" class="${className}"></div>`;
             }
         }
-        const style = utils.getLabHourGridStyle(numColumns, numRows);
+        const gridStyle = utils.getLabHourGridStyle(numColumns, numRows);
         return `
-        <div class="grid-container" style="${style}">
+        <div class="grid-container" style="${gridStyle}">
             ${gridItems}
         </div>
         `;
@@ -210,17 +228,26 @@ export async function renderLabHourAssignmentForm() {
                     className += ' non-hour';
                 if (!isOpen)
                     className += ' closed';
-                if (isOpen && isAssigned)
+                if (isOpen && isAssigned) {
                     className += ' selected';
-                gridItems += `<div id="${id}" class="${className}"></div>`;
+                    const style = `background-color: ${getGridItemColor(adjustedRow, col)}`;
+                    gridItems += `<div id="${id}" class="${className}" style="${style}"></div>`;
+                } else
+                    gridItems += `<div id="${id}" class="${className}"></div>`;
             }
         }
-        const style = utils.getLabHourGridStyle(numColumns, numRows);
+        const gridStyle = utils.getLabHourGridStyle(numColumns, numRows);
         return `
-        <div class="read-only-grid-container" style="${style}">
+        <div class="read-only-grid-container" style="${gridStyle}">
             ${gridItems}
         </div>
         `;
+    }
+
+    function getGridItemColor(row, col) {
+        const assignedEagleId = assignments[row][col];
+        const [r, g, b] = taColors[parseInt(assignedEagleId)];
+        return `rgb(${r}, ${g}, ${b})`;
     }
 
     function RowHeaders(startHour, endHour) {
@@ -234,9 +261,7 @@ export async function renderLabHourAssignmentForm() {
     function selectFromHere(e) {
         e.preventDefault();
         const {row, col} = utils.getRowAndCol(e.target.id);
-        const isOpen = constraints[row][col];
-        const isAvailable = preferences[row][col];
-        if (!isOpen || !isAvailable) return;
+        if (!isSelectable(row, col)) return;
         const isSelected = selected[row][col];
         shouldSelect = !isSelected;
         toggleSelection(row, col, !isSelected);
@@ -244,10 +269,18 @@ export async function renderLabHourAssignmentForm() {
         mouseDown = true;
     }
 
-    function toggleSelection(row, col, shouldSelectThisElement) {
+    function isSelectable(row, col) {
         const isOpen = constraints[row][col];
         const isAvailable = preferences[row][col];
-        if (!isOpen || !isAvailable) return;
+        const isAssigned = !!assignments[row][col];
+        const isAssignedToSelectedTA = assignments[row][col] == selectedEagleId;
+        return isOpen 
+            && isAvailable 
+            && (!isAssigned || isAssignedToSelectedTA);
+    }
+
+    function toggleSelection(row, col, shouldSelectThisElement) {
+        if (!isSelectable(row, col)) return;
         const element = utils.getElement(row, col);
         const isSelected = selected[row][col];
         selected[row][col] = shouldSelectThisElement;
@@ -258,8 +291,8 @@ export async function renderLabHourAssignmentForm() {
     }
 
     function selectToHere(e) {
-        if (!mouseDown) return;
         e.preventDefault();
+        if (!mouseDown) return;
         let {row: rowTo, col: colTo} = toCoordinates;
         const isGridCell = e.target.className.includes('grid-item');
         if (isGridCell) toCoordinates = utils.getRowAndCol(e.target.id);
@@ -269,18 +302,17 @@ export async function renderLabHourAssignmentForm() {
     }
 
     function assignHours() {
-        const eagleId = document.querySelector('#select-ta').value;
         selected.forEach((row, rowIdx) => {
             row.forEach((isSelected, colIdx) => {
-                const isAssigned = assignments[rowIdx][colIdx] == eagleId;
+                const isAssigned = assignments[rowIdx][colIdx] == selectedEagleId;
                 if (isSelected)
-                    assignments[rowIdx][colIdx] = eagleId;
+                    assignments[rowIdx][colIdx] = selectedEagleId;
                 else if (!isSelected && isAssigned)
                     assignments[rowIdx][colIdx] = '';
             })
         })
         render();
-        setSelectedApplicant(eagleId);
+        setSelectedApplicant(selectedEagleId);
     }
 
     function toggleFromTo(toggle) {
@@ -314,8 +346,8 @@ export async function renderLabHourAssignmentForm() {
     }
 
     function highlightToHere(e) {
-        if (!mouseDown) return;
         e.preventDefault();
+        if (!mouseDown) return;
         toCoordinates = utils.getRowAndCol(e.target.id);
         toggleHighlightFromTo();
     }
@@ -329,7 +361,8 @@ export async function renderLabHourAssignmentForm() {
             for (let col = 0; col < numColumns; col++) {
                 const isOpen = constraints[row][col];
                 const isAvailable = preferences[row][col];
-                if (isOpen && isAvailable && !isWithinFromToPlane(row, col)) {
+                const isAssigned = assignments[row][col];
+                if (isSelectable(row, col) && !isWithinFromToPlane(row, col)) {
                     const element = utils.getElement(row, col);
                     const isHighlighted = element.className.includes('selected');
                     const isSelected = selected[row][col];
@@ -343,9 +376,7 @@ export async function renderLabHourAssignmentForm() {
     }
 
     function toggleHighlight(row, col, shouldHighlightThisElement) {
-        const isOpen = constraints[row][col];
-        const isAvailable = preferences[row][col];
-        if (!isOpen || !isAvailable) return;
+        if (!isSelectable(row, col)) return;
         const element = utils.getElement(row, col);
         const isHighlighted = element.className.includes('selected');
         if (!isHighlighted && shouldHighlightThisElement)
@@ -391,27 +422,12 @@ export async function renderLabHourAssignmentForm() {
         selectApplicant.value = eagleId;
     }
 
-    function assignHours() {
-        const eagleId = document.querySelector('#select-ta').value;
-        selected.forEach((row, rowIdx) => {
-            row.forEach((isSelected, colIdx) => {
-                const isAssigned = assignments[rowIdx][colIdx] == eagleId;
-                if (isSelected)
-                    assignments[rowIdx][colIdx] = eagleId;
-                else if (!isSelected && isAssigned)
-                    assignments[rowIdx][colIdx] = '';
-            })
-        })
-        render();
-        setSelectedApplicant(eagleId);
-    }
-
     async function changeTA(e) {
-        const eagleId = e.target.value;
-        preferences = await getPreferences(semester, eagleId);
-        selected = getAssignment(assignments, eagleId);
+        selectedEagleId = e.target.value;
+        preferences = await getPreferences(semester, selectedEagleId);
+        selected = getAssignment(assignments, selectedEagleId);
         render();
-        setSelectedApplicant(eagleId);
+        setSelectedApplicant(selectedEagleId);
     }
 
     function outputAssignments() {

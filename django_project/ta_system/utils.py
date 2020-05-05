@@ -1,3 +1,4 @@
+from colorsys import hsv_to_rgb
 from datetime import date
 from .models import Semester
 
@@ -113,3 +114,20 @@ def get_tas_from_semester(semester):
         for ta in course_tas:
             tas[ta.eagle_id] = ta.full_name
     return tas
+
+
+def get_ta_rgb_colors(tas):
+    num_tas = len(tas)
+    rgb_colors = []
+    for i in range(num_tas):
+        hue = calculate_hue_excluding_reds(i, num_tas)
+        rgb_percentages = hsv_to_rgb(hue, .35, .96)
+        rgb_values = [percent * 255 for percent in rgb_percentages]
+        rgb_colors.append(rgb_values)
+    return dict(zip(tas.keys(), rgb_colors))
+
+
+def calculate_hue_excluding_reds(idx, num_tas):
+    lower_bound = .1
+    upper_bound = .9
+    return lower_bound + (idx * (upper_bound - lower_bound) / num_tas)

@@ -236,6 +236,8 @@ class CustomAdminSite(AdminSite):
                 context['verbose_semester'] = utils.get_verbose_semester(semester)
                 teaching_assistants = utils.get_tas_from_semester(semester)
                 context['teaching_assistants'] = dumps(teaching_assistants)
+                ta_colors = utils.get_ta_rgb_colors(teaching_assistants)
+                context['ta_colors'] = dumps(ta_colors)
                 if not teaching_assistants:
                     messages.error(
                         request,

@@ -103,6 +103,10 @@ body {
     background-color: #de8791!important;
 }
 
+.busy {
+    background-color: #e3e3e3;
+}
+
 .read-only-grid-container {
     display: grid;
     flex: 1;
@@ -131,6 +135,19 @@ body {
     width: 47.5%;
 }
 
-.assign-legend {
+.assign-legend, .view-assigned-legend {
     width: 100%;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.legend-column {
+    width: 70px;
+    margin: 0 5px 0 5px;
+    height: 70px;
+}
+
+.legend-item {
+    width: 50px;
 }
