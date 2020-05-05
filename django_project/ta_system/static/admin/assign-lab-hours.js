@@ -89,9 +89,9 @@ export async function renderLabHourAssignmentForm() {
             const color = `rgb(${r}, ${g}, ${b})`;
             const style = `background-color: ${color}`;
             return `
-            <div class="legend-column">
-                <div class="legend-desc">${name}</div>
-                <div class="legend-item" style="${style}"></div>
+            <div id="legend-column" class="legend-column">
+                <div id="legend-desc-${eagleId}" class="legend-desc">${name}</div>
+                <div id="legend-item-${eagleId}" class="legend-item" style="${style}"></div>
             </div>
             `;
         }).join('');
@@ -203,7 +203,7 @@ export async function renderLabHourAssignmentForm() {
                     className += ' unavailable';
                 else if (isOpen && isAvailable && isSelected)
                     className += ' selected';
-                gridItems += `<div id="${id}" class="${className}"></div>`;
+                gridItems += AssignedGridItem({id, className});
             }
         }
         const gridStyle = utils.getLabHourGridStyle(numColumns, numRows);
@@ -212,6 +212,11 @@ export async function renderLabHourAssignmentForm() {
             ${gridItems}
         </div>
         `;
+    }
+
+    function AssignedGridItem({id, className}) {
+        return `<div id="${id}" class="${className}"></div>`;
+
     }
 
     function ViewAssignedGridItems(numRows, numColumns) {
@@ -223,6 +228,7 @@ export async function renderLabHourAssignmentForm() {
                 const isOpen = constraints[adjustedRow][col];
                 const isAssigned = assignments[adjustedRow][col];
                 const isHour = (row + 1) % settings.numSlotsInHour == 0;
+                const initials = getGridItemInitials(adjustedRow, col);
                 let className = "read-only-grid-item";
                 if (!isHour)
                     className += ' non-hour';
@@ -230,10 +236,11 @@ export async function renderLabHourAssignmentForm() {
                     className += ' closed';
                 if (isOpen && isAssigned) {
                     className += ' selected';
-                    const style = `background-color: ${getGridItemColor(adjustedRow, col)}`;
-                    gridItems += `<div id="${id}" class="${className}" style="${style}"></div>`;
-                } else
-                    gridItems += `<div id="${id}" class="${className}"></div>`;
+                    const style = `background-color: ${getGridItemColor(adjustedRow, col)};`
+                    gridItems += ViewAssignedGridItem({id, className, style, initials});
+                } else {
+                    gridItems += ViewAssignedGridItem({id, className, initials});
+                }
             }
         }
         const gridStyle = utils.getLabHourGridStyle(numColumns, numRows);
@@ -244,10 +251,33 @@ export async function renderLabHourAssignmentForm() {
         `;
     }
 
+    function getGridItemInitials(row, col) {
+        const eagleId = assignments[row][col];
+        if (!eagleId) return '';
+        const taName = tas[parseInt(eagleId)];
+        const [first, last] = taName.split(' ');
+        return `${first[0]}${last[0]}`
+    }
+
     function getGridItemColor(row, col) {
         const assignedEagleId = assignments[row][col];
         const [r, g, b] = taColors[parseInt(assignedEagleId)];
         return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function ViewAssignedGridItem({id, className, style, initials}) {
+        if (style) {
+            return `
+            <div id="${id}" class="${className}" style="${style}">
+                <div class="read-only-grid-item-content">${initials}</div>
+            </div>
+            `;
+        }
+        return `
+        <div id="${id}" class="${className}">
+            <div class="read-only-grid-item-content">${initials}</div>
+        </div>
+        `;
     }
 
     function RowHeaders(startHour, endHour) {
@@ -411,6 +441,16 @@ export async function renderLabHourAssignmentForm() {
         }
     }
 
+    function highlightLegendItem(e, textColor, borderColor) {
+        const {row, col} = utils.getRowAndCol(e.target.id);
+        const eagleId = assignments[row][col];
+        if (!eagleId) return;
+        const legendDescription = document.querySelector(`#legend-desc-${eagleId}`);
+        legendDescription.style.color = textColor;
+        const legendItem = document.querySelector(`#legend-item-${eagleId}`);
+        legendItem.style.borderColor = borderColor;
+    }
+
     function resizeColHeaders(e) {
         const colHeaders = document.querySelector('.col-headers');
         const numLetters = utils.getNumColHeaderLetters(e.target);
@@ -438,11 +478,16 @@ export async function renderLabHourAssignmentForm() {
     function render() {
         const labHourFormRoot = document.querySelector('#lab-hour-form');
         labHourFormRoot.innerHTML = LabHourAssignmentForm();
-        const timeSlots = document.querySelectorAll('.grid-item');
-        timeSlots.forEach(slot => {
-            slot.onmousedown = selectFromHere;
-            slot.onmouseenter = highlightToHere;
-            slot.onmouseup = selectToHere;
+        const gridItems = document.querySelectorAll('.grid-item');
+        gridItems.forEach(item => {
+            item.onmousedown = selectFromHere;
+            item.onmouseenter = highlightToHere;
+            item.onmouseup = selectToHere;
+        });
+        const readOnlyGridItems = document.querySelectorAll('.read-only-grid-item');
+        readOnlyGridItems.forEach(item => {
+            item.onmouseenter = e => highlightLegendItem(e, '#c9ac16', '#c9ac16');
+            item.onmouseleave = e => highlightLegendItem(e, 'black', 'var(--grid-color');
         });
         const selectTA = document.querySelector('#select-ta');
         selectTA.onchange = changeTA;

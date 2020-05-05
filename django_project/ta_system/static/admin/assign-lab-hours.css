@@ -81,6 +81,10 @@ body {
     margin-right: 63px;
 }
 
+#left-grid-header-content p {
+    margin-bottom: 20px;
+}
+
 #left-grid-header-content label {
     font-weight: 600;
 }
@@ -113,14 +117,29 @@ body {
     margin-top: 10px;
     border-top: 2px solid var(--grid-color);
     border-right: 2px solid var(--grid-color);
+}
 
+.read-only-grid-container:hover {
+    cursor: default;
 }
 
 .read-only-grid-item {
+    position: relative;
     box-sizing: border-box;
     border-bottom: 2px solid var(--grid-color);
     border-left: 2px solid var(--grid-color);
     background-color: var(--unselected-color);
+    color: var(--grid-color);
+    text-align: center;
+    font-size: 10px;
+    line-height: 16px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
 
 .read-only-grid-item.closed {
@@ -129,6 +148,14 @@ body {
 
 .read-only-grid-item.selected {
     background-color: var(--selected-color);
+}
+
+.read-only-grid-item-content {
+    width: 100%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
 }
 
 .left-assignment-grid, .right-assignment-grid {
