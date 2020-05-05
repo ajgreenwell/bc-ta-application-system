@@ -23,15 +23,17 @@
 
 {% block content %}
 <div class="content-section">
-    <header id="assign-lab-hours-header">
-        <h1>Assign TAs to Lab Hours ({{ verbose_semester }})</h1>
-        <a href="{% url 'admin:index' %}">Back</a>
-    </header>
     <input id="lab-hour-semester" type="hidden" value="{{ semester }}" />
-    <input id="lab-hour-tas" type="hidden" value="{{ teaching_assistants }}" />
+    <input id="lab-hour-verbose-semester" type="hidden" value="{{ verbose_semester }}"/>
+    <input id="lab-hour-tas" type="hidden" value="{{ teaching_assistants }}"/>
     <form method="POST" action="{% url 'admin:assign_lab_hours' %}" enctype="multipart/form-data">
         {% csrf_token %}
         {{ assign_lab_hours_form }}
+        <header id="assign-lab-hours-header">
+            <a href="{% url 'admin:index' %}">Back</a>
+            <h1>Assign TAs to Lab Hours ({{ verbose_semester }})</h1>
+            <input type="submit" class="btn btn-outline-info"/>
+        </header>
         <!-- includes form submit button -->
         <div id="lab-hour-form"></div>
     </form>

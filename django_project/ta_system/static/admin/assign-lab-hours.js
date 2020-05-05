@@ -67,16 +67,17 @@ export async function renderLabHourAssignmentForm() {
         ${Header()}
         <div id="lab-hour-assignment-form">
             <div class="left-assignment-grid">
-                ${LabHourGrid(AssignGridItems, AssignFooter)}
+                ${LabHourGrid(AssignGridItems)}
             </div>
             <div class="right-assignment-grid">
-                ${LabHourGrid(ViewAssignedGridItems, ViewAssignedFooter)}
+                ${LabHourGrid(ViewAssignedGridItems)}
             </div>
         </div>
         `;
     }
 
     function Header() {
+        const verboseSemester = document.querySelector('#lab-hour-verbose-semester').value;
         const options = eagleIds.map(eagleId =>
             `<option value="${eagleId}">${tas[eagleId]}</option>`
         ).join('');
@@ -85,19 +86,65 @@ export async function renderLabHourAssignmentForm() {
         <header id="assignment-grid-header">
             <div id="left-grid-header">
                 <div id="left-grid-header-content">
+                    <h2>Individual Assignments</h2>
+                    <p>
+                        Choose a teaching assistant from the list and modify their lab hour
+                        assignments using the grid below. Each individual assignment will be
+                        displayed on the "All Assignments" grid.
+                    </p>
                     <label>Teaching Assistant:</label>
                     <select id="select-ta">
                         ${options}
                     </select>
+                    <div class="assign-legend flex">
+                        <div id="legend-closed" class="legend-column">
+                            <div class="legend-desc">Closed</div>
+                            <div class="legend-item closed"></div>
+                        </div>
+                        <div class="legend-column">
+                            <div id="legend-desc-busy" class="legend-desc">N/A</div>
+                            <div class="legend-item unavailable"></div>
+                        </div>
+                        <div class="legend-column">
+                            <div id="legend-desc-free" class="legend-desc">Free</div>
+                            <div class="legend-item"></div>
+                        </div>
+                        <div class="legend-column">
+                            <div id="legend-desc-assigned" class="legend-desc">Assigned</div>
+                            <div class="legend-item selected"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="right-grid-header">
+                <div id="right-grid-header-content">
+                    <h2>All Assignments</h2>
+                    <p>
+                        The grid below displays all current lab hour assignments
+                        for the semester ${verboseSemester}. To modify an individual's
+                        lab hour assignment, use the "Individual Assignments" grid.
+                    </p>
+                    <div class="view-assigned-legend flex">
+                        <div id="legend-closed" class="legend-column">
+                            <div class="legend-desc">Closed</div>
+                            <div class="legend-item closed"></div>
+                        </div>
+                        <div class="legend-column">
+                            <div id="legend-desc-free" class="legend-desc">Unassigned</div>
+                            <div class="legend-item"></div>
+                        </div>
+                        <div class="legend-column">
+                            <div id="legend-desc-assigned" class="legend-desc">Assigned</div>
+                            <div class="legend-item selected"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
         `;
     }
 
-    function LabHourGrid(GridItems, Footer) {
+    function LabHourGrid(GridItems) {
         const numLetters = utils.getNumColHeaderLetters(window);
         return `
         <div class="col-headers flex">
@@ -109,7 +156,6 @@ export async function renderLabHourAssignmentForm() {
                 ${RowHeaders(startHour, endHour)}
             </div>
         </div>
-        ${Footer()}
         `;
     }
 
@@ -185,54 +231,6 @@ export async function renderLabHourAssignmentForm() {
         }).join('');
     }
 
-    function AssignFooter() {
-        return `
-        <div class="footer">
-            <button id="assign-button" type="button">Assign</button>
-            <div class="legend flex">
-                <div id="legend-closed" class="legend-column">
-                    <div class="legend-desc">Closed</div>
-                    <div class="legend-item closed"></div>
-                </div>
-                <div class="legend-column">
-                    <div id="legend-desc-busy" class="legend-desc">N/A</div>
-                    <div class="legend-item unavailable"></div>
-                </div>
-                <div class="legend-column">
-                    <div id="legend-desc-free" class="legend-desc">Free</div>
-                    <div class="legend-item"></div>
-                </div>
-                <div class="legend-column">
-                    <div id="legend-desc-assigned" class="legend-desc">Assigned</div>
-                    <div class="legend-item selected"></div>
-                </div>
-            </div>
-        </div>
-        `;
-    }
-
-    function ViewAssignedFooter() {
-        return `
-        <div class="footer">
-            <input type="submit" id="lab-hour-submit-button" class="btn btn-outline-info"/>
-            <div class="legend flex">
-                <div id="legend-closed" class="legend-column">
-                    <div class="legend-desc">Closed</div>
-                    <div class="legend-item closed"></div>
-                </div>
-                <div class="legend-column">
-                    <div id="legend-desc-free" class="legend-desc">Unassigned</div>
-                    <div class="legend-item"></div>
-                </div>
-                <div class="legend-column">
-                    <div id="legend-desc-assigned" class="legend-desc">Assigned</div>
-                    <div class="legend-item selected"></div>
-                </div>
-            </div>
-        </div>
-        `;
-    }
-
     function selectFromHere(e) {
         e.preventDefault();
         const {row, col} = utils.getRowAndCol(e.target.id);
@@ -266,7 +264,23 @@ export async function renderLabHourAssignmentForm() {
         const isGridCell = e.target.className.includes('grid-item');
         if (isGridCell) toCoordinates = utils.getRowAndCol(e.target.id);
         toggleFromTo(toggleSelection);
+        assignHours();
         mouseDown = false;
+    }
+
+    function assignHours() {
+        const eagleId = document.querySelector('#select-ta').value;
+        selected.forEach((row, rowIdx) => {
+            row.forEach((isSelected, colIdx) => {
+                const isAssigned = assignments[rowIdx][colIdx] == eagleId;
+                if (isSelected)
+                    assignments[rowIdx][colIdx] = eagleId;
+                else if (!isSelected && isAssigned)
+                    assignments[rowIdx][colIdx] = '';
+            })
+        })
+        render();
+        setSelectedApplicant(eagleId);
     }
 
     function toggleFromTo(toggle) {
@@ -377,7 +391,7 @@ export async function renderLabHourAssignmentForm() {
         selectApplicant.value = eagleId;
     }
 
-    function assignHours(e) {
+    function assignHours() {
         const eagleId = document.querySelector('#select-ta').value;
         selected.forEach((row, rowIdx) => {
             row.forEach((isSelected, colIdx) => {
@@ -414,8 +428,6 @@ export async function renderLabHourAssignmentForm() {
             slot.onmouseenter = highlightToHere;
             slot.onmouseup = selectToHere;
         });
-        const assignButton = document.querySelector('#assign-button');
-        assignButton.onclick = assignHours;
         const selectTA = document.querySelector('#select-ta');
         selectTA.onchange = changeTA;
         const grid = document.querySelector('.grid-container');
@@ -423,7 +435,6 @@ export async function renderLabHourAssignmentForm() {
         window.onmouseup = selectToHere;
         window.onresize = resizeColHeaders;
         document.querySelector('#id_semester').value = semester;
-        console.log(semester);
         outputAssignments();
     }
 

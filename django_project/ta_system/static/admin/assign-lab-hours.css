@@ -21,23 +21,31 @@ body {
 #assign-lab-hours-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
+    justify-content: space-around;
+    margin-bottom: 30px;
 }
 
 #assign-lab-hours-header h1 {
-    display: inline-block;
+    margin: 0 25px 0 25px!important;
+    display: inline;
     margin: 0;
     font-size: 32px;
     width: max-content;
+    text-align: center;
+}
+
+#assign-lab-hours-header input,
+#assign-lab-hours-header a {
+    font-size: 20px;
+    padding-left: 2vw;
+    padding-right: 2vw;
 }
 
 #assign-lab-hours-header a {
     color: white;
-    margin-right: 5vw;
-    font-size: 20px;
     background-color: #79aec8;
-    padding: 10px 20px 10px 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     border-radius: 5px;
 }
 
@@ -64,13 +72,21 @@ body {
     justify-content: space-between;
 }
 
-#left-grid-header {
+#left-grid-header, #right-grid-header {
     width: 47.5%;
     text-align: center;
 }
 
-#left-grid-header-content {
-    margin-right: 62px;
+#left-grid-header-content, #right-grid-header-content {
+    margin-right: 63px;
+}
+
+#left-grid-header-content label {
+    font-weight: 600;
+}
+
+#select-ta {
+    margin-left: 8px;
 }
 
 .content-section {
@@ -111,15 +127,10 @@ body {
     background-color: var(--selected-color);
 }
 
-.left-assignment-grid {
+.left-assignment-grid, .right-assignment-grid {
     width: 47.5%;
 }
 
-.right-assignment-grid {
-    width: 47.5%;
-}
-
-.footer {
-    display: flex;
+.assign-legend {
     width: 100%;
 }
