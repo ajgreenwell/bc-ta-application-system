@@ -83,19 +83,6 @@ export async function renderLabHourAssignmentForm() {
             `<option value="${eagleId}">${tas[parseInt(eagleId)]}</option>`
         ).join('');
         const verboseSemester = document.querySelector('#lab-hour-verbose-semester').value;
-        const taLegendColumns = eagleIds.map(eagleId => {
-            const name = tas[parseInt(eagleId)];
-            const [r, g, b] = taColors[parseInt(eagleId)];
-            const color = `rgb(${r}, ${g}, ${b})`;
-            const style = `background-color: ${color}`;
-            return `
-            <div id="legend-column" class="legend-column">
-                <div id="legend-desc-${eagleId}" class="legend-desc">${name}</div>
-                <div id="legend-item-${eagleId}" class="legend-item" style="${style}"></div>
-            </div>
-            `;
-        }).join('');
-
 
         return `
         <header id="assignment-grid-header">
@@ -111,28 +98,7 @@ export async function renderLabHourAssignmentForm() {
                     <select id="select-ta">
                         ${options}
                     </select>
-                    <div class="assign-legend flex">
-                        <div id="legend-closed" class="legend-column">
-                            <div class="legend-desc">Closed</div>
-                            <div class="legend-item closed"></div>
-                        </div>
-                        <div class="legend-column">
-                            <div id="legend-desc-busy" class="legend-desc">Busy</div>
-                            <div class="legend-item busy"></div>
-                        </div>
-                        <div class="legend-column">
-                            <div id="legend-desc-" class="legend-desc">N/A</div>
-                            <div class="legend-item unavailable"></div>
-                        </div>
-                        <div class="legend-column">
-                            <div id="legend-desc-free" class="legend-desc">Unassigned</div>
-                            <div class="legend-item"></div>
-                        </div>
-                        <div class="legend-column">
-                            <div id="legend-desc-assigned" class="legend-desc">Assigned</div>
-                            <div class="legend-item selected"></div>
-                        </div>
-                    </div>
+                    ${AssignLegend()}
                 </div>
             </div>
             <div id="right-grid-header">
@@ -143,20 +109,66 @@ export async function renderLabHourAssignmentForm() {
                         for the semester ${verboseSemester}. To modify an individual's
                         lab hour assignment, use the "Individual Assignments" grid.
                     </p>
-                    <div class="view-assigned-legend flex">
-                        <div id="legend-closed" class="legend-column">
-                            <div class="legend-desc">Closed</div>
-                            <div class="legend-item closed"></div>
-                        </div>
-                        <div class="legend-column">
-                            <div id="legend-desc-free" class="legend-desc">Unassigned</div>
-                            <div class="legend-item"></div>
-                        </div>
-                        ${taLegendColumns}
-                    </div>
+                    ${ViewAssignedLegend()}
                 </div>
             </div>
         </header>
+        `;
+    }
+
+    function AssignLegend() {
+        return `
+        <div class="assign-legend flex">
+            <div id="legend-closed" class="legend-column">
+                <div class="legend-desc">Closed</div>
+                <div class="legend-item closed"></div>
+            </div>
+            <div class="legend-column">
+                <div id="legend-desc-busy" class="legend-desc">Busy</div>
+                <div class="legend-item busy"></div>
+            </div>
+            <div class="legend-column">
+                <div id="legend-desc-unavailable" class="legend-desc">N/A</div>
+                <div class="legend-item unavailable"></div>
+            </div>
+            <div class="legend-column">
+                <div id="legend-desc-free" class="legend-desc">Unassigned</div>
+                <div class="legend-item"></div>
+            </div>
+            <div class="legend-column">
+                <div id="legend-desc-assigned" class="legend-desc">Assigned</div>
+                <div class="legend-item selected"></div>
+            </div>
+        </div>
+        `;
+    }
+
+    function ViewAssignedLegend() {
+        const taLegendColumns = eagleIds.map(eagleId => {
+            const name = tas[parseInt(eagleId)];
+            const [r, g, b] = taColors[parseInt(eagleId)];
+            const color = `rgb(${r}, ${g}, ${b})`;
+            const style = `background-color: ${color}`;
+            return `
+            <div id="legend-column" class="legend-column">
+                <div id="legend-desc-${eagleId}" class="legend-desc">${name}</div>
+                <div id="legend-item-${eagleId}" class="legend-item" style="${style}"></div>
+            </div>
+            `;
+        }).join('');
+
+        return `
+        <div class="view-assigned-legend flex">
+            <div id="legend-closed" class="legend-column">
+                <div class="legend-desc">Closed</div>
+                <div class="legend-item closed"></div>
+            </div>
+            <div class="legend-column">
+                <div id="legend-desc-free" class="legend-desc">Unassigned</div>
+                <div class="legend-item"></div>
+            </div>
+            ${taLegendColumns}
+        </div>
         `;
     }
 

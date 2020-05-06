@@ -115,8 +115,8 @@ body {
     display: grid;
     flex: 1;
     margin-top: 10px;
-    border-top: 2px solid var(--grid-color);
-    border-right: 2px solid var(--grid-color);
+    border-top: medium solid var(--grid-color);
+    border-right: medium solid var(--grid-color);
 }
 
 .read-only-grid-container:hover {
@@ -126,8 +126,8 @@ body {
 .read-only-grid-item {
     position: relative;
     box-sizing: border-box;
-    border-bottom: 2px solid var(--grid-color);
-    border-left: 2px solid var(--grid-color);
+    border-bottom: medium solid var(--grid-color);
+    border-left: medium solid var(--grid-color);
     background-color: var(--unselected-color);
     color: var(--grid-color);
     text-align: center;
