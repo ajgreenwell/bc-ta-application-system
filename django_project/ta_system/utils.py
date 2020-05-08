@@ -1,4 +1,5 @@
 from datetime import date
+from .models import Application, Semester
 
 
 def get_current_semester():
@@ -19,7 +20,10 @@ def save_preferences(student, preferences):
     student.save()
 
 
-def has_submitted_application(student):
-    current_semester = get_current_semester()
-    semesters = [obj["semester"] for obj in student.lab_hour_preferences]
-    return current_semester in semesters
+def has_submitted_application(user):
+    current_semester = Semester.objects.get(semester=get_current_semester())
+    try:
+        Application.objects.get(applicant=user, semester=current_semester)
+    except:
+        return False
+    return True
