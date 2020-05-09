@@ -1,11 +1,16 @@
+from colorsys import hsv_to_rgb
 from datetime import date
 from .models import Semester
+
+
+def get_year_and_semester_code(semester):
+    return (semester[:4], semester[-1])
+
 
 def get_semester_choices():
     semesters = [str(semester) for semester in Semester.objects.all()]
     verbose_semesters = [get_verbose_semester(sem) for sem in semesters]
-    semester_choices = list(zip(semesters, verbose_semesters))
-    return sorted(semester_choices, key=lambda choice: choice[1], reverse=True)
+    return list(zip(semesters, verbose_semesters))
 
 
 def get_verbose_semester(semester):
@@ -68,11 +73,61 @@ def is_valid_preferences(preferences):
 
 
 def get_constraints(semester):
-    semester_obj = Semester.objects.get(semester=semester)
+    year, semester_code = get_year_and_semester_code(semester)
+    semester_obj = Semester.objects.get(
+        year=year,
+        semester_code=semester_code
+    )
     return semester_obj.lab_hour_constraints
 
 
 def save_constraints(semester, constraints):
-    semester_obj = Semester.objects.get(semester=semester)
+    year, semester_code = get_year_and_semester_code(semester)
+    semester_obj = Semester.objects.get(year=year, semester_code=semester_code)
     semester_obj.lab_hour_constraints = constraints
     semester_obj.save()
+
+
+def save_assignments(semester, assignments):
+    year, semester_code = get_year_and_semester_code(semester)
+    semester_obj = Semester.objects.get(year=year, semester_code=semester_code)
+    semester_obj.lab_hour_assignments = assignments
+    semester_obj.save()
+
+
+def get_tas_from_courses(courses):
+    tas = []
+    for course in courses:
+        course_tas = course.teaching_assistants.all()
+        for ta in course_tas:
+            if ta not in tas:
+                tas.append(ta)
+    return tas
+
+
+def get_tas_from_semester(semester):
+    tas = {}
+    year, semester_code = get_year_and_semester_code(semester)
+    semester_obj = Semester.objects.get(year=year, semester_code=semester_code)
+    for course in semester_obj.course_set.all():
+        course_tas = course.teaching_assistants.all()
+        for ta in course_tas:
+            tas[ta.eagle_id] = ta.full_name
+    return tas
+
+
+def get_ta_rgb_colors(tas):
+    num_tas = len(tas)
+    rgb_colors = []
+    for i in range(num_tas):
+        hue = calculate_hue_excluding_reds(i, num_tas)
+        rgb_percentages = hsv_to_rgb(hue, .35, .96)
+        rgb_values = [percent * 255 for percent in rgb_percentages]
+        rgb_colors.append(rgb_values)
+    return dict(zip(tas.keys(), rgb_colors))
+
+
+def calculate_hue_excluding_reds(idx, num_tas):
+    lower_bound = .1
+    upper_bound = .9
+    return lower_bound + (idx * (upper_bound - lower_bound) / num_tas)

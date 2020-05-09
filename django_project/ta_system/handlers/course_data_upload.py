@@ -1,6 +1,7 @@
 from uuid import uuid4
 from django.db import IntegrityError as AlreadyExistsError
 from ..models import Course, Semester, Instructor
+from ta_system.utils import get_year_and_semester_code
 from ta_system.data_formats.course_data_formats import (
     DATA_FORMATS,
     EXPECTED_LINE_FORMAT
@@ -36,7 +37,8 @@ def validate_course_data(courses):
         if course_id in unique_course_ids:
             raise ValueError(course_id)
         course_obj = Course.objects.filter(
-            semester__semester=semester,
+            semester__year=semester[:4],
+            semester__semester_code=semester[-1],
             course_number=course_number
         )
         if course_obj:
@@ -63,10 +65,17 @@ def process_course(course_data):
 
 
 def get_semester(course_data):
+    year, semester_code = get_year_and_semester_code(course_data['semester'])
     try:
-        semester = Semester.objects.get(semester=course_data['semester'])
+        semester = Semester.objects.get(
+            year=year,
+            semester_code=semester_code
+        )
     except Semester.DoesNotExist:
-        semester = Semester(semester=course_data['semester'])
+        semester = Semester(
+            year=year,
+            semester_code=semester_code
+        )
         semester.save()
     return semester
 

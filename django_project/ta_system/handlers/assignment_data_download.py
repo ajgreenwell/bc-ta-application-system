@@ -3,6 +3,7 @@ from ..utils import get_verbose_semester
 from csv import writer
 from django.http import HttpResponse
 from io import StringIO
+from ta_system.utils import get_year_and_semester_code
 
 
 def handle_assignment_data_download(semester):
@@ -29,7 +30,11 @@ def handle_assignment_data_download(semester):
 
 def write_ta_assignment_data(csv_writer, semester):
     semester_has_assigned_tas = False
-    courses = Semester.objects.get(semester=semester).course_set.all()
+    year, semester_code = get_year_and_semester_code(semester)
+    courses = Semester.objects.get(
+        year=year,
+        semester_code=semester_code
+    ).course_set.all()
     for course in courses:
         tas = course.teaching_assistants.all()
         if not semester_has_assigned_tas and tas:
