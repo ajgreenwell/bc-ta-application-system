@@ -202,6 +202,12 @@ class Profile(models.Model):
         blank=True
     )
     lab_hour_preferences = JSONField(default=list, blank=True)
+    is_blacklisted = models.BooleanField(
+        default=False,
+        verbose_name="Is Blacklisted",
+        help_text="If a student is blacklisted, the simulation will not assign her to be a TA. " +
+                  "This does not affect manual TA assignments."
+    )
 
     @property
     def full_name(self):
@@ -217,7 +223,17 @@ class Profile(models.Model):
 
 
 class SystemStatus(models.Model):
-    status = models.BooleanField(default=False)
+    status = models.BooleanField(
+        default=False,
+        verbose_name="Is Open",
+        help_text="When the system is closed, students will not be able to submit applications."
+    )
+    max_lab_hours_per_ta = models.PositiveIntegerField(
+        default=3,
+        verbose_name="Max Lab Hours per TA",
+        help_text="When the simulation is run, students will not be assigned more hours in the " + 
+                  "CS lab than this maximum value. This does not affect manual lab hour assignments."
+    )
     date_changed = models.DateField(default=now)
 
     class Meta:

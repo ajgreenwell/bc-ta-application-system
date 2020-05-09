@@ -351,7 +351,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id')
+            'fields': ('user', 'eagle_id', 'is_blacklisted')
         })
     )
 
@@ -443,7 +443,7 @@ class SemesterAdmin(InstructorAdmin):
 
 
 class SystemStatusAdmin(ModelAdmin):
-    list_display = ('id', 'status', 'date_changed')
+    list_display = ('id', 'status', 'max_lab_hours_per_ta', 'date_changed')
 
 
 admin_site = CustomAdminSite()
