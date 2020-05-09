@@ -15,6 +15,7 @@ from .handlers.bad_request import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
 from .handlers.applicant_data_upload import handle_applicant_data_upload
 from .handlers.assignment_data_download import handle_assignment_data_download
+from .handlers.lab_hour_assignments_download import handle_lab_hour_assignments_download
 from .handlers.file_upload import UPLOAD_DATA_FORMATS_URL as DATA_FORMATS_URL
 
 import ta_system.html_utils as html
@@ -66,7 +67,10 @@ class CustomAdminSite(AdminSite):
                  name='get_lab_hour_preferences'),
             path('get_lab_hour_assignments',
                  self.admin_view(self.get_lab_hour_assignments),
-                 name='get_lab_hour_assignments')
+                 name='get_lab_hour_assignments'),
+            path('lab_hour_assignments_download',
+                 self.admin_view(self.lab_hour_assignments_download),
+                 name='lab_hour_assignments_download')
         ] + urls
         return urls
 
@@ -294,6 +298,23 @@ class CustomAdminSite(AdminSite):
             content_type='application/json',
             status=200
         )
+
+    def lab_hour_assignments_download(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+
+        form = forms.SemesterForm(request.GET)
+        if form.is_valid():
+            semester = form.cleaned_data.get('semester')
+            try:
+                return handle_lab_hour_assignments_download(semester)
+            except ValueError as err:
+                messages.error(
+                    request,
+                    f'Lab Hour Assignment Data Download Failed: {err}.'
+                )
+        return redirect('admin:index')
+
 
 
 class CourseAdmin(ModelAdmin):

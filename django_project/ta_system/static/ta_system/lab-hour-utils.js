@@ -63,7 +63,9 @@ export function generateTimes(startHour, endHour) {
 
 export function convertFromMillitary(hour) {
     let time = '';
-    if (hour > 12)
+    if (hour == 24)
+        time = '12:00 AM';
+    else if (hour > 12)
         time = `${hour - 12}:00 PM`;
     else if (hour == 12)
         time = `${hour}:00 PM`;
