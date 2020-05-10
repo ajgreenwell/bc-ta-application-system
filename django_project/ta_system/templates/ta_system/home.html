@@ -2,7 +2,6 @@
 {% load static %}
 {% block extra-head %}
     <link rel="stylesheet" type="text/css" href="{% static 'ta_system/lab-hour-form.css' %}" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.mjs"></script>
     <script src="{% static 'ta_system/home-lab-hour-form.js' %}" type="module" ></script>
 {% endblock %}
 {% block content %}
@@ -16,7 +15,7 @@
             {{ application_form }}
             <!-- includes form submit button -->
             <div id="lab-hour-form"></div>
-         </form>
+        </form>
     {% elif system_is_open.status and user_has_submitted_application %}
         <h2>Thank you for applying.</h2>
         <p>

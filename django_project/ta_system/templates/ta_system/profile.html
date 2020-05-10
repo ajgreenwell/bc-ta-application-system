@@ -2,7 +2,6 @@
 {% load crispy_forms_tags static %}
 {% block extra-head %}
     <link rel="stylesheet" type="text/css" href="{% static 'ta_system/lab-hour-form.css' %}" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.mjs"></script>
     <script src="{% static 'ta_system/profile-lab-hour-form.js' %}" type="module" ></script>
 {% endblock %}
 {% block content %}
@@ -17,8 +16,9 @@
         {{ user_form|crispy }}
         {{ eagleid_form|crispy }}
         {{ preference_form }}
-        <font size="4">Lab Hour Preferences:</font>
-        <div id="lab-hour-form"></div>
+        <div>Lab Hour Preferences*</div>
+        <small class='text-muted'>Please select the hours for which you will be able to attend the CS lab.</small>
+        <div class="mt-12" id="lab-hour-form"></div>
       </form>
     </div>
 {% endblock content %}

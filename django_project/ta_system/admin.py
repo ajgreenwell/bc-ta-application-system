@@ -5,9 +5,11 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError as AlreadyExistsError
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import path
 from django.utils.html import format_html
+from json import dumps
 
 from .handlers.bad_request import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
@@ -18,6 +20,7 @@ from .handlers.file_upload import UPLOAD_DATA_FORMATS_URL as DATA_FORMATS_URL
 import ta_system.html_utils as html
 import ta_system.forms as forms
 import ta_system.models as models
+import ta_system.utils as utils
 
 
 MAX_NUM_TO_DISPLAY = 3
@@ -45,7 +48,16 @@ class CustomAdminSite(AdminSite):
                  name='assignment_data_download'),
             path('change_system_status',
                  self.admin_view(self.change_system_status),
-                 name='change_system_status')
+                 name='change_system_status'),
+            path('view_lab_hour_constraints',
+                 self.admin_view(self.view_lab_hour_constraints),
+                 name='view_lab_hour_constraints'),
+            path('get_lab_hour_constraints',
+                 self.admin_view(self.get_lab_hour_constraints),
+                 name='get_lab_hour_constraints'),
+            path('set_lab_hour_constraints',
+                 self.admin_view(self.set_lab_hour_constraints),
+                 name='set_lab_hour_constraints')
         ] + urls
         return urls
 
@@ -58,7 +70,8 @@ class CustomAdminSite(AdminSite):
             'app_list': app_list,
             'course_data_upload_form': forms.CourseDataUploadForm(),
             'applicant_data_upload_form': forms.ApplicantDataUploadForm(),
-            'assignment_data_download_form': forms.AssignmentDataDownloadForm(),
+            'assignment_data_download_form': forms.SemesterForm(),
+            'view_lab_hour_constraints_form': forms.SemesterForm(),
             'last_system_status': status_list.last()
         }
         request.current_app = self.name
@@ -125,12 +138,11 @@ class CustomAdminSite(AdminSite):
         if request.method != 'GET':
             return handle_bad_request(request, app='admin', expected_method='GET')
 
-        form = forms.AssignmentDataDownloadForm(request.GET)
+        form = forms.SemesterForm(request.GET)
         if form.is_valid():
             semester = form.cleaned_data.get('semester')
             try:
-                response = handle_assignment_data_download(semester)
-                return response
+                return handle_assignment_data_download(semester)
             except ValueError as err:
                 messages.error(
                     request,
@@ -141,6 +153,7 @@ class CustomAdminSite(AdminSite):
     def change_system_status(self, request):
         if request.method != 'POST':
             return handle_bad_request(request, app='admin', expected_method='POST')
+
         new_system_status = models.SystemStatus()
         if models.SystemStatus.objects.count() > 0:
             previous_system_status = models.SystemStatus.objects.order_by(
@@ -149,6 +162,56 @@ class CustomAdminSite(AdminSite):
         else:
             new_system_status.status = True
         new_system_status.save()
+        return redirect('admin:index')
+
+    def view_lab_hour_constraints(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+
+        context = {
+            **self.each_context(request),
+            'lab_hour_constraints_form': forms.LabHourConstraintsForm()
+        }
+        form = forms.SemesterForm(request.GET)
+        if form.is_valid():
+            semester = form.cleaned_data.get('semester')
+            context['semester'] = semester
+            context['verbose_semester'] = utils.get_verbose_semester(semester)
+            return render(request, 'admin/lab_hour_constraints.html', context)
+        else:
+            messages.error(request, 'Error, Invalid Semester Selected.')
+            return redirect('admin:index')
+
+    def get_lab_hour_constraints(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+
+        semester = request.GET.get('semester', utils.get_current_semester())
+        constraints = utils.get_constraints(semester)
+        return HttpResponse(
+            dumps(constraints),
+            content_type='application/json',
+            status=200
+        )
+
+    def set_lab_hour_constraints(self, request):
+        if request.method != 'POST':
+            return handle_bad_request(request, app='admin', expected_method='POST')
+
+        form = forms.LabHourConstraintsForm(request.POST)
+        if form.is_valid():
+            semester = form.cleaned_data.get('semester')
+            constraints = form.cleaned_data.get('lab_hour_data')
+            utils.save_constraints(semester, constraints)
+            messages.success(
+                request,
+                "Success! You have saved the CS Lab's Hours of Operation."
+            )
+        else:
+            messages.error(
+                request,
+                'CS Lab Hours Update Failed: Invalid Form Data.'
+            )
         return redirect('admin:index')
 
 
@@ -207,7 +270,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id')
+            'fields': ('user', 'eagle_id', 'lab_hour_preferences')
         })
     )
 

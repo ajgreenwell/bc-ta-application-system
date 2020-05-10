@@ -24,7 +24,7 @@ def home(request):
     if request.method == 'POST':
         form = ApplicationForm(request.POST)
         if form.is_valid():
-            preferences = form.cleaned_data.get('lab_hour_preferences')
+            preferences = form.cleaned_data.get('lab_hour_data')
             if utils.is_valid_preferences(preferences):
                 utils.save_preferences(student, preferences)
                 context['user_has_submitted_application'] = True
@@ -58,7 +58,7 @@ def profile(request):
             eagleid_form.save()
             student = request.user.profile
             preferences = preference_form.cleaned_data.get(
-                'lab_hour_preferences')
+                'lab_hour_data')
             if utils.is_valid_preferences(preferences):
                 utils.save_preferences(student, preferences)
                 messages.success(
@@ -90,6 +90,20 @@ def get_lab_hour_preferences(request):
     preferences = utils.get_preferences(student, semester)
     return HttpResponse(
         dumps(preferences),
+        content_type='application/json',
+        status=200
+    )
+
+
+@login_required
+def get_lab_hour_constraints(request):
+    if request.method != 'GET':
+        return handle_bad_request(request, app='admin', expected_method='GET')
+
+    semester = utils.get_current_semester()
+    constraints = utils.get_constraints(semester)
+    return HttpResponse(
+        dumps(constraints),
         content_type='application/json',
         status=200
     )

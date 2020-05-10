@@ -126,3 +126,7 @@ a.article-title:hover {
   border: 1px solid #f0d100;
   box-shadow: 0 0 0 1px #ffec6e;
 }
+
+.mt-12 {
+  margin-top: 12px;
+}
