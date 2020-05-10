@@ -8,15 +8,17 @@
     <div class="content-section">
       <div class="media">
         <div class="media-body">
-          <h2 class="account-heading">{{ user.username }}</h2>
-          <p class="text-secondary">{{ user.email }}</p>
+          <h2 class="account-heading">Profile Page</h2>
         </div>
       </div>
       <form method="POST" action="{% url 'ta_system:profile' %}" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ profile_form }}
-        <!-- includes form submit button -->
-        <div id="lab-hour-form"></div>
+        {{ user_form|crispy }}
+        {{ eagleid_form|crispy }}
+        {{ preference_form }}
+        <div>Lab Hour Preferences*</div>
+        <small class='text-muted'>Please select the hours for which you will be able to attend the CS lab.</small>
+        <div class="mt-12" id="lab-hour-form"></div>
       </form>
     </div>
 {% endblock content %}
