@@ -35,6 +35,11 @@ class LabHourConstraintsForm(forms.Form):
     lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)
 
 
+class AssignLabHoursForm(forms.Form):
+    semester = forms.CharField(widget=forms.HiddenInput(), required=False)
+    lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)
+
+
 class EagleIdForm(forms.ModelForm):
     eagle_id = forms.CharField(max_length=8, label="Eagle ID",
                                validators=[DataValidator(

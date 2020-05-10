@@ -70,7 +70,7 @@ def profile(request):
                 messages.error(
                     request,
                     'Error: Please specify which times you ' +
-                    'would be available to tend the CS Lab.'
+                    'would be available to tend the CS Lab. '
                 )
     context = {
         'user_form': user_form,

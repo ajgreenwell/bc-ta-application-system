@@ -1,6 +1,7 @@
 from uuid import uuid4
 from django.core.exceptions import ObjectDoesNotExist
 from ta_system.models import Course, Profile
+from ta_system.utils import get_year_and_semester_code
 from ta_system.data_formats.applicant_data_formats import (
     DATA_FORMATS,
     EXPECTED_LINE_FORMAT
@@ -29,9 +30,11 @@ def process_applicant_data(fname):
 
 def process_applicant(applicant_data):
     applicant_data = dict(zip(DATA_FORMATS.keys(), applicant_data))
+    year, semester_code = get_year_and_semester_code(applicant_data['semester'])
     try:
         course = Course.objects.get(
-            semester__semester=applicant_data['semester'],
+            semester__year=year,
+            semester__semester_code=semester_code,
             course_number=applicant_data['course_number']
         )
         applicant = Profile.objects.get(eagle_id=applicant_data['eagle_id'])

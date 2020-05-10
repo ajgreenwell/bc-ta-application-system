@@ -1,13 +1,14 @@
 import { renderLabHourForm } from './lab-hour-form.js';
-import { getLabHourConstraints, getLabHourPreferences } from './lab-hour-utils.js';
-
-function getConstraints() {
-    const endpoint = '/get_lab_hour_constraints/';
-    return getLabHourConstraints(endpoint, true);
-}
+import { getLabHourData } from './lab-hour-utils.js';
 
 renderLabHourForm({
-    getConstraints: getConstraints,
-    getStartingGrid: getLabHourPreferences,
+    getConstraints: () => getLabHourData({
+        endpoint: '/get_lab_hour_constraints/',
+        defaultValue: true
+    }),
+    getStartingGrid: () => getLabHourData({
+        endpoint: '/get_lab_hour_preferences/',
+        defaultValue: false
+    }),
     extraJS: null
 });

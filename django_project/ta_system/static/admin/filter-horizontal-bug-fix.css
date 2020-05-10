@@ -1,7 +1,21 @@
-.active.selector-add:focus, .active.selector-add:hover {
-    background-position: 0 -140px;
+
+@media (max-width: 766px) {
+    .active.selector-add:focus, .active.selector-add:hover {
+        background-position: 0 -60px;
+    }
+
+    .active.selector-remove:focus, .active.selector-remove:hover {
+        background-position: 0 -20px;
+    }
 }
 
-.active.selector-remove:focus, .active.selector-remove:hover {
-    background-position: 0 -100px;
+@media (min-width: 766px) and (max-width: 1024px) {
+    .active.selector-add:focus, .active.selector-add:hover {
+        background-position: 0 -140px;
+    }
+
+    .active.selector-remove:focus, .active.selector-remove:hover {
+        background-position: 0 -100px;
+    }
 }
+
