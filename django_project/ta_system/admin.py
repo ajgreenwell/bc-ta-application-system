@@ -197,7 +197,7 @@ class CustomAdminSite(AdminSite):
     def get_lab_hour_constraints(self, request):
         if request.method != 'GET':
             return handle_bad_request(request, app='admin', expected_method='GET')
-        
+
         semester = request.GET.get('semester', utils.get_current_semester())
         constraints = utils.get_constraints(semester)
         return HttpResponse(
@@ -237,7 +237,8 @@ class CustomAdminSite(AdminSite):
             if form.is_valid():
                 semester = form.cleaned_data.get('semester')
                 context['semester'] = semester
-                context['verbose_semester'] = utils.get_verbose_semester(semester)
+                context['verbose_semester'] = utils.get_verbose_semester(
+                    semester)
                 teaching_assistants = utils.get_tas_from_semester(semester)
                 context['teaching_assistants'] = dumps(teaching_assistants)
                 ta_colors = utils.get_ta_rgb_colors(teaching_assistants)
@@ -275,7 +276,7 @@ class CustomAdminSite(AdminSite):
     def get_lab_hour_preferences(self, request):
         if request.method != 'GET':
             return handle_bad_request(request, app='admin', expected_method='GET')
-        
+
         semester = request.GET.get('semester')
         eagle_id = request.GET.get('eagle_id')
         student = models.Profile.objects.get(eagle_id=eagle_id)
@@ -289,10 +290,11 @@ class CustomAdminSite(AdminSite):
     def get_lab_hour_assignments(self, request):
         if request.method != 'GET':
             return handle_bad_request(request, app='admin', expected_method='GET')
-        
+
         semester_string = request.GET.get('semester')
         year, semester_code = utils.get_year_and_semester_code(semester_string)
-        semester = models.Semester.objects.get(year=year, semester_code=semester_code)
+        semester = models.Semester.objects.get(
+            year=year, semester_code=semester_code)
         return HttpResponse(
             dumps(semester.lab_hour_assignments),
             content_type='application/json',
@@ -442,7 +444,8 @@ class InstructorAdmin(ModelAdmin):
 
 
 class SemesterAdmin(InstructorAdmin):
-    fields = ('year', 'semester_code', 'get_all_courses', 'get_all_teaching_assistants')
+    fields = ('year', 'semester_code', 'get_all_courses',
+              'get_all_teaching_assistants')
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
     list_display = ('get_semester', 'get_courses')
 

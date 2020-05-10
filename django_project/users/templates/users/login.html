@@ -1,5 +1,6 @@
 {% extends "ta_system/base.html" %}
 {% load crispy_forms_tags %}
+{% block message %}{% endblock %}
 {% block content %}
     <div class='content-section'>
         <form method='POST'>
@@ -11,6 +12,9 @@
             </fieldset>
             <div class='form-group'>
                 <button class='btn btn-outline-info btn-red' type='submit'>Login</button>
+                <small class="text-muted ml-2">
+                    <a href="{% url 'password_reset' %}">Forgot Password?</a>
+                </small>
             </div>
         </form>
         <div class='border-top pt-3'>
