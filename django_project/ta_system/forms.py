@@ -41,7 +41,7 @@ class AssignLabHoursForm(forms.Form):
 
 
 class EagleIdForm(forms.ModelForm):
-    eagle_id = forms.CharField(max_length=8, label="Eagle ID",
+    eagle_id = forms.CharField(max_length=8, label="Eagle ID", disabled=True,
                                validators=[DataValidator(
                                    regex=APPILCANT_DATA_FORMATS['eagle_id'],
                                    message="Please enter a valid 8-digit eagle id, e.g. '58704254'."
