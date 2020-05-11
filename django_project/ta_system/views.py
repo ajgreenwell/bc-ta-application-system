@@ -28,6 +28,7 @@ def home(request):
     }
 
     user = request.user
+    student = user.profile
 
     if request.method == 'POST':
         app_form = ApplicationForm(request.POST)
@@ -41,7 +42,7 @@ def home(request):
                                       app_form.cleaned_data.get('prof3')]
             major = app_form.cleaned_data.get('major')
             grad_year = app_form.cleaned_data.get('grad_year')
-            preferences = form.cleaned_data.get('lab_hour_data')
+            preferences = app_form.cleaned_data.get('lab_hour_data')
             if utils.is_valid_preferences(preferences):
                 utils.save_preferences(student, preferences)
                 context['user_has_submitted_application'] = True
@@ -56,11 +57,10 @@ def home(request):
                               course_preferences=course_preferences,
                               instructor_preferences=instructor_preferences,
                               major=major,
-                              grad_year=grad_year,
-                              lab_hour_data=preferences)
+                              grad_year=grad_year)
             app.save()
 
-            student = Profile.objects.get(eagle_id=user.eagle_id)
+            student = Profile.objects.get(user=user)
             messages.success(request, f'Application Submitted For {student.full_name}!')
             preferences = app_form.cleaned_data.get('lab_hour_data')
             utils.save_preferences(student, preferences)

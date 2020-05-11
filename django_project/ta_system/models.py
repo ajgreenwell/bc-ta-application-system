@@ -9,7 +9,6 @@ from .data_formats.applicant_data_formats \
 from django.utils.timezone import now
 
 
-
 class Course(models.Model):
     semester = models.ForeignKey(
         'Semester',
