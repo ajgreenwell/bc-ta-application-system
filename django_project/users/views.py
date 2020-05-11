@@ -47,7 +47,7 @@ def register(request):
                 email.send()
                 auth_logout(request)
                 messages.success(
-                    request, f'Please activate account in your email.')
+                    request, f'An email has been sent with instructions to active your account.')
                 return redirect('ta_system:home')
             else:
                 auth_logout(request)
