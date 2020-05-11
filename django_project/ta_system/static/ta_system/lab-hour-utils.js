@@ -1,45 +1,48 @@
 import { numSlotsInHour, rowHeight } from './lab-hour-settings.js';
 
-export function getLabHourConstraints() {
-    const falseConstraintRow = [false, false, false, false, false, false, false];
-    const trueConstraintRow = [false, true, true, true, true, true, false];
-    const constraints = [];
-    for (let i = 0; i < 38; i++)
-        constraints.push(falseConstraintRow);
-    for (let j = 0; j < 32; j++)
-        constraints.push(trueConstraintRow);
-    for (let k = 0; k < 26; k++)
-        constraints.push(falseConstraintRow);
-    return constraints;
+export function initLabHourGrid(value) {
+    let grid = [];
+    for (let row = 0; row < 24 * numSlotsInHour; row++) {
+        let row = [];
+        for (let col = 0; col < 7; col++)
+            row.push(value);
+        grid.push(row);
+    }
+    return grid;
+}
+
+export async function getLabHourConstraints(endpoint, defaultValue) {
+    const res = await fetch(endpoint);
+    const data = await res.json();
+    if (data && data.length) return data;
+    return initLabHourGrid(defaultValue);
+}
+
+export async function getLabHourPreferences() {
+    const res = await fetch('/get_lab_hour_preferences/');
+    const data = await res.json();
+    if (data && data.length) return data;
+    return initLabHourGrid(false);
 }
 
 export function getStartAndEndHour(constraints) {
     let [startRow, endRow] = [0, constraints.length - 1];
     let [isStart, isEnd] = [false, false];
-    while (startRow < endRow) {
+    while (startRow <= endRow) {
         isStart = constraints[startRow].includes(true);
         if (isStart) break;
         startRow++;
     }
-    while (startRow < endRow) {
+    while (startRow <= endRow) {
         isEnd = constraints[endRow].includes(true);
         if (isEnd) break;
         endRow--;
     }
-    if (endRow <= startRow)
-        return [0, constraints.length];
+    if (endRow < startRow)
+        return [0, Math.ceil(constraints.length / numSlotsInHour)];
     const startHour = Math.floor(startRow / numSlotsInHour);
     const endHour = Math.ceil((endRow + 1) / numSlotsInHour);
     return [startHour, endHour];
-}
-
-export function initSelectedMatrix(constraints) {
-    let isSelected = [];
-    constraints.forEach(row => {
-        let initRow = row.map( _ => false);
-        isSelected.push(initRow);
-    });
-    return isSelected;
 }
 
 export function getNumColHeaderLetters(windowObj) {
@@ -86,10 +89,16 @@ export function getRowAndCol(id) {
     let [row, col] = id.split(',');
     row = row.split(':')[1];
     col = col.split(':')[1];
-    return [row, col];
+    return [parseInt(row), parseInt(col)];
+}
+
+export function getElement(row, col) {
+    const id = getId(row, col);
+    return document.getElementById(id);
 }
 
 export function rstrip(str, substr) {
     const index = str.indexOf(substr);
+    if (index == -1) return str;
     return str.substring(0, index);
 }

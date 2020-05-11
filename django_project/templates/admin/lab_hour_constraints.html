@@ -1,0 +1,35 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "ta_system/lab-hour-form.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "admin/lab-hour-constraints.css" %}">
+{% endblock %}
+
+{% block title %}Boston College TA Application System{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="{% static 'admin/lab-hour-constraints.js' %}" type="module" ></script>
+{% endblock %}
+
+{% block coltype %}{% endblock %}
+
+{% block bodyclass %}{{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <h1 id="cs-lab-hour-constraints-header">Update the CS Lab's Hours of Operation ({{ verbose_semester }})</h1>
+    <input id="lab-hour-semester" type="hidden" value="{{ semester }}" />
+    <form method="POST" action="{% url 'admin:set_lab_hour_constraints' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ lab_hour_constraints_form }}
+        <!-- includes form submit button -->
+        <div id="lab-hour-form"></div>
+    </form>
+</div>
+{% endblock %}

@@ -1,6 +1,8 @@
 :root {
+    --unselected-color: white;
     --selected-color: #ffec6e;
     --closed-color: #a13743;
+    --grid-color: #73131d;
 }
 
 .flex {
@@ -15,14 +17,15 @@
     display: grid;
     flex: 1;
     margin-top: 10px;
-    border-top: 1.5px solid #73131d;
-    border-right: 1.5px solid #73131d;
+    border-top: 2px solid var(--grid-color);
+    border-right: 2px solid var(--grid-color);
 
 }
 
 .grid-item {
-    border-bottom: 1.5px solid #73131d;
-    border-left: 1.5px solid #73131d;
+    border-bottom: 2px solid var(--grid-color);
+    border-left: 2px solid var(--grid-color);
+    background-color: var(--unselected-color);
 }
 
 .grid-item.closed {
@@ -34,7 +37,7 @@
 }
 
 .non-hour {
-    border-bottom: 1px dashed #73131d;
+    border-bottom: 1px dashed var(--grid-color);
 }
 
 .col-headers {
@@ -65,7 +68,7 @@
 }
 
 .legend-item {
-    border: 1.5px solid #73131d;
+    border: 1.5px solid var(--grid-color);
     height: 25px;
     width: 50%;
 }

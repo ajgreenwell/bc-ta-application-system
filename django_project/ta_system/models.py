@@ -123,6 +123,8 @@ class Semester(models.Model):
         )]
     )
 
+    lab_hour_constraints = JSONField(default=list, blank=True)
+
     class Meta:
         ordering = ('-semester',)
 

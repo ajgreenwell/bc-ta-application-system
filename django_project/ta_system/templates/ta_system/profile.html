@@ -1,5 +1,9 @@
 {% extends "ta_system/base.html" %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags static %}
+{% block extra-head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'ta_system/lab-hour-form.css' %}" />
+    <script src="{% static 'ta_system/profile-lab-hour-form.js' %}" type="module" ></script>
+{% endblock %}
 {% block content %}
     <div class="content-section">
       <div class="media">
@@ -8,6 +12,11 @@
           <p class="text-secondary">{{ user.email }}</p>
         </div>
       </div>
-      <!-- FORM HERE -->
+      <form method="POST" action="{% url 'ta_system:profile' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ profile_form }}
+        <!-- includes form submit button -->
+        <div id="lab-hour-form"></div>
+      </form>
     </div>
 {% endblock content %}

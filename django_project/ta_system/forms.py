@@ -1,8 +1,9 @@
 from django import forms
-from .handlers.assignment_data_download import get_semester_choices
-from .models import Course, Semester, Instructor, Application
+from .models import Course, Semester, Instructor
 from .utils import get_current_semester
 from datetime import date
+from django.contrib.postgres.forms import JSONField
+from .utils import get_semester_choices
 
 
 class CourseDataUploadForm(forms.Form):
@@ -13,7 +14,7 @@ class ApplicantDataUploadForm(forms.Form):
     file = forms.FileField(label='Applicant Data CSV')
 
 
-class AssignmentDataDownloadForm(forms.Form):
+class SemesterForm(forms.Form):
     semester = forms.ChoiceField(choices=get_semester_choices)
 
 
@@ -55,3 +56,13 @@ class ApplicationForm(forms.Form):
     prof3 = forms.ChoiceField(choices=prof_choices, required=False, label='Professor 3')
     major = forms.CharField(max_length=200, label='Major(s)')
     grad_year = forms.ChoiceField(choices=year_choices, label='Graduation Year')
+    lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)
+
+
+class ProfileForm(forms.Form):
+    lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)
+
+
+class LabHourConstraintsForm(forms.Form):
+    semester = forms.CharField(widget=forms.HiddenInput(), required=False)
+    lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)

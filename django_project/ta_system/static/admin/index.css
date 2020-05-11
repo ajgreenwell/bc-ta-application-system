@@ -3,6 +3,10 @@ header {
     color: #666;
 }
 
+#content-related {
+    margin-bottom: 30px!important;
+}
+
 .custom-content-separator {
     height: 231px;
 }
@@ -15,10 +19,26 @@ header {
     margin-top: 8px;
 }
 
+.mt-12 {
+    margin-top: 12px;
+}
+
 .mt-30 {
     margin-top: 30px;
 }
 
 .mb-30 {
     margin-bottom: 30px;
+}
+
+.lab-hour-btn {
+    padding: 10px 15px 10px 15px!important;
+}
+
+.lab-hour-btn:active {
+    outline: -webkit-focus-ring-color auto 5px;
+}
+
+.lab-hour-btn:focus {
+    text-decoration: none;
 }
