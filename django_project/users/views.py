@@ -47,7 +47,7 @@ def register(request):
                 email.send()
                 auth_logout(request)
                 messages.success(
-                    request, f'An email has been sent with instructions to active your account.')
+                    request, f'An email has been sent with instructions to activate your account.')
                 return redirect('ta_system:home')
             else:
                 auth_logout(request)
@@ -75,7 +75,7 @@ def activate_account(request, uidb64, token):
         user.save()
         auth_login(request, user)
         messages.success(
-            request, f'Your account has been activate successfully!')
+            request, f'Your account has been activated successfully!')
         return redirect('ta_system:home')
     else:
         messages.error('Activation link is invalid!')
