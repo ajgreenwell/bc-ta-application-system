@@ -13,8 +13,8 @@
       </div>
       <form method="POST" action="{% url 'ta_system:profile' %}" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ user_form|crispy }}
         {{ eagleid_form|crispy }}
+        {{ user_form|crispy }}
         {{ preference_form }}
         <div>Lab Hour Preferences*</div>
         <small class='text-muted'>Please select the hours for which you will be able to attend the CS lab.</small>

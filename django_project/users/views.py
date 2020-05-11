@@ -29,7 +29,3 @@ def register(request):
         'user_form': user_form,
         'profile_form': profile_form
     })
-
-
-def login(request):
-    return render(request, 'users/login.html', {'title': 'Login'})
