@@ -4,6 +4,8 @@ from .forms import UserRegisterForm, ProfileForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.models import User
 
 
 def register(request):
@@ -23,6 +25,10 @@ def register(request):
                 profile_form.save()
                 messages.success(request, f'Account Created For {username}!')
                 return redirect('ta_system:home')
+            else:
+                auth_logout(request)
+                u = User.objects.get(username=username)
+                u.delete()
         else:
             messages.error(request, f'Please Correct The Error Below.')
     return render(request, 'users/register.html', {

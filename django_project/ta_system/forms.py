@@ -54,7 +54,7 @@ class EagleIdForm(forms.ModelForm):
 
 
 class UserUpdateForm(forms.ModelForm):
-    username = forms.EmailField(max_length=30, label="BC Email",
+    username = forms.EmailField(max_length=30, label="BC Email", disabled=True,
                                 validators=[DataValidator(
                                     regex=USER_DATA_FORMATS['username'],
                                     message="Please enter a valid BC email address."
