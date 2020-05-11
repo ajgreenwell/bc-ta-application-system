@@ -46,7 +46,7 @@ def write_lab_hour_assignment_data(csv_writer, semester):
     if not semester_has_assigned_lab_hours:
         raise ValueError(
             f'The semester ({get_verbose_semester(semester)}) has no ' +
-            'teaching assistants to which any lab hours have been assigned.'
+            'teaching assistants to which any lab hours have been assigned'
         )
     last_row = ['' for _ in range(7)]
     last_row.append('12:00 AM')

@@ -197,14 +197,18 @@ class CustomAdminSite(AdminSite):
     def get_lab_hour_constraints(self, request):
         if request.method != 'GET':
             return handle_bad_request(request, app='admin', expected_method='GET')
-        
+
         semester = request.GET.get('semester', utils.get_current_semester())
-        constraints = utils.get_constraints(semester)
-        return HttpResponse(
-            dumps(constraints),
-            content_type='application/json',
-            status=200
-        )
+        try:
+            constraints = utils.get_constraints(semester)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=500)
+        else:
+            return HttpResponse(
+                dumps(constraints),
+                content_type='application/json',
+                status=200
+            )
 
     def set_lab_hour_constraints(self, request):
         if request.method != 'POST':
@@ -248,6 +252,7 @@ class CustomAdminSite(AdminSite):
                         'Error: There are no teaching assistants that ' +
                         'have been assigned for this semester.'
                     )
+                    return redirect('admin:index')
                 return render(request, 'admin/assign_lab_hours.html', context)
             else:
                 messages.error(request, 'Error, Invalid Semester Selected.')
@@ -275,7 +280,7 @@ class CustomAdminSite(AdminSite):
     def get_lab_hour_preferences(self, request):
         if request.method != 'GET':
             return handle_bad_request(request, app='admin', expected_method='GET')
-        
+
         semester = request.GET.get('semester')
         eagle_id = request.GET.get('eagle_id')
         student = models.Profile.objects.get(eagle_id=eagle_id)

@@ -13,9 +13,13 @@ export function initLabHourGrid(value) {
 
 export async function getLabHourData({ endpoint, defaultValue }) {
     const res = await fetch(endpoint);
+    if (!res.ok)
+        return initLabHourGrid(defaultValue);
     const data = await res.json();
-    if (data && data.length) return data;
-    return initLabHourGrid(defaultValue);
+    if (!data || !data.length)
+        return initLabHourGrid(defaultValue);
+    return data;
+    
 }
 
 export function getStartAndEndHour(constraints) {
