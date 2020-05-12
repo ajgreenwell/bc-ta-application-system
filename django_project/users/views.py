@@ -54,9 +54,6 @@ def register(request):
                 userData = User.objects.get(username=username)
                 userData.delete()
         else:
-            auth_logout(request)
-            userData = User.objects.get(username=username)
-            userData.delete()
             messages.error(request, f'Please Correct The Error Below.')
     return render(request, 'users/register.html', {
         'user_form': user_form,
