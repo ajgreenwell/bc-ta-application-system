@@ -152,5 +152,14 @@
             </div>
         </fieldset>
     </form>
+    <form method="POST" action="{% url 'admin:simulation' %}" class="mt-30">
+        {% csrf_token %}
+        <header>Simulation</header>
+        <fieldset class="mt-8">
+            <div class="mt-12">
+                <input type="submit" value="Start Simulation" />
+            </div>
+        </fieldset>
+    </form>
 </div>
 {% endblock %}

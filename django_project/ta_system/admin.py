@@ -66,7 +66,10 @@ class CustomAdminSite(AdminSite):
                  name='get_lab_hour_preferences'),
             path('get_lab_hour_assignments',
                  self.admin_view(self.get_lab_hour_assignments),
-                 name='get_lab_hour_assignments')
+                 name='get_lab_hour_assignments'),
+            path('simulation',
+                 self.admin_view(self.simulation),
+                 name='simulation')
         ] + urls
         return urls
 
@@ -296,6 +299,16 @@ class CustomAdminSite(AdminSite):
             content_type='application/json',
             status=200
         )
+
+    def simulation(self, request):
+        if request.method != 'POST':
+            return handle_bad_request(request, app='admin', expected_method='POST')
+
+        current_semester = utils.get_current_semester()
+
+
+class UserAdmin(ModelAdmin):
+    list_display = ('username', 'first_name', 'last_name', 'is_active')
 
 
 class CourseAdmin(ModelAdmin):
