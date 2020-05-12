@@ -316,7 +316,7 @@ class CustomAdminSite(AdminSite):
             except ValueError as err:
                 messages.error(
                     request,
-                    f'Lab Hour Assignment Data Download Failed: {err}.'
+                    f'Lab Hour Assignments Download Failed: {err}.'
                 )
         return redirect('admin:index')
 
