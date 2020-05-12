@@ -305,6 +305,11 @@ class CustomAdminSite(AdminSite):
             return handle_bad_request(request, app='admin', expected_method='POST')
 
         current_semester = utils.get_current_semester()
+        students = User.objects.all()
+        for student in students:
+            if student.Profile.is_blacklisted:
+                students.remove(student)
+        courses = models.Course.objects.all()
 
 
 class UserAdmin(ModelAdmin):
