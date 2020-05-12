@@ -33,7 +33,8 @@ def home(request):
     if request.method == 'POST':
         app_form = ApplicationForm(request.POST)
         if app_form.is_valid():
-            semester = Semester.objects.get(semester=get_current_semester())
+            current_semester = get_current_semester()
+            semester = Semester.objects.get(year=current_semester[:4], semester_code=current_semester[-1])
             course_preferences = [app_form.cleaned_data.get('course1'),
                                   app_form.cleaned_data.get('course2'),
                                   app_form.cleaned_data.get('course3')]
