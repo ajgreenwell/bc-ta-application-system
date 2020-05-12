@@ -6,10 +6,10 @@ from django.http import HttpResponse
 from json import dumps
 
 from .handlers.bad_request import handle_bad_request
-from .forms import ApplicationForm
+
 from .utils import get_current_semester
 from django.contrib import messages
-from .forms import ApplicationForm, ProfileForm
+from .forms import ApplicationForm, LabHourPreferencesForm, UserUpdateForm, EagleIdForm
 from .models import SystemStatus
 
 import ta_system.utils as utils
@@ -77,25 +77,37 @@ def profile(request):
     if request.method not in ('GET', 'POST'):
         return handle_bad_request(request, app='ta_system', expected='GET, POST')
 
-    form = ProfileForm()
+    user_form = UserUpdateForm(instance=request.user)
+    preference_form = LabHourPreferencesForm()
+    eagleid_form = EagleIdForm(instance=request.user.profile)
     if request.method == 'POST':
-        form = ProfileForm(request.POST)
-        if form.is_valid():
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        preference_form = LabHourPreferencesForm(request.POST)
+        eagleid_form = EagleIdForm(request.POST, instance=request.user.profile)
+        if user_form.is_valid() and preference_form.is_valid() and eagleid_form.is_valid():
+            user_form.save()
+            eagleid_form.save()
             student = request.user.profile
-            preferences = form.cleaned_data.get('lab_hour_data')
+            preferences = preference_form.cleaned_data.get(
+                'lab_hour_data')
             if utils.is_valid_preferences(preferences):
                 utils.save_preferences(student, preferences)
                 messages.success(
                     request,
                     'Success! Your profile information has been saved.'
                 )
+                return redirect('ta_system:profile')
             else:
                 messages.error(
                     request,
                     'Error: Please specify which times you ' +
-                    'would be available to tend the CS Lab.'
+                    'would be available to tend the CS Lab. '
                 )
-    context = {'profile_form': form}
+    context = {
+        'user_form': user_form,
+        'preference_form': preference_form,
+        'eagleid_form': eagleid_form
+    }
     return render(request, 'ta_system/profile.html', context=context)
 
 
@@ -118,7 +130,7 @@ def get_lab_hour_preferences(request):
 def get_lab_hour_constraints(request):
     if request.method != 'GET':
         return handle_bad_request(request, app='admin', expected_method='GET')
-    
+
     semester = utils.get_current_semester()
     constraints = utils.get_constraints(semester)
     return HttpResponse(

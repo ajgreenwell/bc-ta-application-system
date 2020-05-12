@@ -136,17 +136,19 @@
         <header>Download Files</header>
         <fieldset class="mt-8">
             <div class="mt-12">
-                {{ assignment_data_download_form.as_p }}
+                {{ semester_form.as_p }}
                 <input type="submit" value="Download TA Assignment Data">
             </div>
         </fieldset>
     </form>
-    <form method="GET" action="{% url 'admin:view_lab_hour_constraints' %}" enctype="multipart/form-data" class="mt-30">
+    <form method="GET" enctype="multipart/form-data" class="mt-30">
+        {% csrf_token %}
         <header>CS Lab Hour Features</header>
         <fieldset class="mt-8">
             <div class="mt-12">
-                {{ view_lab_hour_constraints_form.as_p }}
-                <input type="submit" class="button lab-hour-btn" value="Update Hours of Operation" />
+                {{ semester_form.as_p }}
+                <input type="submit" class="lab-hour-btn" value="Update Hours of Operation" formaction="{% url 'admin:view_lab_hour_constraints' %}"/>
+                <input type="submit" class="lab-hour-btn mt-8" value="Assign Lab Hours" formaction="{% url 'admin:assign_lab_hours' %}"/>
             </div>
         </fieldset>
     </form>

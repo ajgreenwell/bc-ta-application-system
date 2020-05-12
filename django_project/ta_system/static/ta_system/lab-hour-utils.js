@@ -11,18 +11,11 @@ export function initLabHourGrid(value) {
     return grid;
 }
 
-export async function getLabHourConstraints(endpoint, defaultValue) {
+export async function getLabHourData({ endpoint, defaultValue }) {
     const res = await fetch(endpoint);
     const data = await res.json();
     if (data && data.length) return data;
     return initLabHourGrid(defaultValue);
-}
-
-export async function getLabHourPreferences() {
-    const res = await fetch('/get_lab_hour_preferences/');
-    const data = await res.json();
-    if (data && data.length) return data;
-    return initLabHourGrid(false);
 }
 
 export function getStartAndEndHour(constraints) {
@@ -89,7 +82,7 @@ export function getRowAndCol(id) {
     let [row, col] = id.split(',');
     row = row.split(':')[1];
     col = col.split(':')[1];
-    return [parseInt(row), parseInt(col)];
+    return {row: parseInt(row), col: parseInt(col)};
 }
 
 export function getElement(row, col) {

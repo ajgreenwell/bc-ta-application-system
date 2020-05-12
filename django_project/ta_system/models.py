@@ -12,6 +12,7 @@ from django.utils.timezone import now
 class Course(models.Model):
     semester = models.ForeignKey(
         'Semester',
+        verbose_name='Semester',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -111,27 +112,39 @@ class Course(models.Model):
 
 
 class Semester(models.Model):
-    semester = models.CharField(
-        max_length=5,
-        unique=True,
-        verbose_name="Semester",
-        help_text="A year followed by a 1-digit semester code, e.g. 2020F.",
+    year = models.CharField(
+        max_length=4,
+        verbose_name="Year",
+        help_text="The year of this semester, e.g. 2020.",
         validators=[DataValidator(
-            regex=COURSE_DATA_FORMATS['semester'],
-            message="Please specify the year followed by the semester, e.g. '2020F'."
+            regex='\d{4}',
+            message="Please specify the year of this semester, e.g. 2020."
+        )]
+    )
+
+    semester_code = models.CharField(
+        max_length=1,
+        verbose_name="Semester Code",
+        help_text="A 1-character semester code, e.g. 'S' for Spring.",
+        validators=[DataValidator(
+            regex='F|S',
+            message="Valid semester codes include 'F' for Fall and 'S' for Spring."
         )]
     )
 
     lab_hour_constraints = JSONField(default=list, blank=True)
+    lab_hour_assignments = JSONField(default=list, blank=True)
 
     class Meta:
-        ordering = ('-semester',)
+        unique_together = ('year', 'semester_code')
+        ordering = ('-year', 'semester_code')
+
+    @property
+    def semester(self):
+        return f'{self.year}{self.semester_code}'
 
     def __str__(self):
         return self.semester
-
-    class Meta:
-        ordering = ('-semester',)
 
 
 class Instructor(models.Model):
@@ -189,6 +202,12 @@ class Profile(models.Model):
         blank=True
     )
     lab_hour_preferences = JSONField(default=list, blank=True)
+    is_blacklisted = models.BooleanField(
+        default=False,
+        verbose_name="Is Blacklisted",
+        help_text="If a student is blacklisted, the simulation will not assign her to be a TA. " +
+                  "This does not affect manual TA assignments."
+    )
 
     @property
     def full_name(self):
@@ -204,7 +223,17 @@ class Profile(models.Model):
 
 
 class SystemStatus(models.Model):
-    status = models.BooleanField(default=False)
+    status = models.BooleanField(
+        default=False,
+        verbose_name="Is Open",
+        help_text="When the system is closed, students will not be able to submit applications."
+    )
+    max_lab_hours_per_ta = models.PositiveIntegerField(
+        default=3,
+        verbose_name="Max Lab Hours per TA",
+        help_text="When the simulation is run, students will not be assigned more hours in the " + 
+                  "CS lab than this maximum value. This does not affect manual lab hour assignments."
+    )
     date_changed = models.DateField(default=now)
 
     class Meta:

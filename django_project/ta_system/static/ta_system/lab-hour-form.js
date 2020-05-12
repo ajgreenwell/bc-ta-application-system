@@ -95,17 +95,12 @@ export async function renderLabHourForm(props) {
 
     function selectFromHere(e) {
         e.preventDefault();
-        const [row, col] = utils.getRowAndCol(e.target.id);
-        const isClosed = !constraints[row][col];
-        if (isClosed) return;
+        const {row, col} = utils.getRowAndCol(e.target.id);
+        const isOpen = constraints[row][col];
+        if (!isOpen) return;
         const isSelected = selected[row][col];
-        if (isSelected) {
-            toggleSelection(row, col, !isSelected);
-            shouldSelect = false;
-        } else {
-            toggleSelection(row, col, !isSelected);
-            shouldSelect = true;
-        }
+        toggleSelection(row, col, !isSelected);
+        shouldSelect = !isSelected;
         fromCoordinates = {row, col};
         outputSelected();
         mouseDown = true;
@@ -133,10 +128,7 @@ export async function renderLabHourForm(props) {
         e.preventDefault();
         let {row: rowTo, col: colTo} = toCoordinates;
         const isGridCell = e.target.className.includes('grid-item');
-        if (isGridCell) {
-            [rowTo, colTo] = utils.getRowAndCol(e.target.id);
-            toCoordinates = {row: rowTo, col: colTo};
-        }
+        if (isGridCell) toCoordinates = utils.getRowAndCol(e.target.id);
         toggleFromTo(toggleSelection);
         outputSelected();
         mouseDown = false;
@@ -175,8 +167,7 @@ export async function renderLabHourForm(props) {
     function highlightToHere(e) {
         if (!mouseDown) return;
         e.preventDefault();
-        const [rowTo, colTo] = utils.getRowAndCol(e.target.id);
-        toCoordinates = {row: rowTo, col: colTo};
+        toCoordinates = utils.getRowAndCol(e.target.id);
         toggleHighlightFromTo();
     }
 
@@ -245,7 +236,6 @@ export async function renderLabHourForm(props) {
     }
 
     const labHourFormRoot = document.querySelector('#lab-hour-form');
-    if (!labHourFormRoot) return;
     labHourFormRoot.innerHTML = LabHourGrid();
     const timeSlots = document.querySelectorAll('.grid-item');
     timeSlots.forEach(slot => {

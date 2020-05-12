@@ -66,6 +66,7 @@
               {% endif %}
             {% endfor %}
           {% endif %}
+          {% block message %}{% endblock %}
           {% block content %}{% endblock %}
         </div>
         {% block sidebar %}

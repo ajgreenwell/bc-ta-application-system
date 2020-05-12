@@ -57,7 +57,16 @@ class CustomAdminSite(AdminSite):
                  name='get_lab_hour_constraints'),
             path('set_lab_hour_constraints',
                  self.admin_view(self.set_lab_hour_constraints),
-                 name='set_lab_hour_constraints')
+                 name='set_lab_hour_constraints'),
+            path('assign_lab_hours',
+                 self.admin_view(self.assign_lab_hours),
+                 name='assign_lab_hours'),
+            path('get_lab_hour_preferences',
+                 self.admin_view(self.get_lab_hour_preferences),
+                 name='get_lab_hour_preferences'),
+            path('get_lab_hour_assignments',
+                 self.admin_view(self.get_lab_hour_assignments),
+                 name='get_lab_hour_assignments')
         ] + urls
         return urls
 
@@ -70,8 +79,7 @@ class CustomAdminSite(AdminSite):
             'app_list': app_list,
             'course_data_upload_form': forms.CourseDataUploadForm(),
             'applicant_data_upload_form': forms.ApplicantDataUploadForm(),
-            'assignment_data_download_form': forms.SemesterForm(),
-            'view_lab_hour_constraints_form': forms.SemesterForm(),
+            'semester_form': forms.SemesterForm(),
             'last_system_status': status_list.last()
         }
         request.current_app = self.name
@@ -185,7 +193,7 @@ class CustomAdminSite(AdminSite):
     def get_lab_hour_constraints(self, request):
         if request.method != 'GET':
             return handle_bad_request(request, app='admin', expected_method='GET')
-        
+
         semester = request.GET.get('semester', utils.get_current_semester())
         constraints = utils.get_constraints(semester)
         return HttpResponse(
@@ -201,11 +209,12 @@ class CustomAdminSite(AdminSite):
         form = forms.LabHourConstraintsForm(request.POST)
         if form.is_valid():
             semester = form.cleaned_data.get('semester')
+            verbose_semester = utils.get_verbose_semester(semester)
             constraints = form.cleaned_data.get('lab_hour_data')
             utils.save_constraints(semester, constraints)
             messages.success(
                 request,
-                "Success! You have saved the CS Lab's Hours of Operation."
+                f"Success! You have saved the CS Lab's Hours of Operation for {verbose_semester}."
             )
         else:
             messages.error(
@@ -214,10 +223,84 @@ class CustomAdminSite(AdminSite):
             )
         return redirect('admin:index')
 
+    def assign_lab_hours(self, request):
+        if request.method == 'GET':
+            context = {
+                **self.each_context(request),
+                'assign_lab_hours_form': forms.AssignLabHoursForm()
+            }
+            form = forms.SemesterForm(request.GET)
+            if form.is_valid():
+                semester = form.cleaned_data.get('semester')
+                context['semester'] = semester
+                context['verbose_semester'] = utils.get_verbose_semester(
+                    semester)
+                teaching_assistants = utils.get_tas_from_semester(semester)
+                context['teaching_assistants'] = dumps(teaching_assistants)
+                ta_colors = utils.get_ta_rgb_colors(teaching_assistants)
+                context['ta_colors'] = dumps(ta_colors)
+                if not teaching_assistants:
+                    messages.error(
+                        request,
+                        'Error: There are no teaching assistants that ' +
+                        'have been assigned for this semester.'
+                    )
+                return render(request, 'admin/assign_lab_hours.html', context)
+            else:
+                messages.error(request, 'Error, Invalid Semester Selected.')
+                return redirect('admin:index')
+        elif request.method == 'POST':
+            form = forms.AssignLabHoursForm(request.POST)
+            if form.is_valid():
+                semester = form.cleaned_data.get('semester')
+                verbose_semester = utils.get_verbose_semester(semester)
+                assignments = form.cleaned_data.get('lab_hour_data')
+                utils.save_assignments(semester, assignments)
+                messages.success(
+                    request,
+                    f'Success! You have saved the Lab Hour Assignments for {verbose_semester}.'
+                )
+            else:
+                messages.error(
+                    request,
+                    'Assignment of Lab Hours Failed: Invalid Form Data.'
+                )
+            return redirect('admin:index')
+        else:
+            return handle_bad_request(request, app='admin', expected_method='GET, POST')
+
+    def get_lab_hour_preferences(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+
+        semester = request.GET.get('semester')
+        eagle_id = request.GET.get('eagle_id')
+        student = models.Profile.objects.get(eagle_id=eagle_id)
+        preferences = utils.get_preferences(student, semester)
+        return HttpResponse(
+            dumps(preferences),
+            content_type='application/json',
+            status=200
+        )
+
+    def get_lab_hour_assignments(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+
+        semester_string = request.GET.get('semester')
+        year, semester_code = utils.get_year_and_semester_code(semester_string)
+        semester = models.Semester.objects.get(
+            year=year, semester_code=semester_code)
+        return HttpResponse(
+            dumps(semester.lab_hour_assignments),
+            content_type='application/json',
+            status=200
+        )
+
 
 class CourseAdmin(ModelAdmin):
     filter_horizontal = ('teaching_assistants',)
-    list_filter = ('semester__semester', 'instructor__name')
+    list_filter = ('semester', 'instructor__name')
     list_display_links = ('course_number', 'name')
     list_display = (
         'semester', 'course_number', 'name',
@@ -270,7 +353,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id')
+            'fields': ('user', 'eagle_id', 'is_blacklisted')
         })
     )
 
@@ -306,15 +389,6 @@ class InstructorAdmin(ModelAdmin):
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
     list_display = ('name', 'get_courses')
 
-    def get_tas_from_courses(self, courses):
-        tas = []
-        for course in courses:
-            course_tas = course.teaching_assistants.all()
-            for ta in course_tas:
-                if ta not in tas:
-                    tas.append(ta)
-        return tas
-
     def get_courses(self, obj, display_func=str):
         courses = obj.course_set.all()
         return html.generate_ul(
@@ -335,7 +409,7 @@ class InstructorAdmin(ModelAdmin):
 
     def get_all_teaching_assistants(self, obj):
         courses = obj.course_set.all()
-        tas = self.get_tas_from_courses(courses)
+        tas = utils.get_tas_from_courses(courses)
         ul_style = "margin: 0 0 0 0; padding-left: 0;"
         return html.generate_ul(
             model_objects=tas,
@@ -349,9 +423,13 @@ class InstructorAdmin(ModelAdmin):
 
 
 class SemesterAdmin(InstructorAdmin):
-    fields = ('semester', 'get_all_courses', 'get_all_teaching_assistants')
+    fields = ('year', 'semester_code', 'get_all_courses',
+              'get_all_teaching_assistants')
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
-    list_display = ('semester', 'get_courses')
+    list_display = ('get_semester', 'get_courses')
+
+    def get_semester(self, obj):
+        return obj.semester
 
     def display_course(self, course):
         return course.course_number_and_name
@@ -362,12 +440,13 @@ class SemesterAdmin(InstructorAdmin):
     def get_all_courses(self, obj):
         return super().get_all_courses(obj, display_func=self.display_course)
 
+    get_semester.short_description = 'Semester'
     get_courses.short_description = 'Courses'
     get_all_courses.short_description = 'Courses'
 
 
 class SystemStatusAdmin(ModelAdmin):
-    list_display = ('id', 'status', 'date_changed')
+    list_display = ('id', 'status', 'max_lab_hours_per_ta', 'date_changed')
 
 
 class ApplicationAdmin(ModelAdmin):
