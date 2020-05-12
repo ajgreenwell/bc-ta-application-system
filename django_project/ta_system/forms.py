@@ -41,7 +41,7 @@ class AssignLabHoursForm(forms.Form):
 
 
 class EagleIdForm(forms.ModelForm):
-    eagle_id = forms.CharField(max_length=8, label="Eagle ID", disabled=True,
+    eagle_id = forms.CharField(max_length=8, label="Eagle ID",
                                validators=[DataValidator(
                                    regex=APPILCANT_DATA_FORMATS['eagle_id'],
                                    message="Please enter a valid 8-digit eagle id, e.g. '58704254'."
@@ -54,7 +54,7 @@ class EagleIdForm(forms.ModelForm):
 
 
 class UserUpdateForm(forms.ModelForm):
-    username = forms.EmailField(max_length=30, label="BC Email", disabled=True,
+    username = forms.EmailField(max_length=30, label="BC Email",
                                 validators=[DataValidator(
                                     regex=USER_DATA_FORMATS['username'],
                                     message="Please enter a valid BC email address."

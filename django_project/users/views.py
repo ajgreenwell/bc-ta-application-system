@@ -27,8 +27,8 @@ def register(request):
                 return redirect('ta_system:home')
             else:
                 auth_logout(request)
-                u = User.objects.get(username=username)
-                u.delete()
+                user = User.objects.get(username=username)
+                user.delete()
         else:
             messages.error(request, f'Please Correct The Error Below.')
     return render(request, 'users/register.html', {
