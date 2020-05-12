@@ -114,7 +114,7 @@ class CustomAdminSite(AdminSite):
             except Exception as err:
                 messages.error(
                     request,
-                    f'Course Data Eupload Failed: The following uncaught error occurred: {err}'
+                    f'Course Data Upload Failed: The following uncaught error occurred: {err}'
                 )
             else:
                 messages.success(request, 'Course Data Uploaded Successfully.')
