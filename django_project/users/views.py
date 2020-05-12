@@ -46,15 +46,13 @@ def register(request):
                 email = EmailMessage(email_subject, message, to=[to_email])
                 email.send()
                 auth_logout(request)
-                messages.success(
-                    request, f'An email has been sent with instructions to activate your account.')
-                return redirect('ta_system:home')
+                return redirect('registration_done')
             else:
                 auth_logout(request)
                 userData = User.objects.get(username=username)
                 userData.delete()
         else:
-            messages.error(request, f'Please Correct The Error Below.')
+            messages.error(request, 'Please Correct The Error Below.')
     return render(request, 'users/register.html', {
         'user_form': user_form,
         'profile_form': profile_form
@@ -72,11 +70,8 @@ def activate_account(request, uidb64, token):
         user.save()
         auth_login(request, user)
         messages.success(
-            request, f'Your account has been activated successfully!')
+            request, 'Your account has been activated successfully!')
         return redirect('ta_system:home')
     else:
-        messages.error('Activation link is invalid!')
-
-
-def login(request):
-    return render(request, 'users/login.html', {'title': 'Login'})
+        messages.error(request, 'Activation link is invalid, or has already been used.')
+        return redirect('ta_system:home')

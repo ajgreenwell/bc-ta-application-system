@@ -47,4 +47,9 @@ urlpatterns = [
          name='password_reset_complete'),
     path('activate/<uidb64>/<token>/',
          user_views.activate_account, name='activate'),
+    path('registration-done/',
+         auth_views.LoginView.as_view(
+             template_name='users/registration_done.html'
+         ),
+         name='registration_done'),
 ]
