@@ -309,7 +309,56 @@ class CustomAdminSite(AdminSite):
         for student in students:
             if student.Profile.is_blacklisted:
                 students.remove(student)
+            if not has_submitted_application(student):
+                students.remove(student)
         courses = models.Course.objects.all()
+        for course in courses:
+            if course.semester != current_semester:
+                courses.remove(course)
+        current_courses = courses.objects.order_by(course_number)
+        # fill in the variable to make the students order by time
+        applicants = students.objects.order_by()
+
+        for course in current_courses:
+            num_tas = count(course.teaching_assistants)
+            if course.max_num_tas > num_tas:
+                if course.course_number[:8] == 'CSCI1101':
+                    # how do we connect discussion group to cs 1
+                    # do we treat discussion groups as courses?
+                else:
+                    for applicant in applicants:
+                        # where do you store the preferences and what are the variable names
+                        # I put prof_pref and course_pref here for now
+                        if applicant.Profile.prof_pref == course.instructor:
+                            if applicant.Profile.courses_taken == course.course_number:
+                                if count(applicant.Profile.ta_assignments) == 0:
+                                    num_tas = num_tas + 1
+                                    course.teaching_assistants.add(
+                                        applicant.Profile)
+                                    applicant.Profile.ta_assignments.add(
+                                        course)
+                                    applicants.remove(applicant)
+                    if course.max_num_tas > num_tas:
+                        for applicant in applicants:
+                            if applicant.Profile.course_pref == course.course_number:
+                                if applicant.Profile.courses_taken == course.course_number:
+                                    if count(applicant.Profile.ta_assignments) == 0:
+                                        num_tas = num_tas + 1
+                                        course.teaching_assistants.add(
+                                            applicant.Profile)
+                                        applicant.Profile.ta_assignments.add(
+                                            course)
+                                        applicants.remove(applicant)
+                    if course.max_num_tas > num_tas:
+                        for applicant in applicants:
+                            if applicant.Profile.courses_taken == course.course_number:
+                                if count(applicant.Profile.ta_assignments) == 0:
+                                    num_tas = num_tas + 1
+                                    course.teaching_assistants.add(
+                                        applicant.Profile)
+                                    applicant.Profile.ta_assignments.add(
+                                        course)
+                                    applicants.remove(applicant)
 
 
 class UserAdmin(ModelAdmin):
