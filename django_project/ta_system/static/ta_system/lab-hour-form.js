@@ -236,6 +236,7 @@ export async function renderLabHourForm(props) {
     }
 
     const labHourFormRoot = document.querySelector('#lab-hour-form');
+    if (!labHourFormRoot) return;
     labHourFormRoot.innerHTML = LabHourGrid();
     const timeSlots = document.querySelectorAll('.grid-item');
     timeSlots.forEach(slot => {

@@ -15,6 +15,7 @@ from .handlers.bad_request import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
 from .handlers.applicant_data_upload import handle_applicant_data_upload
 from .handlers.assignment_data_download import handle_assignment_data_download
+from .handlers.lab_hour_assignments_download import handle_lab_hour_assignments_download
 from .handlers.file_upload import UPLOAD_DATA_FORMATS_URL as DATA_FORMATS_URL
 
 import ta_system.html_utils as html
@@ -66,7 +67,10 @@ class CustomAdminSite(AdminSite):
                  name='get_lab_hour_preferences'),
             path('get_lab_hour_assignments',
                  self.admin_view(self.get_lab_hour_assignments),
-                 name='get_lab_hour_assignments')
+                 name='get_lab_hour_assignments'),
+            path('lab_hour_assignments_download',
+                 self.admin_view(self.lab_hour_assignments_download),
+                 name='lab_hour_assignments_download')
         ] + urls
         return urls
 
@@ -110,7 +114,7 @@ class CustomAdminSite(AdminSite):
             except Exception as err:
                 messages.error(
                     request,
-                    f'Course Data Eupload Failed: The following uncaught error occurred: {err}'
+                    f'Course Data Upload Failed: The following uncaught error occurred: {err}'
                 )
             else:
                 messages.success(request, 'Course Data Uploaded Successfully.')
@@ -195,12 +199,16 @@ class CustomAdminSite(AdminSite):
             return handle_bad_request(request, app='admin', expected_method='GET')
 
         semester = request.GET.get('semester', utils.get_current_semester())
-        constraints = utils.get_constraints(semester)
-        return HttpResponse(
-            dumps(constraints),
-            content_type='application/json',
-            status=200
-        )
+        try:
+            constraints = utils.get_constraints(semester)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=500)
+        else:
+            return HttpResponse(
+                dumps(constraints),
+                content_type='application/json',
+                status=200
+            )
 
     def set_lab_hour_constraints(self, request):
         if request.method != 'POST':
@@ -233,8 +241,7 @@ class CustomAdminSite(AdminSite):
             if form.is_valid():
                 semester = form.cleaned_data.get('semester')
                 context['semester'] = semester
-                context['verbose_semester'] = utils.get_verbose_semester(
-                    semester)
+                context['verbose_semester'] = utils.get_verbose_semester(semester)
                 teaching_assistants = utils.get_tas_from_semester(semester)
                 context['teaching_assistants'] = dumps(teaching_assistants)
                 ta_colors = utils.get_ta_rgb_colors(teaching_assistants)
@@ -245,6 +252,7 @@ class CustomAdminSite(AdminSite):
                         'Error: There are no teaching assistants that ' +
                         'have been assigned for this semester.'
                     )
+                    return redirect('admin:index')
                 return render(request, 'admin/assign_lab_hours.html', context)
             else:
                 messages.error(request, 'Error, Invalid Semester Selected.')
@@ -286,16 +294,31 @@ class CustomAdminSite(AdminSite):
     def get_lab_hour_assignments(self, request):
         if request.method != 'GET':
             return handle_bad_request(request, app='admin', expected_method='GET')
-
+        
         semester_string = request.GET.get('semester')
         year, semester_code = utils.get_year_and_semester_code(semester_string)
-        semester = models.Semester.objects.get(
-            year=year, semester_code=semester_code)
+        semester = models.Semester.objects.get(year=year, semester_code=semester_code)
         return HttpResponse(
             dumps(semester.lab_hour_assignments),
             content_type='application/json',
             status=200
         )
+
+    def lab_hour_assignments_download(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+
+        form = forms.SemesterForm(request.GET)
+        if form.is_valid():
+            semester = form.cleaned_data.get('semester')
+            try:
+                return handle_lab_hour_assignments_download(semester)
+            except ValueError as err:
+                messages.error(
+                    request,
+                    f'Lab Hour Assignments Download Failed: {err}.'
+                )
+        return redirect('admin:index')
 
 
 class CourseAdmin(ModelAdmin):
@@ -353,7 +376,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id', 'is_blacklisted')
+            'fields': ('user', 'eagle_id', 'is_blacklisted', 'lab_hour_preferences')
         })
     )
 
@@ -423,8 +446,7 @@ class InstructorAdmin(ModelAdmin):
 
 
 class SemesterAdmin(InstructorAdmin):
-    fields = ('year', 'semester_code', 'get_all_courses',
-              'get_all_teaching_assistants')
+    fields = ('year', 'semester_code', 'get_all_courses', 'get_all_teaching_assistants')
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
     list_display = ('get_semester', 'get_courses')
 
