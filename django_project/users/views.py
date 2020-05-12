@@ -73,5 +73,6 @@ def activate_account(request, uidb64, token):
             request, 'Your account has been activated successfully!')
         return redirect('ta_system:home')
     else:
-        messages.error(request, 'Activation link is invalid, or has already been used.')
+        messages.error(
+            request, 'Activation link is invalid, or has already been used.')
         return redirect('ta_system:home')
