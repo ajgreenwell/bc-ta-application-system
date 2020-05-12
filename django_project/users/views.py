@@ -51,8 +51,8 @@ def register(request):
                 return redirect('ta_system:home')
             else:
                 auth_logout(request)
-                userData = User.objects.get(username=username)
-                userData.delete()
+                user = User.objects.get(username=username)
+                user.delete()
         else:
             auth_logout(request)
             userData = User.objects.get(username=username)
