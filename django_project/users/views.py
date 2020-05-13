@@ -62,6 +62,7 @@ def register(request):
         'user_form': user_form,
         'profile_form': profile_form
     })
+<<<<<<< HEAD
 
 
 def activate_account(request, uidb64, token):
@@ -83,3 +84,5 @@ def activate_account(request, uidb64, token):
 
 def login(request):
     return render(request, 'users/login.html', {'title': 'Login'})
+=======
+>>>>>>> master
