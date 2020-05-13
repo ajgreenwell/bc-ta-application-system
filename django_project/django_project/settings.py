@@ -90,6 +90,9 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'adminpassword',
+        # 'PASSWORD': 'ajg123',
+        # 'PASSWORD': '<3',
+        # 'PASSWORD': 'tasystem',
         'HOST': 'localhost',
         'PORT': '',
     }
