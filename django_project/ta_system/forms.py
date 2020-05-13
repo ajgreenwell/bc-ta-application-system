@@ -1,4 +1,7 @@
 from django import forms
+from .models import Course, Semester, Instructor
+from .utils import get_current_semester
+from datetime import date
 from django.contrib.postgres.forms import JSONField
 from .models import Profile
 from django.contrib.auth.models import User
@@ -7,7 +10,7 @@ from .data_formats.applicant_data_formats \
     import DATA_FORMATS as APPILCANT_DATA_FORMATS
 from users.data_formats.user_data_formats \
     import DATA_FORMATS as USER_DATA_FORMATS
-from .utils import get_semester_choices
+from .utils import get_semester_choices, get_year_and_semester_code
 
 
 class CourseDataUploadForm(forms.Form):
@@ -23,6 +26,44 @@ class SemesterForm(forms.Form):
 
 
 class ApplicationForm(forms.Form):
+
+    def get_grad_years():
+        year = date.today().year
+        grad_years = [(year, str(year))]
+        for i in range(4):
+            year += 1
+            grad_years.append((year, str(year)))
+        return grad_years
+
+    course_choices = [('', 'No preference')]
+    sem = get_year_and_semester_code(get_current_semester())
+    current_semester = Semester.objects.filter(year=sem[0], semester_code=sem[1])[0]
+    current_courses = list(Course.objects.filter(semester=current_semester).values_list('name', flat=True).distinct())
+    for course in current_courses:
+        if (course, course) in course_choices:
+            continue
+        course_choices.append((course, course))
+
+    prof_choices = [('', 'No preference')]
+    prof_ids = list(Course.objects.filter(semester=current_semester).values_list('instructor', flat=True).distinct())
+    profs = []
+    for prof in prof_ids:
+        profs.append(Instructor.objects.get(id=prof))
+    for prof in profs:
+        if (prof, prof) in prof_choices:
+            continue
+        prof_choices.append((prof, prof))
+
+    year_choices = get_grad_years()
+
+    course1 = forms.ChoiceField(choices=course_choices, required=False, label='Course 1')
+    course2 = forms.ChoiceField(choices=course_choices, required=False, label='Course 2')
+    course3 = forms.ChoiceField(choices=course_choices, required=False, label='Course 3')
+    prof1 = forms.ChoiceField(choices=prof_choices, required=False, label='Professor 1')
+    prof2 = forms.ChoiceField(choices=prof_choices, required=False, label='Professor 2')
+    prof3 = forms.ChoiceField(choices=prof_choices, required=False, label='Professor 3')
+    major = forms.CharField(max_length=200, label='Major(s)')
+    grad_year = forms.ChoiceField(choices=year_choices, label='Graduation Year')
     lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)
 
 

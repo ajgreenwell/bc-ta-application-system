@@ -1,10 +1,14 @@
 from django.shortcuts import render, redirect
+from .models import SystemStatus, Semester, Application, Profile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from json import dumps
 
 from .handlers.bad_request import handle_bad_request
+
+from .utils import get_current_semester, get_year_and_semester_code
+from django.contrib import messages
 from .forms import ApplicationForm, LabHourPreferencesForm, UserUpdateForm, EagleIdForm
 from .models import SystemStatus
 
@@ -13,18 +17,33 @@ import ta_system.utils as utils
 
 @login_required
 def home(request):
+
     if request.method not in ('GET', 'POST'):
         return handle_bad_request(request, app='ta_system', expected='GET, POST')
 
+    app_form = ApplicationForm()
     context = {
-        'system_is_open': SystemStatus.objects.order_by('id').last()
+        'system_is_open': SystemStatus.objects.order_by('id').last(),
+        'app_form': app_form
     }
-    student = request.user.profile
-    form = ApplicationForm()
+
+    user = request.user
+    student = Profile.objects.get(user=user)
+
     if request.method == 'POST':
-        form = ApplicationForm(request.POST)
-        if form.is_valid():
-            preferences = form.cleaned_data.get('lab_hour_data')
+        app_form = ApplicationForm(request.POST)
+        if app_form.is_valid():
+            current_semester = get_year_and_semester_code(get_current_semester())
+            semester = Semester.objects.filter(year=current_semester[0], semester_code=current_semester[1])[0]
+            course_preferences = [app_form.cleaned_data.get('course1'),
+                                  app_form.cleaned_data.get('course2'),
+                                  app_form.cleaned_data.get('course3')]
+            instructor_preferences = [app_form.cleaned_data.get('prof1'),
+                                      app_form.cleaned_data.get('prof2'),
+                                      app_form.cleaned_data.get('prof3')]
+            major = app_form.cleaned_data.get('major')
+            grad_year = app_form.cleaned_data.get('grad_year')
+            preferences = app_form.cleaned_data.get('lab_hour_data')
             if utils.is_valid_preferences(preferences):
                 utils.save_preferences(student, preferences)
                 context['user_has_submitted_application'] = True
@@ -34,10 +53,22 @@ def home(request):
                     'Error: Please specify which times you ' +
                     'would be available to tend the CS Lab.'
                 )
+            app = Application(applicant=student,
+                              semester=semester,
+                              course_preferences=course_preferences,
+                              instructor_preferences=instructor_preferences,
+                              major=major,
+                              grad_year=grad_year)
+            app.save()
+
+            messages.success(request, f'Application Submitted For {student.full_name}!')
+            preferences = app_form.cleaned_data.get('lab_hour_data')
+            utils.save_preferences(student, preferences)
+            return redirect('ta_system:home')
+
     elif utils.has_submitted_application(student):
         context['user_has_submitted_application'] = True
 
-    context['application_form'] = form
     return render(request, 'ta_system/home.html', context=context)
 
 

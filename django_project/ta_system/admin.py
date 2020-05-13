@@ -471,6 +471,10 @@ class SystemStatusAdmin(ModelAdmin):
     list_display = ('id', 'status', 'max_lab_hours_per_ta', 'date_changed')
 
 
+class ApplicationAdmin(ModelAdmin):
+    list_display = ('applicant', 'semester', 'major')
+
+
 admin_site = CustomAdminSite()
 admin_site.register(models.User, UserAdmin)
 admin_site.register(models.Course, CourseAdmin)
@@ -478,3 +482,4 @@ admin_site.register(models.Profile, ProfileAdmin)
 admin_site.register(models.Instructor, InstructorAdmin)
 admin_site.register(models.Semester, SemesterAdmin)
 admin_site.register(models.SystemStatus, SystemStatusAdmin)
+admin_site.register(models.Application, ApplicationAdmin)

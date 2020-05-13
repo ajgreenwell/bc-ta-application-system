@@ -1,5 +1,6 @@
 {% extends "ta_system/base.html" %}
 {% load static %}
+{% load crispy_forms_tags %}
 {% block extra-head %}
     <link rel="stylesheet" type="text/css" href="{% static 'ta_system/lab-hour-form.css' %}" />
     <script src="{% static 'ta_system/home-lab-hour-form.js' %}" type="module" ></script>
@@ -13,10 +14,11 @@
         </p>
     {% elif system_is_open.status and not user_has_submitted_application %}
         <h2>Apply Here</h2>
+        <h4>Course and Professor Preference</h4>
+        <p>If you prefer to TA a specific course or with a specific professor note your preference here.</p>
         <form method="POST" action="{% url 'ta_system:home' %}" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ application_form }}
-            <!-- includes form submit button -->
+            {{ app_form | crispy }}
             <div id="lab-hour-form"></div>
         </form>
     {% elif system_is_open.status and user_has_submitted_application %}

@@ -1,6 +1,6 @@
 from colorsys import hsv_to_rgb
 from datetime import date
-from .models import Semester
+from .models import Application, Semester
 
 
 def get_year_and_semester_code(semester):
@@ -36,14 +36,13 @@ def get_preferences(student, semester):
     return None
 
 
-# THIS MUST BE CHANGED TO TEST FOR SOMETHING MORE 
-# STABLE ONCE THE APPLICATION FORM IS FINISHED, BECAUSE
-# STUDENTS CAN UPDATE LAB HOUR PREFERENCES FROM THEIR 
-# PROFILE BEFORE SUBMITTING AN APPLICATION.
 def has_submitted_application(student):
-    current_semester = get_current_semester()
-    semesters = [obj["semester"] for obj in student.lab_hour_preferences]
-    return current_semester in semesters
+    current_semester = Semester.objects.filter(year=get_current_semester()[:4], semester_code=get_current_semester()[-1])[0]
+    try:
+        Application.objects.get(applicant=student, semester=current_semester)
+    except:
+        return False
+    return True
 
 
 def remove_preferences(student, semester):
@@ -53,9 +52,7 @@ def remove_preferences(student, semester):
 
 def save_preferences(student, preferences):
     current_semester = get_current_semester()
-    current_preferences = student.lab_hour_preferences
-    if has_submitted_application(student):
-        current_preferences = remove_preferences(student, current_semester)
+    current_preferences = remove_preferences(student, current_semester)
 
     current_preferences.append({
         'semester': current_semester,
