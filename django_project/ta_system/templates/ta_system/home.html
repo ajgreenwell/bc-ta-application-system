@@ -9,6 +9,9 @@
     <div class="content-section">
     {% if not system_is_open.status %}
         <h2> The TA Application System is Closed.</h2>
+        <p>
+            Please come back when the system is open to apply. To edit your account info in the meantime, go to your <a href= "{% url 'ta_system:profile' %}">profile</a> page.
+        </p>
     {% elif system_is_open.status and not user_has_submitted_application %}
         <h2>Apply Here</h2>
         <h4>Course and Professor Preference</h4>

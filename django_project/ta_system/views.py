@@ -106,7 +106,8 @@ def profile(request):
     context = {
         'user_form': user_form,
         'preference_form': preference_form,
-        'eagleid_form': eagleid_form
+        'eagleid_form': eagleid_form,
+        'system_is_open': SystemStatus.objects.order_by('id').last()
     }
     return render(request, 'ta_system/profile.html', context=context)
 

@@ -36,9 +36,10 @@ def validate_course_data(courses):
         course_id = f'({semester}: {course_number})'
         if course_id in unique_course_ids:
             raise ValueError(course_id)
+        year, semester_code = get_year_and_semester_code(semester)
         course_obj = Course.objects.filter(
-            semester__year=semester[:4],
-            semester__semester_code=semester[-1],
+            semester__year=year,
+            semester__semester_code=semester_code,
             course_number=course_number
         )
         if course_obj:
@@ -67,15 +68,9 @@ def process_course(course_data):
 def get_semester(course_data):
     year, semester_code = get_year_and_semester_code(course_data['semester'])
     try:
-        semester = Semester.objects.get(
-            year=year,
-            semester_code=semester_code
-        )
+        semester = Semester.objects.get(year=year, semester_code=semester_code)
     except Semester.DoesNotExist:
-        semester = Semester(
-            year=year,
-            semester_code=semester_code
-        )
+        semester = Semester(year=year, semester_code=semester_code)
         semester.save()
     return semester
 
