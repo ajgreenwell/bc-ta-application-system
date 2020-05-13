@@ -305,7 +305,7 @@ class CustomAdminSite(AdminSite):
         if request.method != 'POST':
             return handle_bad_request(request, app='admin', expected_method='POST')
 
-        semester = get_year_and_semester_code(get_current_semester())
+        semester = utils.get_year_and_semester_code(utils.get_current_semester())
         current_semester = Semester.objects.filter(
             year=sem[0], semester_code=sem[1])[0]
         applications = models.Application.objects.all()
@@ -326,41 +326,43 @@ class CustomAdminSite(AdminSite):
         print(current_courses)
         print('*************************************')
 
-        for course in current_courses:
-            num_tas = count(course.teaching_assistants)
-            if course.max_num_tas > num_tas:
-                if course.course_number[:8] in ['CSCI1105', 'CSCI1006', 'CSCI1007', 'CSCI1010']:
-                    col = simulation.convert_days_of_week(course.days_of_week)
-                    row = simulation.convert_class_time(
-                        course.start_time, course.end_time)
-                    for application in valid_applications:
-                        if course.instructor in application.instructor_preferences:
-                            if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
-                                simulation.assign_TA(
-                                    application.applicant, course)
-                    if course.max_num_tas > num_tas:
-                        for applicantion in valid_applications:
-                            if course.name in applicantion.course_preferences:
-                                if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
-                                    simulation.assign_TA(
-                                        application.applicant, course)
-                    if course.max_num_tas > num_tas:
-                        for applicantion in valid_applications:
-                            if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
-                                simulation.assign_TA(
-                                    application.applicant, course)
-                else:
-                    for application in valid_applications:
-                        if course.instructor in application.instructor_preferences:
-                            simulation.assign_TA(application.applicant, course)
-                    if course.max_num_tas > num_tas:
-                        for applicantion in valid_applications:
-                            if course.name in applicantion.course_preferences:
-                                simulation.assign_TA(
-                                    application.applicant, course)
-                    if course.max_num_tas > num_tas:
-                        for applicantion in valid_applications:
-                            simulation.assign_TA(application.applicant, course)
+        # for course in current_courses:
+        #     num_tas = count(course.teaching_assistants)
+        #     if course.max_num_tas > num_tas:
+        #         if course.course_number[:8] in ['CSCI1105', 'CSCI1006', 'CSCI1007', 'CSCI1010']:
+        #             col = simulation.convert_days_of_week(course.days_of_week)
+        #             row = simulation.convert_class_time(
+        #                 course.start_time, course.end_time)
+        #             for application in valid_applications:
+        #                 if course.instructor in application.instructor_preferences:
+        #                     if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
+        #                         simulation.assign_TA(
+        #                             application.applicant, course)
+        #             if course.max_num_tas > num_tas:
+        #                 for applicantion in valid_applications:
+        #                     if course.name in applicantion.course_preferences:
+        #                         if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
+        #                             simulation.assign_TA(
+        #                                 application.applicant, course)
+        #             if course.max_num_tas > num_tas:
+        #                 for applicantion in valid_applications:
+        #                     if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
+        #                         simulation.assign_TA(
+        #                             application.applicant, course)
+        #         else:
+        #             for application in valid_applications:
+        #                 if course.instructor in application.instructor_preferences:
+        #                     simulation.assign_TA(application.applicant, course)
+        #             if course.max_num_tas > num_tas:
+        #                 for applicantion in valid_applications:
+        #                     if course.name in applicantion.course_preferences:
+        #                         simulation.assign_TA(
+        #                             application.applicant, course)
+        #             if course.max_num_tas > num_tas:
+        #                 for applicantion in valid_applications:
+        #                     simulation.assign_TA(application.applicant, course)
+        #
+        # simulation.create_assignment_matrix()
 
         for application in valid_applications:
             applicant = application.applicant
@@ -499,7 +501,7 @@ class InstructorAdmin(ModelAdmin):
 
 class SemesterAdmin(InstructorAdmin):
     fields = ('year', 'semester_code', 'get_all_courses',
-              'get_all_teaching_assistants')
+              'get_all_teaching_assistants', 'lab_hour_assignments')
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
     list_display = ('get_semester', 'get_courses')
 

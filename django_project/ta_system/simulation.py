@@ -66,4 +66,12 @@ def check_availability(col, row, availability):
 def assign_to_lab(prefs):
     sem = get_year_and_semester_code(get_current_semester())
     current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
-    assignments = current_semester.lab_hour_assignments
+    assignment_json = current_semester.lab_hour_assignments
+    assignment_list = assignment_json['assignments']
+
+
+def create_assignment_matrix():
+    sem = get_year_and_semester_code(get_current_semester())
+    current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
+    empty_matrix = [['' for x in range(7)] for n in range(4*24)]
+    current_semester.lab_hour_assignments = {'assignments': empty_matrix}
