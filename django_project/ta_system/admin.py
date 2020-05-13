@@ -330,7 +330,8 @@ class CustomAdminSite(AdminSite):
         if request.method != 'POST':
             return handle_bad_request(request, app='admin', expected_method='POST')
 
-        semester = utils.get_year_and_semester_code(utils.get_current_semester())
+        semester = utils.get_year_and_semester_code(
+            utils.get_current_semester())
         current_semester = models.Semester.objects.filter(
             year=semester[0], semester_code=semester[1])[0]
         applications = models.Application.objects.all()
@@ -352,28 +353,25 @@ class CustomAdminSite(AdminSite):
         print('*************************************')
 
         for course in current_courses:
-            num_tas = len(course.teaching_assistants)
+            num_tas = course.teaching_assistants.all().count()
             if course.max_num_tas > num_tas:
-                if course.course_number[:8] in ['CSCI1105', 'CSCI1006', 'CSCI1007', 'CSCI1010']:
+                if course.name in ['Discussion Group / CSCI1101', 'Discussion Group / CSCI1103']:
                     col = simulation.convert_days_of_week(course.days_of_week)
                     row = simulation.convert_class_time(
                         course.start_time, course.end_time)
                     for application in valid_applications:
                         if course.instructor in application.instructor_preferences:
-                            if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
-                                simulation.assign_TA(
-                                    application.applicant, course)
+                            assign_CS1_TA(applicant, course, col, row,
+                                          application.applicant.lab_hour_preferences)
                     if course.max_num_tas > num_tas:
                         for applicantion in valid_applications:
                             if course.name in applicantion.course_preferences:
-                                if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
-                                    simulation.assign_TA(
-                                        application.applicant, course)
+                                assign_CS1_TA(applicant, course, col, row,
+                                              application.applicant.lab_hour_preferences)
                     if course.max_num_tas > num_tas:
                         for applicantion in valid_applications:
-                            if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
-                                simulation.assign_TA(
-                                    application.applicant, course)
+                            assign_CS1_TA(applicant, course, col, row,
+                                          application.applicant.lab_hour_preferences)
                 else:
                     for application in valid_applications:
                         if course.instructor in application.instructor_preferences:
@@ -391,9 +389,12 @@ class CustomAdminSite(AdminSite):
 
         for application in valid_applications:
             applicant = application.applicant
-            if len(applicant.ta_assignments) > 0:
+            if applicant.ta_assignments.all().count() > 0:
                 continue
             simulation.assign_to_lab(applicant.lab_hour_preferences)
+
+        messages.success(
+            request, 'The simulation for course and lab hour assignments is done! You can now download the TA Assignment and Lab Hour Assignment files.')
 
 
 class UserAdmin(ModelAdmin):

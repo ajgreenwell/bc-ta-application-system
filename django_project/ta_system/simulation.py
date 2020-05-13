@@ -3,11 +3,24 @@ from .utils import get_current_semester, get_year_and_semester_code
 
 
 def assign_TA(applicant, course):
-    if course.course_number in applicant.courses_taken:
-        if count(applicant.ta_assignments) == 0:
-            num_tas = num_tas + 1
-            course.teaching_assistants.add(applicant)
-            applicant.ta_assignments.add(course)
+    courses_taken = applicant.courses_taken.all()
+    for course_taken in courses_taken:
+        if course.course_number[:8] == course_taken.course_number[:8]:
+            if applicant.ta_assignments.all().count() == 0:
+                num_tas = num_tas + 1
+                course.teaching_assistants.add(applicant)
+                applicant.ta_assignments.add(course)
+
+
+def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences):
+    courses_taken = applicant.courses_taken.all()
+    if check_availability(col, row, lab_hour_preferences):
+        for course_taken in courses_taken:
+            if course_taken.course_number[:8] in ['CSCI1101', 'CSCI1103']:
+                if applicant.ta_assignments.all().count() == 0:
+                    num_tas = num_tas + 1
+                    course.teaching_assistants.add(applicant)
+                    applicant.ta_assignments.add(course)
 
 
 def convert_day_to_number(day):
@@ -81,5 +94,5 @@ def assign_to_lab(prefs):
 def create_assignment_matrix():
     sem = get_year_and_semester_code(get_current_semester())
     current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
-    empty_matrix = [['' for x in range(7)] for n in range(4*24)]
+    empty_matrix = [['' for x in range(7)] for n in range(4 * 24)]
     current_semester.lab_hour_assignments = {'assignments': empty_matrix}
