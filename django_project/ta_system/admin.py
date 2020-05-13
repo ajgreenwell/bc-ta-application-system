@@ -69,15 +69,12 @@ class CustomAdminSite(AdminSite):
             path('get_lab_hour_assignments',
                  self.admin_view(self.get_lab_hour_assignments),
                  name='get_lab_hour_assignments'),
-<<<<<<< HEAD
+            path('lab_hour_assignments_download',
+                 self.admin_view(self.lab_hour_assignments_download),
+                 name='lab_hour_assignments_download'),
             path('simulation',
                  self.admin_view(self.simulation),
                  name='simulation')
-=======
-            path('lab_hour_assignments_download',
-                 self.admin_view(self.lab_hour_assignments_download),
-                 name='lab_hour_assignments_download')
->>>>>>> master
         ] + urls
         return urls
 
@@ -332,8 +329,8 @@ class CustomAdminSite(AdminSite):
             return handle_bad_request(request, app='admin', expected_method='POST')
 
         semester = utils.get_year_and_semester_code(utils.get_current_semester())
-        current_semester = Semester.objects.filter(
-            year=sem[0], semester_code=sem[1])[0]
+        current_semester = models.Semester.objects.filter(
+            year=semester[0], semester_code=semester[1])[0]
         applications = models.Application.objects.all()
         valid_applications = []
         courses = models.Courses.objects.filter(
