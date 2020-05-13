@@ -242,7 +242,7 @@ class SystemStatus(models.Model):
 
 
 class Application(models.Model):
-    applicant = models.ForeignKey(User, on_delete=models.CASCADE)
+    applicant = models.ForeignKey(Profile, on_delete=models.CASCADE)
     semester = models.ForeignKey('Semester', on_delete=models.CASCADE)
     course_preferences = ArrayField(models.CharField(max_length=20, blank=True))
     instructor_preferences = ArrayField(models.CharField(max_length=50, blank=True))
@@ -254,4 +254,4 @@ class Application(models.Model):
         verbose_name_plural = "Applications"
 
     def __str__(self):
-        return f'{self.applicant.first_name} {self.applicant.last_name}'
+        return f'{self.applicant.full_name}'

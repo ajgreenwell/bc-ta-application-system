@@ -10,7 +10,7 @@ from .data_formats.applicant_data_formats \
     import DATA_FORMATS as APPILCANT_DATA_FORMATS
 from users.data_formats.user_data_formats \
     import DATA_FORMATS as USER_DATA_FORMATS
-from .utils import get_semester_choices
+from .utils import get_semester_choices, get_year_and_semester_code
 
 
 class CourseDataUploadForm(forms.Form):
@@ -36,7 +36,8 @@ class ApplicationForm(forms.Form):
         return grad_years
 
     course_choices = [('', 'No preference')]
-    current_semester = Semester.objects.get(year=get_current_semester()[:4], semester_code=get_current_semester()[-1])
+    sem = get_year_and_semester_code(get_current_semester())
+    current_semester = Semester.objects.filter(year=sem[0], semester_code=sem[1])[0]
     current_courses = list(Course.objects.filter(semester=current_semester).values_list('name', flat=True).distinct())
     for course in current_courses:
         if (course, course) in course_choices:

@@ -36,10 +36,10 @@ def get_preferences(student, semester):
     return None
 
 
-def has_submitted_application(user):
+def has_submitted_application(student):
     current_semester = Semester.objects.filter(year=get_current_semester()[:4], semester_code=get_current_semester()[-1])[0]
     try:
-        Application.objects.get(applicant=user, semester=current_semester)
+        Application.objects.get(applicant=student, semester=current_semester)
     except:
         return False
     return True
@@ -53,7 +53,7 @@ def remove_preferences(student, semester):
 def save_preferences(student, preferences):
     current_semester = get_current_semester()
     current_preferences = student.lab_hour_preferences
-    if has_submitted_application(student.user):
+    if has_submitted_application(student):
         current_preferences = remove_preferences(student, current_semester)
 
     current_preferences.append({

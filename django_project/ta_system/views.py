@@ -7,7 +7,7 @@ from json import dumps
 
 from .handlers.bad_request import handle_bad_request
 
-from .utils import get_current_semester
+from .utils import get_current_semester, get_year_and_semester_code
 from django.contrib import messages
 from .forms import ApplicationForm, LabHourPreferencesForm, UserUpdateForm, EagleIdForm
 from .models import SystemStatus
@@ -28,13 +28,13 @@ def home(request):
     }
 
     user = request.user
-    student = user.profile
+    student = Profile.objects.get(user=user)
 
     if request.method == 'POST':
         app_form = ApplicationForm(request.POST)
         if app_form.is_valid():
-            current_semester = get_current_semester()
-            semester = Semester.objects.filter(year=current_semester[:4], semester_code=current_semester[-1])[0]
+            current_semester = get_year_and_semester_code(get_current_semester())
+            semester = Semester.objects.filter(year=current_semester[0], semester_code=current_semester[1])[0]
             course_preferences = [app_form.cleaned_data.get('course1'),
                                   app_form.cleaned_data.get('course2'),
                                   app_form.cleaned_data.get('course3')]
@@ -53,7 +53,7 @@ def home(request):
                     'Error: Please specify which times you ' +
                     'would be available to tend the CS Lab.'
                 )
-            app = Application(applicant=user,
+            app = Application(applicant=student,
                               semester=semester,
                               course_preferences=course_preferences,
                               instructor_preferences=instructor_preferences,
@@ -61,13 +61,12 @@ def home(request):
                               grad_year=grad_year)
             app.save()
 
-            student = Profile.objects.get(user=user)
             messages.success(request, f'Application Submitted For {student.full_name}!')
             preferences = app_form.cleaned_data.get('lab_hour_data')
             utils.save_preferences(student, preferences)
             return redirect('ta_system:home')
 
-    elif utils.has_submitted_application(user):
+    elif utils.has_submitted_application(student):
         context['user_has_submitted_application'] = True
 
     return render(request, 'ta_system/home.html', context=context)
