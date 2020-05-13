@@ -1,3 +1,5 @@
+from .models import Semester
+from .utils import get_current_semester, get_year_and_semester_code
 
 
 def assign_TA(applicant, course):
@@ -35,3 +37,9 @@ def convert_class_time(start, end):
 
 def check_availability(col, row, availability):
     return True
+
+
+def assign_to_lab(prefs):
+    sem = get_year_and_semester_code(get_current_semester())
+    current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
+    assignments = current_semester.lab_hour_assignments

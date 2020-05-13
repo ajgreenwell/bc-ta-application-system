@@ -312,25 +312,25 @@ class CustomAdminSite(AdminSite):
             semester=current_semester).order_by('-course_number')
         current_courses = []
         for application in applications:
-            if not application.applicant.is_blacklisted and has_submitted_application(application.applicant):
+            if not application.applicant.is_blacklisted and utils.has_submitted_application(application.applicant):
                 valid_applications.append(application)
         for course in courses:
             if not course.course_number[:8] in ['CSCI1101', 'CSCI1103']:
                 current_courses.append(course)
 
-        println('*************************************')
-        println(current_semester)
-        println(valid_applications)
-        println(current_courses)
-        println('*************************************')
+        print('*************************************')
+        print(current_semester)
+        print(valid_applications)
+        print(current_courses)
+        print('*************************************')
 
         for course in current_courses:
             num_tas = count(course.teaching_assistants)
             if course.max_num_tas > num_tas:
                 if course.course_number[:8] in ['CSCI1105', 'CSCI1006', 'CSCI1007', 'CSCI1010']:
-                    col = simulation.convert_days_of_week(couse.days_of_week)
+                    col = simulation.convert_days_of_week(course.days_of_week)
                     row = simulation.convert_class_time(
-                        couse.start_time, couse.end_time)
+                        course.start_time, course.end_time)
                     for application in valid_applications:
                         if course.instructor in application.instructor_preferences:
                             if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
@@ -359,6 +359,12 @@ class CustomAdminSite(AdminSite):
                     if course.max_num_tas > num_tas:
                         for applicantion in valid_applications:
                             simulation.assign_TA(application.applicant, course)
+
+        for application in valid_applications:
+            applicant = application.applicant
+            if len(applicant.ta_assignments) > 0:
+                continue
+            simulation.assign_to_lab(applicant.lab_hour_preferences)
 
 
 class UserAdmin(ModelAdmin):
