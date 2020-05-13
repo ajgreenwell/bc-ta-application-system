@@ -21,6 +21,7 @@ import ta_system.html_utils as html
 import ta_system.forms as forms
 import ta_system.models as models
 import ta_system.utils as utils
+import ta_system.simulation as simulation
 
 
 MAX_NUM_TO_DISPLAY = 3
@@ -305,60 +306,59 @@ class CustomAdminSite(AdminSite):
             return handle_bad_request(request, app='admin', expected_method='POST')
 
         current_semester = utils.get_current_semester()
-        students = User.objects.all()
-        for student in students:
-            if student.Profile.is_blacklisted:
-                students.remove(student)
-            if not has_submitted_application(student):
-                students.remove(student)
-        courses = models.Course.objects.all()
+        applications = models.Application.objects.all()
+        valid_applications = []
+        courses = models.Courses.objects.filter(
+            semester=current_semester).order_by('-course_number')
+        current_courses = []
+        for application in applications:
+            if not application.applicant.is_blacklisted and has_submitted_application(application.applicant):
+                valid_applications.append(application)
         for course in courses:
-            if course.semester != current_semester:
-                courses.remove(course)
-        current_courses = courses.objects.order_by(course_number)
-        # fill in the variable to make the students order by time
-        applicants = students.objects.order_by()
+            if not course.course_number[:8] in ['CSCI1101', 'CSCI1103']:
+                current_courses.append(course)
+
+        println('*************************************')
+        println(current_semester)
+        println(valid_applications)
+        println(current_courses)
+        println('*************************************')
 
         for course in current_courses:
             num_tas = count(course.teaching_assistants)
             if course.max_num_tas > num_tas:
-                if course.course_number[:8] == 'CSCI1101':
+                if course.course_number[:8] in ['CSCI1105', 'CSCI1006', 'CSCI1007', 'CSCI1010']:
+                    col = simulation.convert_days_of_week(couse.days_of_week)
+                    row = simulation.convert_class_time(
+                        couse.start_time, couse.end_time)
+                    for application in valid_applications:
+                        if course.instructor in application.instructor_preferences:
+                            if simulation.check_availability(col, row, application.applicant.lab_hour_preferences):
+                                simulation.assign_TA(
+                                    application.applicant, course)
+                    if course.max_num_tas > num_tas:
+                        for applicantion in valid_applications:
+                            if course.name in applicantion.course_preferences:
+                                simulation.assign_TA(
+                                    application.applicant, course)
+                    if course.max_num_tas > num_tas:
+                        for applicantion in valid_applications:
+                            simulation.assign_TA(application.applicant, course)
+
                     # how do we connect discussion group to cs 1
                     # do we treat discussion groups as courses?
                 else:
-                    for applicant in applicants:
-                        # where do you store the preferences and what are the variable names
-                        # I put prof_pref and course_pref here for now
-                        if applicant.Profile.prof_pref == course.instructor:
-                            if applicant.Profile.courses_taken == course.course_number:
-                                if count(applicant.Profile.ta_assignments) == 0:
-                                    num_tas = num_tas + 1
-                                    course.teaching_assistants.add(
-                                        applicant.Profile)
-                                    applicant.Profile.ta_assignments.add(
-                                        course)
-                                    applicants.remove(applicant)
+                    for application in valid_applications:
+                        if course.instructor in application.instructor_preferences:
+                            simulation.assign_TA(application.applicant, course)
                     if course.max_num_tas > num_tas:
-                        for applicant in applicants:
-                            if applicant.Profile.course_pref == course.course_number:
-                                if applicant.Profile.courses_taken == course.course_number:
-                                    if count(applicant.Profile.ta_assignments) == 0:
-                                        num_tas = num_tas + 1
-                                        course.teaching_assistants.add(
-                                            applicant.Profile)
-                                        applicant.Profile.ta_assignments.add(
-                                            course)
-                                        applicants.remove(applicant)
+                        for applicantion in valid_applications:
+                            if course.name in applicantion.course_preferences:
+                                simulation.assign_TA(
+                                    application.applicant, course)
                     if course.max_num_tas > num_tas:
-                        for applicant in applicants:
-                            if applicant.Profile.courses_taken == course.course_number:
-                                if count(applicant.Profile.ta_assignments) == 0:
-                                    num_tas = num_tas + 1
-                                    course.teaching_assistants.add(
-                                        applicant.Profile)
-                                    applicant.Profile.ta_assignments.add(
-                                        course)
-                                    applicants.remove(applicant)
+                        for applicantion in valid_applications:
+                            simulation.assign_TA(application.applicant, course)
 
 
 class UserAdmin(ModelAdmin):

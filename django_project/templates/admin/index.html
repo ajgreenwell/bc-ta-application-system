@@ -99,15 +99,15 @@
 {% block custom-content %}
 <div class="custom-content-separator"></div>
 <div class="custom-content">
-    <form  action="{% url 'admin:change_system_status' %}" method = "POST">
+    <form  method = "POST">
         {% csrf_token %}
         <header>Update TA Application System Status</header>
         <fieldset class="mt-8">
             <div class="mt-8">
                 {% if last_system_status.status %}
-                    <input id='close_system' type="submit" value="Close TA Application System">
+                    <input id='close_system' type="submit" value="Close TA Application System" formaction="{% url 'admin:change_system_status' %}">
                 {% else %}
-                    <input id='open_system' type="submit" value="Open TA Application System">
+                    <input id='open_system' type="submit" value="Open TA Application System" formaction="{% url 'admin:change_system_status' %}">
                 {% endif %}
             </div>
         </fieldset>
