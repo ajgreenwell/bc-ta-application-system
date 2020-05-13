@@ -1,5 +1,6 @@
 from ..models import Semester
 from ..utils import get_verbose_semester
+from .file_download import handle_file_download
 from csv import writer
 from django.http import HttpResponse
 from io import StringIO
@@ -7,25 +8,15 @@ from ta_system.utils import get_year_and_semester_code
 
 
 def handle_assignment_data_download(semester):
-    csv_buffer = StringIO()
-    csv_writer = writer(csv_buffer)
+    def write_data(csv_writer):
+        return write_ta_assignment_data(csv_writer, semester)
+
     headers = [
         'Semester', 'Course Number', 'Course Title', 'Professor',
         'TA Eagle ID', 'TA First Name', 'TA Last Name', 'TA Email'
     ]
-    csv_writer.writerow(headers)
-
-    try:
-        csv_writer = write_ta_assignment_data(csv_writer, semester)
-    except:
-        csv_buffer.close()
-        raise
-    else:
-        csv_buffer.seek(0)
-        response = HttpResponse(csv_buffer, content_type='text/csv')
-        response['Content-Disposition'] = \
-            f'attachment; filename={semester}_TA_Assignment_Data.csv'
-        return response
+    filename = f'{semester}_TA_Assignments.csv'
+    return handle_file_download(headers, write_data, filename)
 
 
 def write_ta_assignment_data(csv_writer, semester):
