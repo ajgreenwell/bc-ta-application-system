@@ -329,7 +329,7 @@ class CustomAdminSite(AdminSite):
         for course in current_courses:
             num_tas = count(course.teaching_assistants)
             if course.max_num_tas > num_tas:
-                if course.course_number[:8] in ['CSCI1105', 'CSCI1006', 'CSCI1007', 'CSCI1010']:
+                if course.name[:-2] == 'Discussion Group / CSCI11':
                     col = simulation.convert_days_of_week(course.days_of_week)
                     row = simulation.convert_class_time(
                         course.start_time, course.end_time)
