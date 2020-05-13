@@ -8,7 +8,7 @@
     <div class="content-section">
       <div class="media">
         <div class="media-body">
-          <h2 class="account-heading">Profile Page</h2>
+          <h2 class="account-heading">User Profile</h2>
         </div>
       </div>
       <form method="POST" action="{% url 'ta_system:profile' %}" enctype="multipart/form-data">
@@ -16,9 +16,11 @@
         {{ eagleid_form|crispy }}
         {{ user_form|crispy }}
         {{ preference_form }}
-        <div>Lab Hour Preferences*</div>
-        <small class='text-muted'>Please select the hours for which you will be able to attend the CS lab.</small>
-        <div class="mt-12" id="lab-hour-form"></div>
+        {% if system_is_open.status %}
+          <div>Lab Hour Preferences*</div>
+          <small class='text-muted'>Please select the hours for which you will be able to attend the CS lab.</small>
+          <div class="mt-12" id="lab-hour-form"></div>
+        {% endif %}
       </form>
     </div>
 {% endblock content %}

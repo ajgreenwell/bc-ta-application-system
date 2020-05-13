@@ -15,6 +15,7 @@ from .handlers.bad_request import handle_bad_request
 from .handlers.course_data_upload import handle_course_data_upload
 from .handlers.applicant_data_upload import handle_applicant_data_upload
 from .handlers.assignment_data_download import handle_assignment_data_download
+from .handlers.lab_hour_assignments_download import handle_lab_hour_assignments_download
 from .handlers.file_upload import UPLOAD_DATA_FORMATS_URL as DATA_FORMATS_URL
 
 import ta_system.html_utils as html
@@ -70,7 +71,10 @@ class CustomAdminSite(AdminSite):
                  name='get_lab_hour_assignments'),
             path('simulation',
                  self.admin_view(self.simulation),
-                 name='simulation')
+                 name='simulation'),
+            path('lab_hour_assignments_download',
+                 self.admin_view(self.lab_hour_assignments_download),
+                 name='lab_hour_assignments_download')
         ] + urls
         return urls
 
@@ -114,7 +118,7 @@ class CustomAdminSite(AdminSite):
             except Exception as err:
                 messages.error(
                     request,
-                    f'Course Data Eupload Failed: The following uncaught error occurred: {err}'
+                    f'Course Data Upload Failed: The following uncaught error occurred: {err}'
                 )
             else:
                 messages.success(request, 'Course Data Uploaded Successfully.')
@@ -199,12 +203,16 @@ class CustomAdminSite(AdminSite):
             return handle_bad_request(request, app='admin', expected_method='GET')
 
         semester = request.GET.get('semester', utils.get_current_semester())
-        constraints = utils.get_constraints(semester)
-        return HttpResponse(
-            dumps(constraints),
-            content_type='application/json',
-            status=200
-        )
+        try:
+            constraints = utils.get_constraints(semester)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=500)
+        else:
+            return HttpResponse(
+                dumps(constraints),
+                content_type='application/json',
+                status=200
+            )
 
     def set_lab_hour_constraints(self, request):
         if request.method != 'POST':
@@ -249,6 +257,7 @@ class CustomAdminSite(AdminSite):
                         'Error: There are no teaching assistants that ' +
                         'have been assigned for this semester.'
                     )
+                    return redirect('admin:index')
                 return render(request, 'admin/assign_lab_hours.html', context)
             else:
                 messages.error(request, 'Error, Invalid Semester Selected.')
@@ -300,6 +309,22 @@ class CustomAdminSite(AdminSite):
             content_type='application/json',
             status=200
         )
+
+    def lab_hour_assignments_download(self, request):
+        if request.method != 'GET':
+            return handle_bad_request(request, app='admin', expected_method='GET')
+
+        form = forms.SemesterForm(request.GET)
+        if form.is_valid():
+            semester = form.cleaned_data.get('semester')
+            try:
+                return handle_lab_hour_assignments_download(semester)
+            except ValueError as err:
+                messages.error(
+                    request,
+                    f'Lab Hour Assignments Download Failed: {err}.'
+                )
+        return redirect('admin:index')
 
     def simulation(self, request):
         if request.method != 'POST':
@@ -518,6 +543,10 @@ class SystemStatusAdmin(ModelAdmin):
     list_display = ('id', 'status', 'max_lab_hours_per_ta', 'date_changed')
 
 
+class ApplicationAdmin(ModelAdmin):
+    list_display = ('applicant', 'semester', 'major')
+
+
 admin_site = CustomAdminSite()
 admin_site.register(models.User, UserAdmin)
 admin_site.register(models.Course, CourseAdmin)
@@ -525,3 +554,4 @@ admin_site.register(models.Profile, ProfileAdmin)
 admin_site.register(models.Instructor, InstructorAdmin)
 admin_site.register(models.Semester, SemesterAdmin)
 admin_site.register(models.SystemStatus, SystemStatusAdmin)
+admin_site.register(models.Application, ApplicationAdmin)

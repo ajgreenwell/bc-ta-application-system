@@ -131,13 +131,14 @@
             <input type="submit" value="Upload">
         </fieldset>
     </form>
-    <form method="GET" action="{% url 'admin:assignment_data_download' %}" enctype="multipart/form-data" class="mt-30">
+    <form method="GET" enctype="multipart/form-data" class="mt-30">
         {% csrf_token %}
         <header>Download Files</header>
         <fieldset class="mt-8">
             <div class="mt-12">
                 {{ semester_form.as_p }}
-                <input type="submit" value="Download TA Assignment Data">
+                <input type="submit" value="Download TA Assignments" formaction="{% url 'admin:assignment_data_download' %}">
+                <input type="submit" class="lab-hour-btn mt-8" value="Download Lab Hour Assignments" formaction="{% url 'admin:lab_hour_assignments_download' %}"/>
             </div>
         </fieldset>
     </form>
@@ -148,7 +149,7 @@
             <div class="mt-12">
                 {{ semester_form.as_p }}
                 <input type="submit" class="lab-hour-btn" value="Update Hours of Operation" formaction="{% url 'admin:view_lab_hour_constraints' %}"/>
-                <input type="submit" class="lab-hour-btn mt-8" value="Assign Lab Hours" formaction="{% url 'admin:assign_lab_hours' %}"/>
+                <input type="submit" class="lab-hour-btn mt-8" value="Assign Lab Hours to TAs" formaction="{% url 'admin:assign_lab_hours' %}"/>
             </div>
         </fieldset>
     </form>

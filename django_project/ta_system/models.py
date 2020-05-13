@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 from .validators import DataValidator
 from .data_formats.course_data_formats \
     import DATA_FORMATS as COURSE_DATA_FORMATS
@@ -239,3 +239,19 @@ class SystemStatus(models.Model):
     class Meta:
         verbose_name = "System Status"
         verbose_name_plural = "System Status"
+
+
+class Application(models.Model):
+    applicant = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    semester = models.ForeignKey('Semester', on_delete=models.CASCADE)
+    course_preferences = ArrayField(models.CharField(max_length=20, blank=True))
+    instructor_preferences = ArrayField(models.CharField(max_length=50, blank=True))
+    major = models.CharField(max_length=50)
+    grad_year = models.IntegerField()
+
+    class Meta:
+        verbose_name = "Application"
+        verbose_name_plural = "Applications"
+
+    def __str__(self):
+        return f'{self.applicant.full_name}'

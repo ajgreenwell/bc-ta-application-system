@@ -92,6 +92,7 @@ DATABASES = {
         # 'PASSWORD': 'ajg123',
         'PASSWORD': '<3',
         # 'PASSWORD': 'tasystem',
+        #'PASSWORD': 'adminpassword',
         'HOST': 'localhost',
         'PORT': '',
     }

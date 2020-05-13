@@ -69,7 +69,7 @@ a:hover {
 
 .content-section {
   background: #ffffff;
-  padding: 10px 20px;
+  padding: 25px 35px;
   border: 1px solid #dddddd;
   border-radius: 3px;
   margin-bottom: 20px;
@@ -120,6 +120,7 @@ a.article-title:hover {
 
 .account-heading {
   font-size: 2.5rem;
+  margin-bottom: 20px;
 }
 
 .form-control:focus {
@@ -129,4 +130,10 @@ a.article-title:hover {
 
 .mt-12 {
   margin-top: 12px;
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 850px!important;
+  }
 }
