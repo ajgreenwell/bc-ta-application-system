@@ -23,6 +23,7 @@ import ta_system.forms as forms
 import ta_system.models as models
 import ta_system.utils as utils
 import ta_system.simulation as simulation
+from .models import Semester, Course, Application
 
 
 MAX_NUM_TO_DISPLAY = 3
@@ -335,7 +336,7 @@ class CustomAdminSite(AdminSite):
             year=semester[0], semester_code=semester[1])[0]
         applications = models.Application.objects.all()
         valid_applications = []
-        courses = models.Courses.objects.filter(
+        courses = models.Course.objects.filter(
             semester=current_semester).order_by('-course_number')
         current_courses = []
         for application in applications:
@@ -391,9 +392,14 @@ class CustomAdminSite(AdminSite):
 
         for application in valid_applications:
             applicant = application.applicant
-            if len(applicant.ta_assignments) > 0:
-                continue
-            simulation.assign_to_lab(applicant.lab_hour_preferences)
+            if len(applicant.ta_assignments) == 0:
+                simulation.assign_to_lab(applicant)
+
+        if not simulation.is_schedule_full:
+            for application in valid_applications:
+                applicant = application.applicant
+                if len(applicant.ta_assignments) > 0:
+                    simulation.assign_to_lab(applicant)
 
 
 class UserAdmin(ModelAdmin):

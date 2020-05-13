@@ -71,11 +71,23 @@ def check_availability(cols, rows, lab_hour_preferences):
     return True
 
 
-def assign_to_lab(prefs):
+def assign_to_lab(student):
+    availability = student.lab_hour_preferences["preferences"]
     sem = get_year_and_semester_code(get_current_semester())
     current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
-    assignment_json = current_semester.lab_hour_assignments
-    assignment_list = assignment_json['assignments']
+    json = current_semester.lab_hour_assignments
+    assignment_list = json['assignments']
+    qhour_count = 0
+    for day in range(7):
+        for quarterhour in range(len(assignment_list)):
+            if qhour_count <= 12:
+                break
+            if assignment_list[quarterhour][day] == '':
+                if availability[quarterhour][day]:
+                    assignment_list[quarterhour][day] = student.eagle_id
+                    qhour_count += 1
+        if qhour_count <= 12:
+            break
 
 
 def create_assignment_matrix():
@@ -83,3 +95,15 @@ def create_assignment_matrix():
     current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
     empty_matrix = [['' for x in range(7)] for n in range(4*24)]
     current_semester.lab_hour_assignments = {'assignments': empty_matrix}
+
+
+def is_schedule_full():
+    sem = get_year_and_semester_code(get_current_semester())
+    current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
+    json = current_semester.lab_hour_assignments
+    assignment_list = json['assignments']
+    for day in range(7):
+        for qhour in range(len(assignment_list)):
+            if not assignment_list[qhour][day]:
+                return False
+    return True
