@@ -401,7 +401,7 @@ class CustomAdminSite(AdminSite):
 
         messages.success(
             request, 'The simulation for course and lab hour assignments is done! You can now download the TA Assignment and Lab Hour Assignment files.')
-
+        return redirect('admin:index')
 
 class UserAdmin(ModelAdmin):
     list_display = ('username', 'first_name', 'last_name', 'is_active')
