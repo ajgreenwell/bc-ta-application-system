@@ -52,9 +52,7 @@ def remove_preferences(student, semester):
 
 def save_preferences(student, preferences):
     current_semester = get_current_semester()
-    current_preferences = student.lab_hour_preferences
-    if has_submitted_application(student):
-        current_preferences = remove_preferences(student, current_semester)
+    current_preferences = remove_preferences(student, current_semester)
 
     current_preferences.append({
         'semester': current_semester,
