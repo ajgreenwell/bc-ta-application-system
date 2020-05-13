@@ -10,6 +10,8 @@ def assign_TA(applicant, course):
                 num_tas = num_tas + 1
                 course.teaching_assistants.add(applicant)
                 applicant.ta_assignments.add(course)
+                print('*********' + course.name + course.course_number + ": "
+                      applicant.user.first_name + applicant.user.last_name)
 
 
 def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences):
@@ -21,6 +23,8 @@ def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences):
                     num_tas = num_tas + 1
                     course.teaching_assistants.add(applicant)
                     applicant.ta_assignments.add(course)
+                    print('*********' + course.name + course.course_number + ": "
+                          applicant.user.first_name + applicant.user.last_name)
 
 
 def convert_day_to_number(day):
@@ -42,20 +46,20 @@ def convert_day_to_number(day):
 
 def convert_days_of_week(days_of_week):
     col = []
-    if len(days_of_week) == 3:
+    if len(days_of_week) == 1:
+        col.append(convert_day_to_number(days_of_week))
+    elif len(days_of_week) == 3:
         day1 = days_of_week.split('/')[0]
         day2 = days_of_week.split('/')[1]
         col.append(convert_day_to_number(day1))
         col.append(convert_day_to_number(day2))
-    elif len(days_of_week) == 5:
+    else:
         day1 = days_of_week.split('/')[0]
         day2 = days_of_week.split('/')[1]
         day3 = days_of_week.split('/')[2]
         col.append(convert_day_to_number(day1))
         col.append(convert_day_to_number(day2))
         col.append(convert_day_to_number(day3))
-    else:
-        col.append(convert_day_to_number(days_of_week))
     return (col)
 
 
@@ -63,12 +67,23 @@ def convert_class_time(start, end):
     row = []
     str_start = str(start)
     str_end = str(end)
+
     start_hour = int(str_start[:2])
     start_min = int(str_start[3:5])
-    start_slot = 4 * start_hour + (start_min / 15)
+    if start_min % 15 == 0:
+        start_min = start_min / 15
+    else:
+        start_min = start_min // 15 + 1
+    start_slot = 4 * start_hour + start_min
+
     end_hour = int(str_end[:2])
     end_min = int(str_end[3:5])
-    end_slot = 4 * end_hour + (end_min / 15)
+    if end_min % 15 == 0:
+        end_min = end_min / 15
+    else:
+        end_min = end_min // 15 + 1
+    end_slot = 4 * end_hour + end_min
+
     range = end_slot - start_slot
     for i in range:
         row.append(start_slot + 1)

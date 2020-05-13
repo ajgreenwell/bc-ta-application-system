@@ -344,7 +344,7 @@ class CustomAdminSite(AdminSite):
             if not application.applicant.is_blacklisted and utils.has_submitted_application(application.applicant):
                 valid_applications.append(application)
         for course in courses:
-            if not course.course_number[:8] in ['CSCI1101', 'CSCI1103']:
+            if not course.course_number[:8] in ['CSCI1101', 'CSCI1103'] or not course.course_number[:5] in ['CSCI4', 'CSCI5', 'CSCI6']:
                 current_courses.append(course)
 
         print('*************************************')
