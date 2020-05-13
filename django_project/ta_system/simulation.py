@@ -10,8 +10,8 @@ def assign_TA(applicant, course):
                 num_tas = num_tas + 1
                 course.teaching_assistants.add(applicant)
                 applicant.ta_assignments.add(course)
-                print('*********' + course.name + course.course_number + ": "
-                      applicant.user.first_name + applicant.user.last_name)
+                print('*********' + course.name + course.course_number + ": " +
+                      applicant.user.username)
 
 
 def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences):
@@ -23,8 +23,8 @@ def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences):
                     num_tas = num_tas + 1
                     course.teaching_assistants.add(applicant)
                     applicant.ta_assignments.add(course)
-                    print('*********' + course.name + course.course_number + ": "
-                          applicant.user.first_name + applicant.user.last_name)
+                    print('*********' + course.name + course.course_number + ": " +
+                          applicant.user.username)
 
 
 def convert_day_to_number(day):
