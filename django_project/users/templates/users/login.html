@@ -1,6 +1,10 @@
 {% extends "ta_system/base.html" %}
 {% load crispy_forms_tags %}
-{% block message %}{% endblock %}
+{% block message %}
+    <div class="alert alert-warning">
+        If you have not yet activate your account, please check your BC email for a confirmation email from taapplicationsystem@gmail.com.
+    </div>
+{% endblock %}
 {% block content %}
     <div class='content-section'>
         <form method='POST'>

@@ -1,0 +1,10 @@
+{% autoescape off %}
+Hi {{ user.first_name }} {{user.last_name}},
+Please click on the link to confirm your registration if the following information is correct.
+BC Email: {{ user.username }}
+Eagle ID: {{ user.profile.eagle_id }}
+Activation Link: http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+If any of the information above is incorrect, please respond to this email and the site administrator will help you activate or delete your account.
+
+{% endautoescape %}
