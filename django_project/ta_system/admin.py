@@ -22,6 +22,7 @@ import ta_system.html_utils as html
 import ta_system.forms as forms
 import ta_system.models as models
 import ta_system.utils as utils
+import ta_system.simulation as simulation
 
 
 MAX_NUM_TO_DISPLAY = 3
@@ -70,7 +71,10 @@ class CustomAdminSite(AdminSite):
                  name='get_lab_hour_assignments'),
             path('lab_hour_assignments_download',
                  self.admin_view(self.lab_hour_assignments_download),
-                 name='lab_hour_assignments_download')
+                 name='lab_hour_assignments_download'),
+            path('simulation',
+                 self.admin_view(self.simulation),
+                 name='simulation')
         ] + urls
         return urls
 
@@ -241,7 +245,8 @@ class CustomAdminSite(AdminSite):
             if form.is_valid():
                 semester = form.cleaned_data.get('semester')
                 context['semester'] = semester
-                context['verbose_semester'] = utils.get_verbose_semester(semester)
+                context['verbose_semester'] = utils.get_verbose_semester(
+                    semester)
                 teaching_assistants = utils.get_tas_from_semester(semester)
                 context['teaching_assistants'] = dumps(teaching_assistants)
                 ta_colors = utils.get_ta_rgb_colors(teaching_assistants)
@@ -294,10 +299,11 @@ class CustomAdminSite(AdminSite):
     def get_lab_hour_assignments(self, request):
         if request.method != 'GET':
             return handle_bad_request(request, app='admin', expected_method='GET')
-        
+
         semester_string = request.GET.get('semester')
         year, semester_code = utils.get_year_and_semester_code(semester_string)
-        semester = models.Semester.objects.get(year=year, semester_code=semester_code)
+        semester = models.Semester.objects.get(
+            year=year, semester_code=semester_code)
         return HttpResponse(
             dumps(semester.lab_hour_assignments),
             content_type='application/json',
@@ -319,6 +325,87 @@ class CustomAdminSite(AdminSite):
                     f'Lab Hour Assignments Download Failed: {err}.'
                 )
         return redirect('admin:index')
+
+    def simulation(self, request):
+        if request.method != 'POST':
+            return handle_bad_request(request, app='admin', expected_method='POST')
+
+        semester = utils.get_year_and_semester_code(
+            utils.get_current_semester())
+        current_semester = models.Semester.objects.get(
+            year=semester[0], semester_code=semester[1])
+        applications = models.Application.objects.all()
+        valid_applications = []
+        courses = models.Course.objects.filter(
+            semester=current_semester).order_by('-course_number')
+        current_courses = []
+        for application in applications:
+            if not application.applicant.is_blacklisted and utils.has_submitted_application(application.applicant):
+                valid_applications.append(application)
+        for course in courses:
+            if not course.course_number[:8] in ['CSCI1101', 'CSCI1103'] or not course.course_number[:5] in ['CSCI4', 'CSCI5', 'CSCI6']:
+                current_courses.append(course)
+
+        # print('*************************************')
+        # print(current_semester)
+        # print(valid_applications)
+        # print(current_courses)
+        # print('*************************************')
+
+        for course in current_courses:
+            num_tas = course.teaching_assistants.all().count()
+            if course.max_num_tas > num_tas:
+                if course.name in ['Discussion Group / CSCI1101', 'Discussion Group / CSCI1103']:
+                    col = simulation.convert_days_of_week(course.days_of_week)
+                    row = simulation.convert_class_time(
+                        course.start_time, course.end_time)
+                    for application in valid_applications:
+                        if course.instructor in application.instructor_preferences:
+                            num_tas = simulation.assign_CS1_TA(applicant, course, col, row,
+                                                    application.applicant.lab_hour_preferences, num_tas)
+                    if course.max_num_tas > num_tas:
+                        for applicantion in valid_applications:
+                            if course.name in applicantion.course_preferences:
+                                num_tas = simulation.assign_CS1_TA(applicant, course, col, row,
+                                                        application.applicant.lab_hour_preferences, num_tas)
+                    if course.max_num_tas > num_tas:
+                        for applicantion in valid_applications:
+                            num_tas = simulation.assign_CS1_TA(applicant, course, col, row,
+                                                    application.applicant.lab_hour_preferences, num_tas)
+                else:
+                    for application in valid_applications:
+                        if course.instructor in application.instructor_preferences:
+                            num_tas = simulation.assign_TA(application.applicant, course, num_tas)
+                    if course.max_num_tas > num_tas:
+                        for applicantion in valid_applications:
+                            if course.name in applicantion.course_preferences:
+                                num_tas = simulation.assign_TA(application.applicant, course, num_tas)
+                    if course.max_num_tas > num_tas:
+                        for applicantion in valid_applications:
+                            num_tas = simulation.assign_TA(application.applicant, course, num_tas)
+
+        simulation.check_sem_assignment(current_semester)
+        simulation.check_sem_constraints(request, current_semester)
+
+        for application in valid_applications:
+            applicant = application.applicant
+            if applicant.ta_assignments.all().count() == 0:
+                simulation.assign_to_lab(current_semester, applicant)
+
+        if not simulation.is_schedule_full(current_semester):
+            for application in valid_applications:
+                applicant = application.applicant
+                if applicant.ta_assignments.all().count() == 0:
+                    simulation.assign_to_lab(current_semester, applicant)
+
+        messages.success(
+            request, 'The simulation for course and lab hour assignments is done! '
+                     'You can now download the TA Assignment and Lab Hour Assignment files.')
+        return redirect('admin:index')
+
+
+class UserAdmin(ModelAdmin):
+    list_display = ('username', 'first_name', 'last_name', 'is_active')
 
 
 class CourseAdmin(ModelAdmin):
@@ -446,7 +533,8 @@ class InstructorAdmin(ModelAdmin):
 
 
 class SemesterAdmin(InstructorAdmin):
-    fields = ('year', 'semester_code', 'get_all_courses', 'get_all_teaching_assistants')
+    fields = ('year', 'semester_code', 'get_all_courses',
+              'get_all_teaching_assistants', 'lab_hour_assignments', 'lab_hour_constraints')
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
     list_display = ('get_semester', 'get_courses')
 
