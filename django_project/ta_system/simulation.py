@@ -130,6 +130,14 @@ def check_sem_constraints(request, current_semester):
         return redirect('admin:index')
 
 
+def check_assignment(assignment_list, constraints, availability, qhour, day):
+    if assignment_list[qhour][day] == '' and \
+            constraints[qhour][day] and \
+            availability[qhour][day]:
+        return True
+    return False
+
+
 def assign_to_lab(current_semester, student):
     availability = student.lab_hour_preferences[0]['preferences']
     constraints = current_semester.lab_hour_constraints
@@ -137,17 +145,20 @@ def assign_to_lab(current_semester, student):
     max_hrs = SystemStatus.objects.order_by('id').last().max_lab_hours_per_ta
     qhour_count = 0
     for day in range(7):
-        for quarterhour in range(len(assignment_list)):
-            if qhour_count >= max_hrs * 4:
+        quarterhour = 0
+        while quarterhour < len(assignment_list)-4:
+            if qhour_count >= max_hrs*4:
                 return
-            if assignment_list[quarterhour][day] == '':
-                if constraints[quarterhour][day]:
-                    if availability[quarterhour][day]:
-                        assignment_list[quarterhour][day] = student.eagle_id
-                        setattr(current_semester,
-                                'lab_hour_assignment', assignment_list)
-                        current_semester.save()
-                        qhour_count += 1
+            if check_assignment(assignment_list, constraints, availability, quarterhour, day) and \
+                    check_assignment(assignment_list, constraints, availability, quarterhour + 1, day) and \
+                    check_assignment(assignment_list, constraints, availability, quarterhour + 2, day) and \
+                    check_assignment(assignment_list, constraints, availability, quarterhour + 3, day):
+                for i in range(4):
+                    assignment_list[quarterhour+i][day] = student.eagle_id
+                setattr(current_semester, 'lab_hour_assignment', assignment_list)
+                current_semester.save()
+                qhour_count += 4
+            quarterhour += 4
 
 
 def is_schedule_full(current_semester):

@@ -404,7 +404,7 @@ class CustomAdminSite(AdminSite):
         if not simulation.is_schedule_full(current_semester):
             for application in valid_applications:
                 applicant = application.applicant
-                if applicant.ta_assignments.all().count() == 0:
+                if applicant.ta_assignments.all().count() > 0:
                     simulation.assign_to_lab(current_semester, applicant)
 
         messages.success(
