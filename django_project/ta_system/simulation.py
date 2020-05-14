@@ -3,9 +3,14 @@ from .utils import get_current_semester, get_year_and_semester_code
 
 
 def assign_TA(applicant, course, num_tas):
+    print('*********Testing for Assign TA')
     courses_taken = applicant.courses_taken.all()
+    print('*********Testing course taken')
     for course_taken in courses_taken:
+        print(course.course_number[:8] + ' ==? ' +
+              course_taken.course_number[:8])
         if course.course_number[:8] == course_taken.course_number[:8]:
+            print('*********Testing TA assignment')
             if applicant.ta_assignments.all().count() == 0:
                 num_tas = num_tas + 1
                 course.teaching_assistants.add(applicant)
@@ -17,9 +22,15 @@ def assign_TA(applicant, course, num_tas):
 
 def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences, num_tas):
     courses_taken = applicant.courses_taken.all()
+    print('*********Testing for Assign TA')
+    print('*********Testing for Availability')
     if check_availability(col, row, lab_hour_preferences):
+        print('*********Testing course taken')
         for course_taken in courses_taken:
+            print(str(['CSCI1101', 'CSCI1103']) + ' ==? ' +
+                  course_taken.course_number[:8])
             if course_taken.course_number[:8] in ['CSCI1101', 'CSCI1103']:
+                print('*********Testing TA assignment')
                 if applicant.ta_assignments.all().count() == 0:
                     num_tas = num_tas + 1
                     course.teaching_assistants.add(applicant)
@@ -76,7 +87,7 @@ def convert_class_time(start, end):
         start_min = start_min / 15
     else:
         start_min = start_min // 15 + 1
-    start_slot = 4 * start_hour + start_min
+    start_slot = int(4 * start_hour + start_min)
 
     end_hour = int(str_end[:2])
     end_min = int(str_end[3:5])
@@ -84,18 +95,26 @@ def convert_class_time(start, end):
         end_min = end_min / 15
     else:
         end_min = end_min // 15 + 1
-    end_slot = 4 * end_hour + end_min
+    end_slot = int(4 * end_hour + end_min)
 
-    slotrange = end_slot - start_slot
+    slotrange = int(end_slot - start_slot)
     for i in range(slotrange):
-        row.append(start_slot + 1)
+        row.append(start_slot + i)
     return row
 
 
 def check_availability(cols, rows, lab_hour_preferences):
-    availability = lab_hour_preferences["preferences"]
+    print(str(cols))
+    print(str(rows))
+    current_semester = get_current_semester()
+    # DONT DELETE THESE!!!!!!!!!!!!!!!
+    # for i in lab_hour_preferences:
+    #     if lab_hour_preferences[i]['semester'] == current_semester:
+    #         availability = lab_hour_preferences[i]["preferences"]
+    availability = lab_hour_preferences[0]["preferences"]
     for col in cols:
         for row in rows:
+            print(str(availability[row][col]))
             if availability[row][col] == False:
                 return False
     return True

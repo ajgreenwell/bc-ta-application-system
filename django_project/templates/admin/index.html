@@ -99,19 +99,6 @@
 {% block custom-content %}
 <div class="custom-content-separator"></div>
 <div class="custom-content">
-    <form  method = "POST">
-        {% csrf_token %}
-        <header>Update TA Application System Status</header>
-        <fieldset class="mt-8">
-            <div class="mt-8">
-                {% if last_system_status.status %}
-                    <input id='close_system' type="submit" value="Close TA Application System" formaction="{% url 'admin:change_system_status' %}">
-                {% else %}
-                    <input id='open_system' type="submit" value="Open TA Application System" formaction="{% url 'admin:change_system_status' %}">
-                {% endif %}
-            </div>
-        </fieldset>
-    </form>
     <form method="POST" action="{% url 'admin:course_data_upload' %}" enctype="multipart/form-data" class="mt-30">
         {% csrf_token %}
         <header>Upload Files</header>
@@ -133,17 +120,6 @@
     </form>
     <form method="GET" enctype="multipart/form-data" class="mt-30">
         {% csrf_token %}
-        <header>Download Files</header>
-        <fieldset class="mt-8">
-            <div class="mt-12">
-                {{ semester_form.as_p }}
-                <input type="submit" value="Download TA Assignments" formaction="{% url 'admin:assignment_data_download' %}">
-                <input type="submit" class="lab-hour-btn mt-8" value="Download Lab Hour Assignments" formaction="{% url 'admin:lab_hour_assignments_download' %}"/>
-            </div>
-        </fieldset>
-    </form>
-    <form method="GET" enctype="multipart/form-data" class="mt-30">
-        {% csrf_token %}
         <header>CS Lab Hour Features</header>
         <fieldset class="mt-8">
             <div class="mt-12">
@@ -153,14 +129,33 @@
             </div>
         </fieldset>
     </form>
-    <form method="POST" action="{% url 'admin:simulation' %}" class="mt-30">
+    <form  method = "POST" class="mt-30">
         {% csrf_token %}
-        <header>Simulation</header>
+        <header>System Features</header>
         <fieldset class="mt-8">
-            <div class="mt-12">
-                <input type="submit" value="Start Simulation" />
+            <div class="mt-8">
+                {% if last_system_status.status %}
+                    <input id='close_system' type="submit" value="Close TA Application System" formaction="{% url 'admin:change_system_status' %}">
+                {% else %}
+                    <input id='open_system' type="submit" value="Open TA Application System" formaction="{% url 'admin:change_system_status' %}">
+                {% endif %}
+            </div>
+            <div class="mt-8">
+                <input type="submit" value="Start Simulation for TA and Lab Hour Assignments" formaction="{% url 'admin:simulation' %}"/>
             </div>
         </fieldset>
     </form>
+    <form method="GET" enctype="multipart/form-data" class="mt-30">
+        {% csrf_token %}
+        <header>Download Files</header>
+        <fieldset class="mt-8">
+            <div class="mt-12">
+                {{ semester_form.as_p }}
+                <input type="submit" value="Download TA Assignments" formaction="{% url 'admin:assignment_data_download' %}">
+                <input type="submit" class="lab-hour-btn mt-8" value="Download Lab Hour Assignments" formaction="{% url 'admin:lab_hour_assignments_download' %}"/>
+            </div>
+        </fieldset>
+    </form>
+
 </div>
 {% endblock %}
