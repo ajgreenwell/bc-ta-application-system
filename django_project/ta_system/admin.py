@@ -23,7 +23,6 @@ import ta_system.forms as forms
 import ta_system.models as models
 import ta_system.utils as utils
 import ta_system.simulation as simulation
-from .models import Semester, Course, Application
 
 
 MAX_NUM_TO_DISPLAY = 3
@@ -433,21 +432,23 @@ class CustomAdminSite(AdminSite):
                                 num_tas = simulation.assign_TA(
                                     application.applicant, course, num_tas)
 
-        # simulation.create_assignment_matrix()
-        #
-        # for application in valid_applications:
-        #     applicant = application.applicant
-        #     if applicant.ta_assignments.all().count() == 0:
-        #         simulation.assign_to_lab(applicant)
-        #
-        # if not simulation.is_schedule_full:
-        #     for application in valid_applications:
-        #         applicant = application.applicant
-        #         if len(applicant.ta_assignments) > 0:
-        #             simulation.assign_to_lab(applicant)
+        simulation.check_sem_assignment(current_semester)
+        simulation.check_sem_constraints(request, current_semester)
+
+        for application in valid_applications:
+            applicant = application.applicant
+            if applicant.ta_assignments.all().count() == 0:
+                simulation.assign_to_lab(current_semester, applicant)
+
+        if not simulation.is_schedule_full(current_semester):
+            for application in valid_applications:
+                applicant = application.applicant
+                if applicant.ta_assignments.all().count() == 0:
+                    simulation.assign_to_lab(current_semester, applicant)
 
         messages.success(
-            request, 'The simulation for course and lab hour assignments is done! You can now download the TA Assignment and Lab Hour Assignment files.')
+            request, 'The simulation for course and lab hour assignments is done! '
+                     'You can now download the TA Assignment and Lab Hour Assignment files.')
         return redirect('admin:index')
 
 
@@ -581,7 +582,7 @@ class InstructorAdmin(ModelAdmin):
 
 class SemesterAdmin(InstructorAdmin):
     fields = ('year', 'semester_code', 'get_all_courses',
-              'get_all_teaching_assistants', 'lab_hour_assignments')
+              'get_all_teaching_assistants', 'lab_hour_assignments', 'lab_hour_constraints')
     readonly_fields = ('get_all_courses', 'get_all_teaching_assistants')
     list_display = ('get_semester', 'get_courses')
 

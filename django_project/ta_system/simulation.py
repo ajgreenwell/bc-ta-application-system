@@ -1,5 +1,7 @@
-from .models import Semester
+from .models import Semester, SystemStatus
 from .utils import get_current_semester, get_year_and_semester_code
+from django.contrib import messages
+from django.shortcuts import redirect
 
 
 def assign_TA(applicant, course, num_tas):
@@ -120,40 +122,44 @@ def check_availability(cols, rows, lab_hour_preferences):
     return True
 
 
-def assign_to_lab(student):
-    availability = student.lab_hour_preferences[0]['preferences']
+def check_sem_assignment(current_semester):
+    if not current_semester.lab_hour_assignments:
+        empty_matrix = [['' for x in range(7)] for n in range(4 * 24)]
+        setattr(current_semester, 'lab_hour_assignments', empty_matrix)
+        current_semester.save()
 
-    sem = get_year_and_semester_code(get_current_semester())
-    current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
-    json = current_semester.lab_hour_assignments
-    assignment_list = json['assignments']
+
+def check_sem_constraints(request, current_semester):
+    if not current_semester.lab_hour_constraints:
+        messages.error(request, f'Lab is never open. Please specify hours of operation before running the simulation.')
+        return redirect('admin:index')
+
+
+def assign_to_lab(current_semester, student):
+    availability = student.lab_hour_preferences[0]['preferences']
+    constraints = current_semester.lab_hour_constraints
+    assignment_list = current_semester.lab_hour_assignments
+    max_hrs = SystemStatus.objects.order_by('id').last().max_lab_hours_per_ta
     qhour_count = 0
     for day in range(7):
         for quarterhour in range(len(assignment_list)):
-            if qhour_count <= 12:
-                break
+            if qhour_count >= max_hrs*4:
+                return
             if assignment_list[quarterhour][day] == '':
-                if availability[quarterhour][day]:
-                    assignment_list[quarterhour][day] = student.eagle_id
-                    qhour_count += 1
-        if qhour_count <= 12:
-            break
+                if constraints[quarterhour][day]:
+                    if availability[quarterhour][day]:
+                        assignment_list[quarterhour][day] = student.eagle_id
+                        setattr(current_semester, 'lab_hour_assignment', assignment_list)
+                        current_semester.save()
+                        qhour_count += 1
 
 
-def create_assignment_matrix():
-    sem = get_year_and_semester_code(get_current_semester())
-    current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
-    empty_matrix = [['' for x in range(7)] for n in range(4 * 24)]
-    current_semester.lab_hour_assignments = {'assignments': empty_matrix}
-
-
-def is_schedule_full():
-    sem = get_year_and_semester_code(get_current_semester())
-    current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
-    json = current_semester.lab_hour_assignments
-    assignment_list = json['assignments']
+def is_schedule_full(current_semester):
+    constraints = current_semester.lab_hour_constraints
+    assignment_list = current_semester.lab_hour_assignments
     for day in range(7):
         for qhour in range(len(assignment_list)):
-            if not assignment_list[qhour][day]:
-                return False
+            if constraints[qhour][day]:
+                if not assignment_list[qhour][day]:
+                    return False
     return True
