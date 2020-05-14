@@ -17,40 +17,25 @@ def get_courses_taken_prev(applicant):
 
 
 def assign_TA(applicant, course, num_tas):
-    print('*********Testing for Assign TA')
     courses_taken = get_courses_taken_prev(applicant)
-    print('*********Testing course taken')
     for course_taken in courses_taken:
-        print(course.course_number[:8] + ' ==? ' +
-              course_taken.course_number[:8])
         if course.course_number[:8] == course_taken.course_number[:8]:
-            print('*********Testing TA assignment')
             if applicant.ta_assignments.all().count() == 0:
                 num_tas = num_tas + 1
                 course.teaching_assistants.add(applicant)
                 applicant.ta_assignments.add(course)
-                print('*********' + course.name + course.course_number + ": " +
-                      applicant.user.username)
     return num_tas
 
 
 def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences, num_tas):
     courses_taken = get_courses_taken_prev(applicant)
-    print('*********Testing for Assign TA')
-    print('*********Testing for Availability')
     if check_availability(col, row, lab_hour_preferences):
-        print('*********Testing course taken')
         for course_taken in courses_taken:
-            print(str(['CSCI1101', 'CSCI1103']) + ' ==? ' +
-                  course_taken.course_number[:8])
             if course_taken.course_number[:8] in ['CSCI1101', 'CSCI1103']:
-                print('*********Testing TA assignment')
                 if applicant.ta_assignments.all().count() == 0:
                     num_tas = num_tas + 1
                     course.teaching_assistants.add(applicant)
                     applicant.ta_assignments.add(course)
-                    print('*********' + course.name + course.course_number + ": " +
-                          applicant.user.username)
     return num_tas
 
 
@@ -118,17 +103,14 @@ def convert_class_time(start, end):
 
 
 def check_availability(cols, rows, lab_hour_preferences):
-    print(str(cols))
-    print(str(rows))
     current_semester = get_current_semester()
-    # DONT DELETE THESE!!!!!!!!!!!!!!!
+    # DO NOT DELETE THESE!!!!!!!!!!!!!!!
     # for i in lab_hour_preferences:
     #     if lab_hour_preferences[i]['semester'] == current_semester:
     #         availability = lab_hour_preferences[i]["preferences"]
     availability = lab_hour_preferences[0]["preferences"]
     for col in cols:
         for row in rows:
-            print(str(availability[row][col]))
             if availability[row][col] == False:
                 return False
     return True
