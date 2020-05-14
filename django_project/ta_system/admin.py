@@ -376,7 +376,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id', 'is_blacklisted', 'lab_hour_preferences')
+            'fields': ('user', 'eagle_id', 'is_blacklisted')
         })
     )
 
