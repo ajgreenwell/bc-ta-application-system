@@ -37,7 +37,8 @@ def get_preferences(student, semester):
 
 
 def has_submitted_application(student):
-    current_semester = Semester.objects.filter(year=get_current_semester()[:4], semester_code=get_current_semester()[-1])[0]
+    sem = get_year_and_semester_code(get_current_semester())
+    current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
     try:
         Application.objects.get(applicant=student, semester=current_semester)
     except:

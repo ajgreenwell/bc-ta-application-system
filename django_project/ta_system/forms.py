@@ -43,10 +43,10 @@ class ApplicationForm(forms.Form):
         for course in current_courses:
             if (course, course) in course_choices:
                 continue
-            if course.name in ['Discussion Group / CSCI1101',
+            if course in ['Discussion Group / CSCI1101',
                                'Discussion Group / CSCI1103',
                                'Discussion Group/CSCI1101',
-                               'Discussion Group/CSCI1103'] or course.course_number[:5] in ['CSCI4', 'CSCI5', 'CSCI6']:
+                               'Discussion Group/CSCI1103']:
                 continue
             course_choices.append((course, course))
         return course_choices
@@ -66,20 +66,20 @@ class ApplicationForm(forms.Form):
         return prof_choices
 
     course1 = forms.ChoiceField(
-        choices=get_course_choices(), required=False, label='Course 1')
+        choices=get_course_choices, required=False, label='Course 1')
     course2 = forms.ChoiceField(
-        choices=get_course_choices(), required=False, label='Course 2')
+        choices=get_course_choices, required=False, label='Course 2')
     course3 = forms.ChoiceField(
-        choices=get_course_choices(), required=False, label='Course 3')
-    prof1 = forms.ChoiceField(choices=get_professor_choices(),
+        choices=get_course_choices, required=False, label='Course 3')
+    prof1 = forms.ChoiceField(choices=get_professor_choices,
                               required=False, label='Professor 1')
-    prof2 = forms.ChoiceField(choices=get_professor_choices(),
+    prof2 = forms.ChoiceField(choices=get_professor_choices,
                               required=False, label='Professor 2')
-    prof3 = forms.ChoiceField(choices=get_professor_choices(),
+    prof3 = forms.ChoiceField(choices=get_professor_choices,
                               required=False, label='Professor 3')
     major = forms.CharField(max_length=200, label='Major(s)')
     grad_year = forms.ChoiceField(
-        choices=get_grad_years(), label='Graduation Year')
+        choices=get_grad_years, label='Graduation Year')
     lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)
 
 
