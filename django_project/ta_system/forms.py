@@ -34,36 +34,40 @@ class ApplicationForm(forms.Form):
             year += 1
             grad_years.append((year, str(year)))
         return grad_years
+    
+    def get_course_choices():
+        course_choices = [('', 'No preference')]
+        sem = get_year_and_semester_code(get_current_semester())
+        current_semester = Semester.objects.filter(year=sem[0], semester_code=sem[1])[0]
+        current_courses = list(Course.objects.filter(semester=current_semester).values_list('name', flat=True).distinct())
+        for course in current_courses:
+            if (course, course) in course_choices:
+                continue
+            course_choices.append((course, course))
+        return course_choices
 
-    course_choices = [('', 'No preference')]
-    sem = get_year_and_semester_code(get_current_semester())
-    current_semester = Semester.objects.filter(year=sem[0], semester_code=sem[1])[0]
-    current_courses = list(Course.objects.filter(semester=current_semester).values_list('name', flat=True).distinct())
-    for course in current_courses:
-        if (course, course) in course_choices:
-            continue
-        course_choices.append((course, course))
+    def get_prof_choices():
+        prof_choices = [('', 'No preference')]
+        sem = get_year_and_semester_code(get_current_semester())
+        current_semester = Semester.objects.filter(year=sem[0], semester_code=sem[1])[0]
+        prof_ids = list(Course.objects.filter(semester=current_semester).values_list('instructor', flat=True).distinct())
+        profs = []
+        for prof in prof_ids:
+            profs.append(Instructor.objects.get(id=prof))
+        for prof in profs:
+            if (prof, prof) in prof_choices:
+                continue
+            prof_choices.append((prof, prof))
+        return prof_choices
 
-    prof_choices = [('', 'No preference')]
-    prof_ids = list(Course.objects.filter(semester=current_semester).values_list('instructor', flat=True).distinct())
-    profs = []
-    for prof in prof_ids:
-        profs.append(Instructor.objects.get(id=prof))
-    for prof in profs:
-        if (prof, prof) in prof_choices:
-            continue
-        prof_choices.append((prof, prof))
-
-    year_choices = get_grad_years()
-
-    course1 = forms.ChoiceField(choices=course_choices, required=False, label='Course 1')
-    course2 = forms.ChoiceField(choices=course_choices, required=False, label='Course 2')
-    course3 = forms.ChoiceField(choices=course_choices, required=False, label='Course 3')
-    prof1 = forms.ChoiceField(choices=prof_choices, required=False, label='Professor 1')
-    prof2 = forms.ChoiceField(choices=prof_choices, required=False, label='Professor 2')
-    prof3 = forms.ChoiceField(choices=prof_choices, required=False, label='Professor 3')
+    course1 = forms.ChoiceField(choices=get_course_choices, required=False, label='Course Preference 1')
+    course2 = forms.ChoiceField(choices=get_course_choices, required=False, label='Course Preference 2')
+    course3 = forms.ChoiceField(choices=get_course_choices, required=False, label='Course Preference 3')
+    prof1 = forms.ChoiceField(choices=get_prof_choices, required=False, label='Professor Preference 1')
+    prof2 = forms.ChoiceField(choices=get_prof_choices, required=False, label='Professor Preference 2')
+    prof3 = forms.ChoiceField(choices=get_prof_choices, required=False, label='Professor Preference 3')
     major = forms.CharField(max_length=200, label='Major(s)')
-    grad_year = forms.ChoiceField(choices=year_choices, label='Graduation Year')
+    grad_year = forms.ChoiceField(choices=get_grad_years, label='Graduation Year')
     lab_hour_data = JSONField(widget=forms.HiddenInput(), required=False)
 
 

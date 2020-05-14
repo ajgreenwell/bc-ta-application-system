@@ -249,8 +249,8 @@ class CustomAdminSite(AdminSite):
                 if not teaching_assistants:
                     messages.error(
                         request,
-                        'Error: There are no teaching assistants that ' +
-                        'have been assigned for this semester.'
+                        'Error: There are no applicants for the semester ' +
+                        f'{context["verbose_semester"]}.'
                     )
                     return redirect('admin:index')
                 return render(request, 'admin/assign_lab_hours.html', context)
@@ -376,7 +376,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id', 'is_blacklisted')
+            'fields': ('user', 'eagle_id', 'is_blacklisted', 'lab_hour_preferences')
         })
     )
 
