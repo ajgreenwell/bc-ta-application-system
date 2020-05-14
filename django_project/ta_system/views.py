@@ -21,10 +21,12 @@ def home(request):
     if request.method not in ('GET', 'POST'):
         return handle_bad_request(request, app='ta_system', expected='GET, POST')
 
+    current_semester = utils.get_current_semester()
     app_form = ApplicationForm()
     context = {
         'system_is_open': SystemStatus.objects.order_by('id').last(),
-        'app_form': app_form
+        'app_form': app_form,
+        'current_semester': utils.get_verbose_semester(current_semester)
     }
 
     user = request.user
@@ -33,8 +35,8 @@ def home(request):
     if request.method == 'POST':
         app_form = ApplicationForm(request.POST)
         if app_form.is_valid():
-            current_semester = get_year_and_semester_code(get_current_semester())
-            semester = Semester.objects.filter(year=current_semester[0], semester_code=current_semester[1])[0]
+            year, semester_code = utils.get_year_and_semester_code(current_semester)
+            semester = Semester.objects.get(year=year, semester_code=semester_code)
             course_preferences = [app_form.cleaned_data.get('course1'),
                                   app_form.cleaned_data.get('course2'),
                                   app_form.cleaned_data.get('course3')]
@@ -46,7 +48,6 @@ def home(request):
             preferences = app_form.cleaned_data.get('lab_hour_data')
             if utils.is_valid_preferences(preferences):
                 utils.save_preferences(student, preferences)
-                context['user_has_submitted_application'] = True
             else:
                 messages.error(
                     request,
@@ -61,7 +62,7 @@ def home(request):
                               grad_year=grad_year)
             app.save()
 
-            messages.success(request, f'Application Submitted For {student.full_name}!')
+            messages.success(request, f'Application Submitted Successfully!')
             preferences = app_form.cleaned_data.get('lab_hour_data')
             utils.save_preferences(student, preferences)
             return redirect('ta_system:home')

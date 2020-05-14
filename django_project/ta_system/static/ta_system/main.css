@@ -123,6 +123,11 @@ a.article-title:hover {
   margin-bottom: 20px;
 }
 
+.application-section-heading {
+  border-bottom: 1px solid black;
+  margin-bottom: 20px;
+}
+
 .form-control:focus {
   border: 1px solid #f0d100;
   box-shadow: 0 0 0 1px #ffec6e;
@@ -130,6 +135,11 @@ a.article-title:hover {
 
 .mt-12 {
   margin-top: 12px;
+}
+
+#application-form-title {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
 @media (min-width: 992px) {
