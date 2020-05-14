@@ -4,9 +4,21 @@ from django.contrib import messages
 from django.shortcuts import redirect
 
 
+def get_courses_taken_prev(applicant):
+    courses_taken = applicant.courses_taken.all()
+    semester = get_year_and_semester_code(get_current_semester())
+    current_semester = Semester.objects.get(
+        year=semester[0], semester_code=semester[1])
+    courses_taken_prev = []
+    for course_taken in courses_taken:
+        if course_taken.semester != current_semester:
+            courses_taken_prev.append(course_taken)
+    return courses_taken_prev
+
+
 def assign_TA(applicant, course, num_tas):
     print('*********Testing for Assign TA')
-    courses_taken = applicant.courses_taken.all()
+    courses_taken = get_courses_taken_prev(applicant)
     print('*********Testing course taken')
     for course_taken in courses_taken:
         print(course.course_number[:8] + ' ==? ' +
@@ -23,7 +35,7 @@ def assign_TA(applicant, course, num_tas):
 
 
 def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences, num_tas):
-    courses_taken = applicant.courses_taken.all()
+    courses_taken = get_courses_taken_prev(applicant)
     print('*********Testing for Assign TA')
     print('*********Testing for Availability')
     if check_availability(col, row, lab_hour_preferences):
@@ -131,7 +143,8 @@ def check_sem_assignment(current_semester):
 
 def check_sem_constraints(request, current_semester):
     if not current_semester.lab_hour_constraints:
-        messages.error(request, f'Lab is never open. Please specify hours of operation before running the simulation.')
+        messages.error(
+            request, f'Lab is never open. Please specify hours of operation before running the simulation.')
         return redirect('admin:index')
 
 
@@ -143,13 +156,14 @@ def assign_to_lab(current_semester, student):
     qhour_count = 0
     for day in range(7):
         for quarterhour in range(len(assignment_list)):
-            if qhour_count >= max_hrs*4:
+            if qhour_count >= max_hrs * 4:
                 return
             if assignment_list[quarterhour][day] == '':
                 if constraints[quarterhour][day]:
                     if availability[quarterhour][day]:
                         assignment_list[quarterhour][day] = student.eagle_id
-                        setattr(current_semester, 'lab_hour_assignment', assignment_list)
+                        setattr(current_semester,
+                                'lab_hour_assignment', assignment_list)
                         current_semester.save()
                         qhour_count += 1
 

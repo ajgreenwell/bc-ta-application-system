@@ -336,12 +336,12 @@ class CustomAdminSite(AdminSite):
             year=semester[0], semester_code=semester[1])
         applications = models.Application.objects.all()
         valid_applications = []
-        courses = models.Course.objects.filter(
-            semester=current_semester).order_by('-course_number')
-        current_courses = []
         for application in applications:
             if not application.applicant.is_blacklisted and utils.has_submitted_application(application.applicant):
                 valid_applications.append(application)
+        courses = models.Course.objects.filter(
+            semester=current_semester).order_by('-course_number')
+        current_courses = []
         for course in courses:
             if not course.course_number[:8] in ['CSCI1101', 'CSCI1103'] and not course.course_number[:5] in ['CSCI4', 'CSCI5', 'CSCI6']:
                 current_courses.append(course)
