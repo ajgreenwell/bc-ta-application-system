@@ -4,10 +4,27 @@ from django.contrib import messages
 from django.shortcuts import redirect
 
 
-def assign_TA(applicant, course, num_tas):
+def get_courses_taken_prev(applicant):
     courses_taken = applicant.courses_taken.all()
+    semester = get_year_and_semester_code(get_current_semester())
+    current_semester = Semester.objects.get(
+        year=semester[0], semester_code=semester[1])
+    courses_taken_prev = []
     for course_taken in courses_taken:
+        if course_taken.semester != current_semester:
+            courses_taken_prev.append(course_taken)
+    return courses_taken_prev
+
+
+def assign_TA(applicant, course, num_tas):
+    print('*********Testing for Assign TA')
+    courses_taken = get_courses_taken_prev(applicant)
+    print('*********Testing course taken')
+    for course_taken in courses_taken:
+        print(course.course_number[:8] + ' ==? ' +
+              course_taken.course_number[:8])
         if course.course_number[:8] == course_taken.course_number[:8]:
+            print('*********Testing TA assignment')
             if applicant.ta_assignments.all().count() == 0:
                 num_tas = num_tas + 1
                 course.teaching_assistants.add(applicant)
@@ -18,10 +35,16 @@ def assign_TA(applicant, course, num_tas):
 
 
 def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences, num_tas):
-    courses_taken = applicant.courses_taken.all()
+    courses_taken = get_courses_taken_prev(applicant)
+    print('*********Testing for Assign TA')
+    print('*********Testing for Availability')
     if check_availability(col, row, lab_hour_preferences):
+        print('*********Testing course taken')
         for course_taken in courses_taken:
+            print(str(['CSCI1101', 'CSCI1103']) + ' ==? ' +
+                  course_taken.course_number[:8])
             if course_taken.course_number[:8] in ['CSCI1101', 'CSCI1103']:
+                print('*********Testing TA assignment')
                 if applicant.ta_assignments.all().count() == 0:
                     num_tas = num_tas + 1
                     course.teaching_assistants.add(applicant)
@@ -78,7 +101,7 @@ def convert_class_time(start, end):
         start_min = start_min / 15
     else:
         start_min = start_min // 15 + 1
-    start_slot = 4 * start_hour + start_min
+    start_slot = int(4 * start_hour + start_min)
 
     end_hour = int(str_end[:2])
     end_min = int(str_end[3:5])
@@ -86,18 +109,26 @@ def convert_class_time(start, end):
         end_min = end_min / 15
     else:
         end_min = end_min // 15 + 1
-    end_slot = 4 * end_hour + end_min
+    end_slot = int(4 * end_hour + end_min)
 
-    slotrange = end_slot - start_slot
+    slotrange = int(end_slot - start_slot)
     for i in range(slotrange):
-        row.append(start_slot + 1)
+        row.append(start_slot + i)
     return row
 
 
 def check_availability(cols, rows, lab_hour_preferences):
-    availability = lab_hour_preferences["preferences"]
+    print(str(cols))
+    print(str(rows))
+    current_semester = get_current_semester()
+    # DONT DELETE THESE!!!!!!!!!!!!!!!
+    # for i in lab_hour_preferences:
+    #     if lab_hour_preferences[i]['semester'] == current_semester:
+    #         availability = lab_hour_preferences[i]["preferences"]
+    availability = lab_hour_preferences[0]["preferences"]
     for col in cols:
         for row in rows:
+            print(str(availability[row][col]))
             if availability[row][col] == False:
                 return False
     return True
@@ -112,7 +143,8 @@ def check_sem_assignment(current_semester):
 
 def check_sem_constraints(request, current_semester):
     if not current_semester.lab_hour_constraints:
-        messages.error(request, f'Lab is never open. Please specify hours of operation before running the simulation.')
+        messages.error(
+            request, f'Lab is never open. Please specify hours of operation before running the simulation.')
         return redirect('admin:index')
 
 
@@ -125,7 +157,6 @@ def check_assignment(assignment_list, constraints, availability, qhour, day):
 
 
 def assign_to_lab(current_semester, student):
-    print(f'assigning {student.eagle_id}')
     availability = student.lab_hour_preferences[0]['preferences']
     constraints = current_semester.lab_hour_constraints
     assignment_list = current_semester.lab_hour_assignments
@@ -145,7 +176,6 @@ def assign_to_lab(current_semester, student):
                 setattr(current_semester, 'lab_hour_assignment', assignment_list)
                 current_semester.save()
                 qhour_count += 4
-                print(qhour_count)
             quarterhour += 4
 
 
