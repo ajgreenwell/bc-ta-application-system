@@ -38,8 +38,8 @@ class ApplicationForm(forms.Form):
     def get_course_choices():
         course_choices = [('', 'No preference')]
         sem = get_year_and_semester_code(get_current_semester())
-        current_semester = Semester.objects.filter(
-            year=sem[0], semester_code=sem[1])[0]
+        current_semester = Semester.objects.get(
+            year=sem[0], semester_code=sem[1])
         current_courses = list(Course.objects.filter(
             semester=current_semester).values_list('name', flat=True).distinct())
         for course in current_courses:
@@ -50,6 +50,8 @@ class ApplicationForm(forms.Form):
 
     def get_professor_choices():
         prof_choices = [('', 'No preference')]
+        sem = get_year_and_semester_code(get_current_semester())
+        current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
         prof_ids = list(Course.objects.filter(semester=current_semester).values_list(
             'instructor', flat=True).distinct())
         profs = []

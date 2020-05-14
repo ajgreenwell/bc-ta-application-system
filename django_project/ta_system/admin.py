@@ -333,8 +333,8 @@ class CustomAdminSite(AdminSite):
 
         semester = utils.get_year_and_semester_code(
             utils.get_current_semester())
-        current_semester = models.Semester.objects.filter(
-            year=semester[0], semester_code=semester[1])[0]
+        current_semester = models.Semester.objects.get(
+            year=semester[0], semester_code=semester[1])
         applications = models.Application.objects.all()
         valid_applications = []
         courses = models.Course.objects.filter(
@@ -347,11 +347,11 @@ class CustomAdminSite(AdminSite):
             if not course.course_number[:8] in ['CSCI1101', 'CSCI1103'] or not course.course_number[:5] in ['CSCI4', 'CSCI5', 'CSCI6']:
                 current_courses.append(course)
 
-        print('*************************************')
-        print(current_semester)
-        print(valid_applications)
-        print(current_courses)
-        print('*************************************')
+        # print('*************************************')
+        # print(current_semester)
+        # print(valid_applications)
+        # print(current_courses)
+        # print('*************************************')
 
         for course in current_courses:
             num_tas = course.teaching_assistants.all().count()
@@ -362,46 +362,46 @@ class CustomAdminSite(AdminSite):
                         course.start_time, course.end_time)
                     for application in valid_applications:
                         if course.instructor in application.instructor_preferences:
-                            assign_CS1_TA(applicant, course, col, row,
-                                          application.applicant.lab_hour_preferences)
+                            num_tas = simulation.assign_CS1_TA(applicant, course, col, row,
+                                                    application.applicant.lab_hour_preferences, num_tas)
                     if course.max_num_tas > num_tas:
                         for applicantion in valid_applications:
                             if course.name in applicantion.course_preferences:
-                                assign_CS1_TA(applicant, course, col, row,
-                                              application.applicant.lab_hour_preferences)
+                                num_tas = simulation.assign_CS1_TA(applicant, course, col, row,
+                                                        application.applicant.lab_hour_preferences, num_tas)
                     if course.max_num_tas > num_tas:
                         for applicantion in valid_applications:
-                            assign_CS1_TA(applicant, course, col, row,
-                                          application.applicant.lab_hour_preferences)
+                            num_tas = simulation.assign_CS1_TA(applicant, course, col, row,
+                                                    application.applicant.lab_hour_preferences, num_tas)
                 else:
                     for application in valid_applications:
                         if course.instructor in application.instructor_preferences:
-                            simulation.assign_TA(application.applicant, course)
+                            num_tas = simulation.assign_TA(application.applicant, course, num_tas)
                     if course.max_num_tas > num_tas:
                         for applicantion in valid_applications:
                             if course.name in applicantion.course_preferences:
-                                simulation.assign_TA(
-                                    application.applicant, course)
+                                num_tas = simulation.assign_TA(application.applicant, course, num_tas)
                     if course.max_num_tas > num_tas:
                         for applicantion in valid_applications:
-                            simulation.assign_TA(application.applicant, course)
+                            num_tas = simulation.assign_TA(application.applicant, course, num_tas)
 
-        simulation.create_assignment_matrix()
-
-        for application in valid_applications:
-            applicant = application.applicant
-            if applicant.ta_assignments.all().count() == 0:
-                simulation.assign_to_lab(applicant)
-
-        if not simulation.is_schedule_full:
-            for application in valid_applications:
-                applicant = application.applicant
-                if len(applicant.ta_assignments) > 0:
-                    simulation.assign_to_lab(applicant)
+        # simulation.create_assignment_matrix()
+        #
+        # for application in valid_applications:
+        #     applicant = application.applicant
+        #     if applicant.ta_assignments.all().count() == 0:
+        #         simulation.assign_to_lab(applicant)
+        #
+        # if not simulation.is_schedule_full:
+        #     for application in valid_applications:
+        #         applicant = application.applicant
+        #         if len(applicant.ta_assignments) > 0:
+        #             simulation.assign_to_lab(applicant)
 
         messages.success(
             request, 'The simulation for course and lab hour assignments is done! You can now download the TA Assignment and Lab Hour Assignment files.')
         return redirect('admin:index')
+
 
 class UserAdmin(ModelAdmin):
     list_display = ('username', 'first_name', 'last_name', 'is_active')

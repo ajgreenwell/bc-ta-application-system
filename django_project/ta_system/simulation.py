@@ -2,7 +2,7 @@ from .models import Semester
 from .utils import get_current_semester, get_year_and_semester_code
 
 
-def assign_TA(applicant, course):
+def assign_TA(applicant, course, num_tas):
     courses_taken = applicant.courses_taken.all()
     for course_taken in courses_taken:
         if course.course_number[:8] == course_taken.course_number[:8]:
@@ -12,9 +12,10 @@ def assign_TA(applicant, course):
                 applicant.ta_assignments.add(course)
                 print('*********' + course.name + course.course_number + ": " +
                       applicant.user.username)
+    return num_tas
 
 
-def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences):
+def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences, num_tas):
     courses_taken = applicant.courses_taken.all()
     if check_availability(col, row, lab_hour_preferences):
         for course_taken in courses_taken:
@@ -25,6 +26,7 @@ def assign_CS1_TA(applicant, course, col, row, lab_hour_preferences):
                     applicant.ta_assignments.add(course)
                     print('*********' + course.name + course.course_number + ": " +
                           applicant.user.username)
+    return num_tas
 
 
 def convert_day_to_number(day):
@@ -84,10 +86,10 @@ def convert_class_time(start, end):
         end_min = end_min // 15 + 1
     end_slot = 4 * end_hour + end_min
 
-    range = end_slot - start_slot
-    for i in range:
+    slotrange = end_slot - start_slot
+    for i in range(slotrange):
         row.append(start_slot + 1)
-    return(row)
+    return row
 
 
 def check_availability(cols, rows, lab_hour_preferences):
@@ -100,7 +102,8 @@ def check_availability(cols, rows, lab_hour_preferences):
 
 
 def assign_to_lab(student):
-    availability = student.lab_hour_preferences["preferences"]
+    availability = student.lab_hour_preferences[0]['preferences']
+
     sem = get_year_and_semester_code(get_current_semester())
     current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
     json = current_semester.lab_hour_assignments
