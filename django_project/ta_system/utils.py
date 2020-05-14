@@ -37,9 +37,11 @@ def get_preferences(student, semester):
 
 
 def has_submitted_application(student):
-    current_semester = Semester.objects.filter(year=get_current_semester()[:4], semester_code=get_current_semester()[-1])[0]
+    current_semester = get_current_semester()
+    year, semester_code = get_year_and_semester_code(current_semester)
+    semester = Semester.objects.get(year=year, semester_code=semester_code)
     try:
-        Application.objects.get(applicant=student, semester=current_semester)
+        Application.objects.get(applicant=student, semester=semester)
     except:
         return False
     return True
@@ -106,10 +108,10 @@ def get_tas_from_semester(semester):
     tas = {}
     year, semester_code = get_year_and_semester_code(semester)
     semester_obj = Semester.objects.get(year=year, semester_code=semester_code)
-    for course in semester_obj.course_set.all():
-        course_tas = course.teaching_assistants.all()
-        for ta in course_tas:
-            tas[ta.eagle_id] = ta.full_name
+    applications = Application.objects.filter(semester=semester_obj).all()
+    for app in applications:
+        ta = app.applicant
+        tas[ta.eagle_id] = ta.full_name
     return tas
 
 
