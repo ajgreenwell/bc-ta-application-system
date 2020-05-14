@@ -13,13 +13,17 @@
             Please come back when the system is open to apply. To edit your account info in the meantime, go to your <a href= "{% url 'ta_system:profile' %}">profile</a> page.
         </p>
     {% elif system_is_open.status and not user_has_submitted_application %}
-        <h2>Apply Here</h2>
-        <h4>Course and Professor Preference</h4>
-        <p>If you prefer to TA a specific course or with a specific professor note your preference here.</p>
+        <h2 id="application-form-title">Application Form ({{ current_semester }})</h2>
+        <div class="application-section-heading">
+            <h5>Instructions:</h5>
+            <p>If you would prefer to be a TA for a specific course or professor, please note your preferences below. Then fill out the remainder of the form and click the submit button.</p>
+        </div>
         <form method="POST" action="{% url 'ta_system:home' %}" enctype="multipart/form-data">
             {% csrf_token %}
             {{ app_form | crispy }}
-            <div id="lab-hour-form"></div>
+          <div>Lab Hour Preferences*</div>
+          <small class='text-muted'>Please select the hours during which you will be available to attend the CS lab.</small>
+          <div class="mt-12" id="lab-hour-form"></div>
         </form>
     {% elif system_is_open.status and user_has_submitted_application %}
         <h2>Thank you for applying.</h2>

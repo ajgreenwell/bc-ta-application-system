@@ -13,7 +13,7 @@ class Course(models.Model):
     semester = models.ForeignKey(
         'Semester',
         verbose_name='Semester',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True
     )
@@ -243,11 +243,11 @@ class SystemStatus(models.Model):
 
 class Application(models.Model):
     applicant = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    semester = models.ForeignKey('Semester', on_delete=models.CASCADE)
-    course_preferences = ArrayField(models.CharField(max_length=20, blank=True))
-    instructor_preferences = ArrayField(models.CharField(max_length=50, blank=True))
+    semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
+    course_preferences = ArrayField(models.CharField(max_length=100, blank=True))
+    instructor_preferences = ArrayField(models.CharField(max_length=100, blank=True))
     major = models.CharField(max_length=50)
-    grad_year = models.IntegerField()
+    grad_year = models.PositiveIntegerField()
 
     class Meta:
         verbose_name = "Application"

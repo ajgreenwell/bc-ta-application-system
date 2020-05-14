@@ -254,8 +254,8 @@ class CustomAdminSite(AdminSite):
                 if not teaching_assistants:
                     messages.error(
                         request,
-                        'Error: There are no teaching assistants that ' +
-                        'have been assigned for this semester.'
+                        'Error: There are no applicants for the semester ' +
+                        f'{context["verbose_semester"]}.'
                     )
                     return redirect('admin:index')
                 return render(request, 'admin/assign_lab_hours.html', context)
@@ -330,7 +330,7 @@ class CustomAdminSite(AdminSite):
         if request.method != 'POST':
             return handle_bad_request(request, app='admin', expected_method='POST')
 
-        if models.SystemStatus.objects.order_by('id').last():
+        if models.SystemStatus.objects.order_by('id').last().status:
             messages.error(
                 request, 'The simulation cannot be run when the TA application system is open.')
             return redirect('admin:index')
@@ -415,11 +415,6 @@ class CustomAdminSite(AdminSite):
             return redirect('admin:index')
 
 
-class UserAdmin(ModelAdmin):
-    list_display = ('username', 'first_name',
-                    'last_name', 'is_staff', 'is_active')
-
-
 class CourseAdmin(ModelAdmin):
     filter_horizontal = ('teaching_assistants',)
     list_filter = ('semester', 'instructor__name')
@@ -475,7 +470,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id', 'is_blacklisted', 'lab_hour_preferences')
+            'fields': ('user', 'eagle_id', 'is_blacklisted')
         })
     )
 

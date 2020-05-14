@@ -102,13 +102,15 @@ def convert_class_time(start, end):
     return row
 
 
-def check_availability(cols, rows, lab_hour_preferences):
+def get_current_semester_preferences(lab_hour_preferences):
     current_semester = get_current_semester()
-    # DO NOT DELETE THESE!!!!!!!!!!!!!!!
-    # for i in lab_hour_preferences:
-    #     if lab_hour_preferences[i]['semester'] == current_semester:
-    #         availability = lab_hour_preferences[i]["preferences"]
-    availability = lab_hour_preferences[0]["preferences"]
+    for preference_object in lab_hour_preferences:
+        if preference_object['semester'] == current_semester:
+            return preference_object["preferences"]
+
+
+def check_availability(cols, rows, lab_hour_preferences):
+    availability = get_current_semester_preferences(lab_hour_preferences)
     for col in cols:
         for row in rows:
             if availability[row][col] == False:
@@ -139,22 +141,23 @@ def check_assignment(assignment_list, constraints, availability, qhour, day):
 
 
 def assign_to_lab(current_semester, student):
-    availability = student.lab_hour_preferences[0]['preferences']
+    availability = get_current_semester_preferences(
+        student.lab_hour_preferences)
     constraints = current_semester.lab_hour_constraints
     assignment_list = current_semester.lab_hour_assignments
     max_hrs = SystemStatus.objects.order_by('id').last().max_lab_hours_per_ta
     qhour_count = 0
     for day in range(7):
         quarterhour = 0
-        while quarterhour < len(assignment_list)-4:
-            if qhour_count >= max_hrs*4:
+        while quarterhour < len(assignment_list) - 4:
+            if qhour_count >= max_hrs * 4:
                 return
             if check_assignment(assignment_list, constraints, availability, quarterhour, day) and \
                     check_assignment(assignment_list, constraints, availability, quarterhour + 1, day) and \
                     check_assignment(assignment_list, constraints, availability, quarterhour + 2, day) and \
                     check_assignment(assignment_list, constraints, availability, quarterhour + 3, day):
                 for i in range(4):
-                    assignment_list[quarterhour+i][day] = student.eagle_id
+                    assignment_list[quarterhour + i][day] = student.eagle_id
                 setattr(current_semester, 'lab_hour_assignment', assignment_list)
                 current_semester.save()
                 qhour_count += 4
