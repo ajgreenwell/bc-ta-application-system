@@ -385,18 +385,18 @@ class CustomAdminSite(AdminSite):
                         for applicantion in valid_applications:
                             num_tas = simulation.assign_TA(application.applicant, course, num_tas)
 
-        # simulation.create_assignment_matrix()
-        #
-        # for application in valid_applications:
-        #     applicant = application.applicant
-        #     if applicant.ta_assignments.all().count() == 0:
-        #         simulation.assign_to_lab(applicant)
-        #
-        # if not simulation.is_schedule_full:
-        #     for application in valid_applications:
-        #         applicant = application.applicant
-        #         if len(applicant.ta_assignments) > 0:
-        #             simulation.assign_to_lab(applicant)
+        simulation.create_assignment_matrix()
+
+        for application in valid_applications:
+            applicant = application.applicant
+            if applicant.ta_assignments.all().count() == 0:
+                simulation.assign_to_lab(applicant)
+
+        if not simulation.is_schedule_full:
+            for application in valid_applications:
+                applicant = application.applicant
+                if len(applicant.ta_assignments) > 0:
+                    simulation.assign_to_lab(applicant)
 
         messages.success(
             request, 'The simulation for course and lab hour assignments is done! You can now download the TA Assignment and Lab Hour Assignment files.')

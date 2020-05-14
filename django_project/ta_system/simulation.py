@@ -125,7 +125,7 @@ def create_assignment_matrix():
     sem = get_year_and_semester_code(get_current_semester())
     current_semester = Semester.objects.get(year=sem[0], semester_code=sem[1])
     empty_matrix = [['' for x in range(7)] for n in range(4 * 24)]
-    current_semester.lab_hour_assignments = {'assignments': empty_matrix}
+    current_semester.lab_hour_assignments.add({'assignments': empty_matrix})
 
 
 def is_schedule_full():
