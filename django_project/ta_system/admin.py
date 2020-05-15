@@ -398,14 +398,17 @@ class CustomAdminSite(AdminSite):
             simulation.check_sem_assignment(current_semester)
             simulation.check_sem_constraints(request, current_semester)
 
+            lab_hour_applicants = []
             for application in valid_applications:
-                applicant = application.applicant
+                if not (application.applicant.ta_assignments .name[:14] == 'DISCUSSION GRP' and course.name[-4:] in ['1101', '1103']):
+                    lab_hour_applicants.append(application.applicant)
+
+            for applicant in lab_hour_applicants:
                 if applicant.ta_assignments.all().count() == 0:
                     simulation.assign_to_lab(current_semester, applicant)
 
             if not simulation.is_schedule_full(current_semester):
-                for application in valid_applications:
-                    applicant = application.applicant
+                for applicant in lab_hour_applicants:
                     if applicant.ta_assignments.all().count() > 0:
                         simulation.assign_to_lab(current_semester, applicant)
 
