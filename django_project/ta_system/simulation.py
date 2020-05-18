@@ -148,8 +148,8 @@ def check_sem_constraints(request, current_semester):
         return redirect('admin:index')
 
 
-def check_assignment(assignment_list, constraints, availability, qhour, day):
-    if assignment_list[qhour][day] == '' and \
+def check_assignment(student, assignment_list, constraints, availability, qhour, day):
+    if (assignment_list[qhour][day] == '' or assignment_list[qhour][day] == student.eagle_id) and \
             constraints[qhour][day] and \
             availability[qhour][day]:
         return True
@@ -167,16 +167,19 @@ def assign_to_lab(current_semester, student):
         while quarterhour < len(assignment_list)-4:
             if qhour_count >= max_hrs*4:
                 return
-            if check_assignment(assignment_list, constraints, availability, quarterhour, day) and \
-                    check_assignment(assignment_list, constraints, availability, quarterhour + 1, day) and \
-                    check_assignment(assignment_list, constraints, availability, quarterhour + 2, day) and \
-                    check_assignment(assignment_list, constraints, availability, quarterhour + 3, day):
+            if check_assignment(student, assignment_list, constraints, availability, quarterhour, day) and \
+                    check_assignment(student, assignment_list, constraints, availability, quarterhour + 1, day) and \
+                    check_assignment(student, assignment_list, constraints, availability, quarterhour + 2, day) and \
+                    check_assignment(student, assignment_list, constraints, availability, quarterhour + 3, day):
                 for i in range(4):
-                    assignment_list[quarterhour+i][day] = student.eagle_id
+                    if assignment_list[quarterhour+i][day] == student.eagle_id:
+                        qhour_count -= 1
+                    else:
+                        assignment_list[quarterhour+i][day] = student.eagle_id
                 setattr(current_semester, 'lab_hour_assignment', assignment_list)
                 current_semester.save()
                 qhour_count += 4
-            quarterhour += 4
+            quarterhour += 1
 
 
 def is_schedule_full(current_semester):
