@@ -141,12 +141,11 @@ def check_assignment(student, assignment_list, constraints, availability, qhour,
 
 
 def assign_to_lab(current_semester, student):
-    availability = get_current_semester_preferences(
-        student.lab_hour_preferences)
+    qhour_count = get_lab_qhours(current_semester, student)
+    max_hrs = SystemStatus.objects.order_by('id').last().max_lab_hours_per_ta
+    availability = get_current_semester_preferences(student.lab_hour_preferences)
     constraints = current_semester.lab_hour_constraints
     assignment_list = current_semester.lab_hour_assignments
-    max_hrs = SystemStatus.objects.order_by('id').last().max_lab_hours_per_ta
-    qhour_count = 0
     for day in range(7):
         quarterhour = 0
         while quarterhour < len(assignment_list) - 4:
@@ -165,6 +164,16 @@ def assign_to_lab(current_semester, student):
                 current_semester.save()
                 qhour_count += 4
             quarterhour += 1
+
+
+def get_lab_qhours(current_semester, student):
+    qhour_count = 0
+    assignment_list = current_semester.lab_hour_assignments
+    for day in range(7):
+        for qhour in range(len(assignment_list)):
+            if assignment_list[qhour][day] == student.eagle_id:
+                qhour_count += 1
+    return qhour_count
 
 
 def is_schedule_full(current_semester):

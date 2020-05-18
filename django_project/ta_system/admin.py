@@ -407,7 +407,8 @@ class CustomAdminSite(AdminSite):
                 for application in valid_applications:
                     applicant = application.applicant
                     if applicant.ta_assignments.all().count() > 0:
-                        simulation.assign_to_lab(current_semester, applicant)
+                        if not applicant.ta_assignments.filter(name__icontains='discussion'):
+                            simulation.assign_to_lab(current_semester, applicant)
 
             messages.success(
                 request, 'The simulation for course and lab hour assignments is done! '
