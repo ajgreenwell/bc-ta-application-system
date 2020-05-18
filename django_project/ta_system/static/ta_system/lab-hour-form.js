@@ -176,7 +176,7 @@ export async function renderLabHourForm(props) {
 
         // undo toggleHighlights from past mouseenter events for
         // all grid cells not within the new from - to rectangular plane
-        for (let row = 0; row < numRows; row++) {
+        for (let row = 0; row < (settings.numSlotsInHour * 24); row++) {
             for (let col = 0; col < numColumns; col++) {
                 const isOpen = constraints[row][col];
                 if (isOpen && !isWithinFromToPlane(row, col)) {

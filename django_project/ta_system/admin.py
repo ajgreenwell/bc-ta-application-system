@@ -254,8 +254,8 @@ class CustomAdminSite(AdminSite):
                 if not teaching_assistants:
                     messages.error(
                         request,
-                        'Error: There are no teaching assistants that ' +
-                        'have been assigned for this semester.'
+                        'Error: There are no applicants for the semester ' +
+                        f'{context["verbose_semester"]}.'
                     )
                     return redirect('admin:index')
                 return render(request, 'admin/assign_lab_hours.html', context)
@@ -330,130 +330,89 @@ class CustomAdminSite(AdminSite):
         if request.method != 'POST':
             return handle_bad_request(request, app='admin', expected_method='POST')
 
-        semester = utils.get_year_and_semester_code(
-            utils.get_current_semester())
-        current_semester = models.Semester.objects.get(
-            year=semester[0], semester_code=semester[1])
-        applications = models.Application.objects.all()
-        valid_applications = []
-        for application in applications:
-            if not application.applicant.is_blacklisted and utils.has_submitted_application(application.applicant):
-                valid_applications.append(application)
-        courses = models.Course.objects.filter(
-            semester=current_semester).order_by('-course_number')
-        current_courses = []
-        for course in courses:
-            if not course.course_number[:8] in ['CSCI1101', 'CSCI1103'] and not course.course_number[:5] in ['CSCI4', 'CSCI5', 'CSCI6']:
-                current_courses.append(course)
+        if models.SystemStatus.objects.order_by('id').last().status:
+            messages.error(
+                request, 'The simulation cannot be run when the TA application system is open.')
+            return redirect('admin:index')
+        else:
+            semester = utils.get_year_and_semester_code(
+                utils.get_current_semester())
+            current_semester = models.Semester.objects.get(
+                year=semester[0], semester_code=semester[1])
 
-        print('*************************************')
-        print(current_semester)
-        print(valid_applications)
-        print(current_courses)
-        print('*************************************')
+            applications = models.Application.objects.all()
+            valid_applications = []
+            for application in applications:
+                if not application.applicant.is_blacklisted and utils.has_submitted_application(application.applicant):
+                    valid_applications.append(application)
 
-        for course in current_courses:
-            num_tas = course.teaching_assistants.all().count()
-            print('***************************************************' +
-                  course.name + ': ' + str(num_tas))
-            if course.max_num_tas > num_tas:
-                print(course.name[:14] + ' ' + course.name[-4:])
-                if course.name[:14] == 'DISCUSSION GRP' and course.name[-4:] in ['1101', '1103']:
-                    col = simulation.convert_days_of_week(course.days_of_week)
-                    row = simulation.convert_class_time(
-                        course.start_time, course.end_time)
-                    for application in valid_applications:
-                        print(application.applicant.user.first_name +
-                              application.applicant.user.last_name)
-                        if course.max_num_tas > num_tas:
-                            if course.instructor.name in application.instructor_preferences:
-                                print('*********' +
-                                      application.applicant.user.username)
-                                print('********* CS 1 Professor Preferences')
-                                num_tas = simulation.assign_CS1_TA(application.applicant, course, col, row,
-                                                                   application.applicant.lab_hour_preferences, num_tas)
-                    print('*********' + course.name + ': ' + str(num_tas))
-                    if course.max_num_tas > num_tas:
+            courses = models.Course.objects.filter(
+                semester=current_semester).order_by('-course_number')
+            current_courses = []
+            for course in courses:
+                if not course.course_number[:8] in ['CSCI1101', 'CSCI1103'] and not course.course_number[:5] in ['CSCI4', 'CSCI5', 'CSCI6']:
+                    current_courses.append(course)
+
+            for course in current_courses:
+                num_tas = course.teaching_assistants.all().count()
+                if course.max_num_tas > num_tas:
+                    if course.name[:14] == 'DISCUSSION GRP' and course.name[-4:] in ['1101', '1103']:
+                        col = simulation.convert_days_of_week(
+                            course.days_of_week)
+                        row = simulation.convert_class_time(
+                            course.start_time, course.end_time)
                         for application in valid_applications:
                             if course.max_num_tas > num_tas:
-                                print(application.applicant.user.first_name +
-                                      application.applicant.user.last_name)
-                                if course.name in application.course_preferences:
-                                    print('*********' +
-                                          application.applicant.user.username)
-                                    print('********* CS 1 Course Preferences')
+                                if course.instructor.name in application.instructor_preferences:
                                     num_tas = simulation.assign_CS1_TA(application.applicant, course, col, row,
                                                                        application.applicant.lab_hour_preferences, num_tas)
-                    print('*********' + course.name + ': ' + str(num_tas))
-                    if course.max_num_tas > num_tas:
-                        for application in valid_applications:
-                            if course.max_num_tas > num_tas:
-                                print(application.applicant.user.first_name +
-                                      application.applicant.user.last_name)
-                                print('*********' +
-                                      application.applicant.user.username)
-                                print('********* CS 1 No Preferences')
-                                num_tas = simulation.assign_CS1_TA(application.applicant, course, col, row,
-                                                                   application.applicant.lab_hour_preferences, num_tas)
-                else:
-                    for application in valid_applications:
                         if course.max_num_tas > num_tas:
-                            print(application.applicant.user.first_name +
-                                  application.applicant.user.last_name)
-                            if course.instructor.name in application.instructor_preferences:
-                                print('*********' +
-                                      application.applicant.user.username)
-                                print(
-                                    '********* Professor Preferences' + course.name)
-                                num_tas = simulation.assign_TA(
-                                    application.applicant, course, num_tas)
-                    print('*********' + course.name + ': ' + str(num_tas))
-                    if course.max_num_tas > num_tas:
+                            for application in valid_applications:
+                                if course.max_num_tas > num_tas:
+                                    if course.name in application.course_preferences:
+                                        num_tas = simulation.assign_CS1_TA(application.applicant, course, col, row,
+                                                                           application.applicant.lab_hour_preferences, num_tas)
+                        if course.max_num_tas > num_tas:
+                            for application in valid_applications:
+                                if course.max_num_tas > num_tas:
+                                    num_tas = simulation.assign_CS1_TA(application.applicant, course, col, row,
+                                                                       application.applicant.lab_hour_preferences, num_tas)
+                    else:
                         for application in valid_applications:
                             if course.max_num_tas > num_tas:
-                                print(application.applicant.user.first_name +
-                                      application.applicant.user.last_name)
-                                if course.name in application.course_preferences:
-                                    print('*********' +
-                                          application.applicant.user.username)
-                                    print(
-                                        '********* Course Preferences' + course.name)
+                                if course.instructor.name in application.instructor_preferences:
                                     num_tas = simulation.assign_TA(
                                         application.applicant, course, num_tas)
-                    print('*********' + course.name + ': ' + str(num_tas))
-                    if course.max_num_tas > num_tas:
-                        for application in valid_applications:
-                            if course.max_num_tas > num_tas:
-                                print(application.applicant.user.first_name +
-                                      application.applicant.user.last_name)
-                                print('*********' +
-                                      application.applicant.user.username)
-                                print('********* No Preferences' + course.name)
-                                num_tas = simulation.assign_TA(
-                                    application.applicant, course, num_tas)
+                        if course.max_num_tas > num_tas:
+                            for application in valid_applications:
+                                if course.max_num_tas > num_tas:
+                                    if course.name in application.course_preferences:
+                                        num_tas = simulation.assign_TA(
+                                            application.applicant, course, num_tas)
+                        if course.max_num_tas > num_tas:
+                            for application in valid_applications:
+                                if course.max_num_tas > num_tas:
+                                    num_tas = simulation.assign_TA(
+                                        application.applicant, course, num_tas)
 
-        simulation.check_sem_assignment(current_semester)
-        simulation.check_sem_constraints(request, current_semester)
+            simulation.check_sem_assignment(current_semester)
+            simulation.check_sem_constraints(request, current_semester)
 
-        for application in valid_applications:
-            applicant = application.applicant
-            if applicant.ta_assignments.all().count() == 0:
-                simulation.assign_to_lab(current_semester, applicant)
-
-        if not simulation.is_schedule_full(current_semester):
             for application in valid_applications:
                 applicant = application.applicant
-                if applicant.ta_assignments.all().count() > 0:
+                if applicant.ta_assignments.all().count() == 0:
                     simulation.assign_to_lab(current_semester, applicant)
 
-        messages.success(
-            request, 'The simulation for course and lab hour assignments is done! '
-                     'You can now download the TA Assignment and Lab Hour Assignment files.')
-        return redirect('admin:index')
+            if not simulation.is_schedule_full(current_semester):
+                for application in valid_applications:
+                    applicant = application.applicant
+                    if applicant.ta_assignments.all().count() > 0:
+                        simulation.assign_to_lab(current_semester, applicant)
 
-
-class UserAdmin(ModelAdmin):
-    list_display = ('username', 'first_name', 'last_name', 'is_active')
+            messages.success(
+                request, 'The simulation for course and lab hour assignments is done! '
+                         'You can now download the TA Assignment and Lab Hour Assignment files.')
+            return redirect('admin:index')
 
 
 class CourseAdmin(ModelAdmin):
@@ -511,7 +470,7 @@ class ProfileAdmin(ModelAdmin):
             'fields': ('courses_taken',)
         }),
         ('Edit Student Information', {
-            'fields': ('user', 'eagle_id', 'is_blacklisted', 'lab_hour_preferences')
+            'fields': ('user', 'eagle_id', 'is_blacklisted')
         })
     )
 
