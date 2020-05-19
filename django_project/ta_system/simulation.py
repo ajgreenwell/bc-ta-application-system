@@ -134,36 +134,41 @@ def check_sem_constraints(request, current_semester):
 
 def check_assignment(student, assignment_list, constraints, availability, qhour, day):
     if (assignment_list[qhour][day] == '' or assignment_list[qhour][day] == student.eagle_id) and \
-            constraints[qhour][day] and \
-            availability[qhour][day]:
+            constraints[qhour][day] and availability[qhour][day] and \
+            (assignment_list[qhour+1][day] == '' or assignment_list[qhour+1][day] == student.eagle_id) and \
+            constraints[qhour+1][day] and availability[qhour+1][day] and \
+            (assignment_list[qhour+2][day] == '' or assignment_list[qhour+2][day] == student.eagle_id) and \
+            constraints[qhour+2][day] and availability[qhour+2][day] and \
+            (assignment_list[qhour+3][day] == '' or assignment_list[qhour+3][day] == student.eagle_id) and \
+            constraints[qhour+3][day] and availability[qhour+3][day]:
         return True
     return False
 
 
-def assign_to_lab(current_semester, student):
+def assign_to_lab(current_semester, student, ta_availability):
     qhour_count = get_lab_qhours(current_semester, student)
     max_hrs = SystemStatus.objects.order_by('id').last().max_lab_hours_per_ta
     availability = get_current_semester_preferences(student.lab_hour_preferences)
     constraints = current_semester.lab_hour_constraints
     assignment_list = current_semester.lab_hour_assignments
-    for day in range(7):
-        quarterhour = 0
-        while quarterhour < len(assignment_list) - 4:
-            if qhour_count >= max_hrs * 4:
-                return
-            if check_assignment(student, assignment_list, constraints, availability, quarterhour, day) and \
-                    check_assignment(student, assignment_list, constraints, availability, quarterhour + 1, day) and \
-                    check_assignment(student, assignment_list, constraints, availability, quarterhour + 2, day) and \
-                    check_assignment(student, assignment_list, constraints, availability, quarterhour + 3, day):
-                for i in range(4):
-                    if assignment_list[quarterhour+i][day] == student.eagle_id:
-                        qhour_count -= 1
-                    else:
-                        assignment_list[quarterhour+i][day] = student.eagle_id
-                setattr(current_semester, 'lab_hour_assignment', assignment_list)
-                current_semester.save()
-                qhour_count += 4
-            quarterhour += 1
+    max_avail = max([max(x) for x in ta_availability])
+    for num_avail_tas in range(1, max_avail+1):
+        for day in range(7):
+            quarterhour = 0
+            while quarterhour < len(assignment_list) - 4:
+                if qhour_count >= max_hrs * 4:
+                    return
+                if ta_availability[quarterhour][day] == num_avail_tas:
+                    if check_assignment(student, assignment_list, constraints, availability, quarterhour, day):
+                        for i in range(4):
+                            if assignment_list[quarterhour+i][day] == student.eagle_id:
+                                qhour_count -= 1
+                            else:
+                                assignment_list[quarterhour+i][day] = student.eagle_id
+                        setattr(current_semester, 'lab_hour_assignment', assignment_list)
+                        current_semester.save()
+                        qhour_count += 4
+                quarterhour += 1
 
 
 def get_lab_qhours(current_semester, student):
@@ -174,6 +179,20 @@ def get_lab_qhours(current_semester, student):
             if assignment_list[qhour][day] == student.eagle_id:
                 qhour_count += 1
     return qhour_count
+
+
+def create_ta_availability_matrix(current_semester, valid_applications):
+    matrix = [[0 for x in range(7)] for n in range(4 * 24)]
+    max_hrs = SystemStatus.objects.order_by('id').last().max_lab_hours_per_ta
+    for app in valid_applications:
+        if get_lab_qhours(current_semester, app.applicant) >= max_hrs*4:
+            continue
+        availability = get_current_semester_preferences(app.applicant.lab_hour_preferences)
+        for day in range(7):
+            for qhour in range(len(availability)):
+                if availability[qhour][day]:
+                    matrix[qhour][day] += 1
+    return matrix
 
 
 def is_schedule_full(current_semester):

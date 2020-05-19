@@ -398,17 +398,19 @@ class CustomAdminSite(AdminSite):
             simulation.check_sem_assignment(current_semester)
             simulation.check_sem_constraints(request, current_semester)
 
+            ta_availability = simulation.create_ta_availability_matrix(current_semester, valid_applications)
+
             for application in valid_applications:
                 applicant = application.applicant
                 if applicant.ta_assignments.all().count() == 0:
-                    simulation.assign_to_lab(current_semester, applicant)
+                    simulation.assign_to_lab(current_semester, applicant, ta_availability)
 
             if not simulation.is_schedule_full(current_semester):
                 for application in valid_applications:
                     applicant = application.applicant
                     if applicant.ta_assignments.all().count() > 0:
                         if not applicant.ta_assignments.filter(name__icontains='discussion'):
-                            simulation.assign_to_lab(current_semester, applicant)
+                            simulation.assign_to_lab(current_semester, applicant, ta_availability)
 
             messages.success(
                 request, 'The simulation for course and lab hour assignments is done! '
@@ -568,7 +570,7 @@ class SystemStatusAdmin(ModelAdmin):
 
 
 class ApplicationAdmin(ModelAdmin):
-    list_display = ('applicant', 'semester', 'major')
+    list_display = ('id', 'applicant', 'semester', 'major')
 
 
 admin_site = CustomAdminSite()
